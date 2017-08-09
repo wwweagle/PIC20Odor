@@ -65,21 +65,21 @@ int u2Received = -1;
 //}
 
 void initPorts() {
-    TRISA = 0x3FFF;
+    TRISA = 0x39FF;
     LATA = 0;
     ADPCFG = 0x0300;
     TRISB = 0xFCFF;
-    LATB = 0;
+    LATB = 0x0300;
     TRISC = 0xFFF5;
-    LATC = 0x0A;
-    TRISD = 0xCFFF;
-    TRISD = 0;
+    LATC = 0;
+    TRISD = 0xCFF0;
+    LATD = 0x3000;
     TRISE = 0;
-    LATE = 0xFF;
+    LATE = 0;
     TRISF = 0xFFFC;
     LATF = 0x03;
-    TRISG = 0xFF33;
-    LATG = 0x00;
+    TRISG = 0xFC33;
+    LATG = 0;
 
 
 }
@@ -87,49 +87,16 @@ void initPorts() {
 void initTMR1(void) {
 
     TMR1 = 0;
-    PR1 = 10000; // 5ms @ 2K counter++ per ms
+    PR1 = 5000; // 5ms @ 1K counter++ per ms 
     IFS0bits.T1IF = 0;
     IEC0bits.T1IE = 1;
-    T1CON = 0x8010; //FCY @ 1:8 prescale, 2K counter++ per ms
+    T1CON = 0x8010; //FCY @ 1:8 prescale, 1K counter++ per ms
     ConfigIntTimer1(T1_INT_PRIOR_7 & T1_INT_ON);
     timerCounterI = 0u;
     timerCounterJ = 0u;
 
 }
 
-//void setP10(int pin, int value) {
-//    switch (pin) {
-//        case 1:
-//            P10_1 = value;
-//            break;
-//        case 2:
-//            P10_2 = value;
-//            break;
-//        case 3:
-//            P10_3 = value;
-//            break;
-//        case 4:
-//            P10_4 = value;
-//            break;
-//        case 5:
-//            P10_5 = value;
-//            break;
-//        case 6:
-//            P10_6 = value;
-//            break;
-//        case 7:
-//            P10_7 = value;
-//            break;
-//        case 8:
-//            P10_8 = value;
-//            break;
-//    }
-//    Nop();
-//    Nop();
-//    Nop();
-//    Nop();
-//
-//}
 
 inline void tick(unsigned int i) {
 
@@ -148,10 +115,16 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
 //    IFS1bits.U2TXIF = 0;
 //}
 
-void wait_ms(unsigned int time) {
+void wait_ms(int time) {
     uint32_t t32 = (uint32_t) time;
     timerCounterI = 0u;
     while (timerCounterI < t32);
+}
+
+void wait_Sec(int time) {
+    while (time--) {
+        wait_ms(1000);
+    }
 }
 
 void initUART2(void) {
@@ -190,33 +163,29 @@ void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void) {
 }
 
 void u2send(int u2Type, int u2Value) {
-    static unsigned char u2Send[] = {0x55, 0x00, 0x00, 0xAA};
-    u2Send[1] = (unsigned char) u2Type;
-    u2Send[2] = (unsigned char) u2Value;
-    static int count = sizeof (u2Send);
-    int i = 0;
-    for (; i < count; i++) {
-        while (BusyUART2());
-        U2TXREG = u2Send[i];
-    }
+    while (BusyUART2());
+    U2TXREG = (unsigned char) (u2Type & 0x7f);
+    while (BusyUART2());
+    U2TXREG = (unsigned char) (u2Value | 0x80);
+    while (BusyUART2());
 }
 
-void setP10_4bit(int val) {
-    P10_1 = (val & 0x1);
+void set4076_4bit(int val) {
+    PORTDbits.RD0 = (val & 0x1);
     Nop();
     Nop();
-    P10_3 = ((val & 0x2) > 1);
+    PORTDbits.RD1 = ((val & 0x2) >> 1);
     Nop();
     Nop();
-    P10_5 = ((val & 0x4) > 2);
+    PORTDbits.RD2 = ((val & 0x4) >> 2);
     Nop();
     Nop();
-    P10_7 = ((val & 0x8) > 3);
+    PORTDbits.RD3 = ((val & 0x8) >> 3);
     Nop();
     Nop();
 }
 
-void setP10_dis(int val) {
+void muxDis(int val) {
     PORTDbits.RD12 = (val & 0x1);
     Nop();
     Nop();

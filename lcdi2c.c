@@ -603,14 +603,14 @@ static void LCDwritePCF8574(unsigned char value) {
 void DelayMicroseconds(unsigned short t) {
     unsigned short i = 0;
     while (i < t) {
-        Nop();
-        Nop();
-        Nop();
-        Nop();
-        Nop();
-        Nop();
-        Nop();
-        Nop();
+//        Nop();
+//        Nop();
+//        Nop();
+//        Nop();
+//        Nop();
+//        Nop();
+//        Nop();
+//        Nop();
         Nop();
         Nop();
         Nop();
