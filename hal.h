@@ -19,6 +19,7 @@
 
 
 extern int u2Received;
+extern volatile int adcdata;
 
 void initPorts(void);
 void initTMR1(void);
@@ -28,6 +29,7 @@ void u2send(int u2Type, int u2Value);
 void initUART2(void);
 void set4076_4bit(int val);
 void muxDis(int val);
+void ADCinit(void);
 
 #endif	//HAL_H
 

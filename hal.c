@@ -7,10 +7,12 @@
 
 
 #include "hal.h"
+#include "adc10.h"
 
 
 uint32_t timerCounterI, timerCounterJ;
 int u2Received = -1;
+volatile int adcdata;
 
 //void flashRB(int port) {
 //
@@ -67,20 +69,18 @@ int u2Received = -1;
 void initPorts() {
     TRISA = 0x39FF;
     LATA = 0;
-    ADPCFG = 0x0300;
     TRISB = 0xFCFF;
     LATB = 0x0300;
-    TRISC = 0xFFF5;
+    TRISC = 0xFFFF;
     LATC = 0;
     TRISD = 0xCFF0;
     LATD = 0x3000;
     TRISE = 0;
     LATE = 0;
-    TRISF = 0xFFFC;
-    LATF = 0x03;
-    TRISG = 0xFC33;
+    TRISF = 0xFFFF;
+    LATF = 0x00;
+    TRISG = 0xFCFF;
     LATG = 0;
-
 
 }
 
@@ -97,7 +97,6 @@ void initTMR1(void) {
 
 }
 
-
 inline void tick(unsigned int i) {
 
     timerCounterI += (uint32_t) i;
@@ -108,6 +107,12 @@ inline void tick(unsigned int i) {
 void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     IFS0bits.T1IF = 0;
     tick(5u);
+}
+
+void __attribute__((__interrupt__, no_auto_psv)) _ADCInterrupt(void) {
+    adcdata = ADCBUF0; //RB8
+
+    IFS0bits.ADIF = 0;  //After conversion ADIF is set to 1 and must be cleared
 }
 
 //void __attribute__((__interrupt__, no_auto_psv)) _U2TXInterrupt(void)
@@ -189,14 +194,47 @@ void muxDis(int val) {
     PORTDbits.RD12 = (val & 0x1);
     Nop();
     Nop();
-    PORTDbits.RD13 = ((val & 0x2) > 1);
+    PORTDbits.RD13 = ((val & 0x2) >> 1);
     Nop();
     Nop();
-    PORTBbits.RB8 = ((val & 0x4) > 2);
+    PORTBbits.RB8 = ((val & 0x4) >> 2);
     Nop();
     Nop();
-    PORTBbits.RB9 = ((val & 0x8) > 3);
+    PORTBbits.RB9 = ((val & 0x8) >> 3);
     Nop();
     Nop();
 }
 
+void ADCinit(void) {
+    ADCON1bits.ADSIDL = 0;
+    ADCON1bits.FORM = 0;
+    ADCON1bits.SSRC = 7;
+
+    ADCON1bits.SAMP = 1;
+
+    ADCON2bits.VCFG = 0;
+    ADCON2bits.CSCNA = 1;
+    ADCON2bits.SMPI = 2;
+
+    ADCON2bits.BUFM = 0;
+    ADCON2bits.ALTS = 0;
+
+    ADCON3bits.SAMC = 31;
+    ADCON3bits.ADRC = 1;
+
+    ADCON3bits.ADCS = 31;
+
+    ADCHSbits.CH0NB = 0;
+    ADCHSbits.CH0NA = 0;
+    ADCHSbits.CH0SA = 0x0F;
+    ADCHSbits.CH0SB = 0;
+
+    ADPCFG = 0x7FFF;
+    ADCSSL = 0x8000;
+
+    ADCON1bits.ASAM = 1;
+    IFS0bits.ADIF = 1;
+    IEC0bits.ADIE = 1;
+
+    ADCON1bits.ADON = 1;
+}
