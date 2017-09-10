@@ -7,7 +7,7 @@
 
 #include <i2c.h>
 
-#include "hwConfig.h"
+//#include "hwConfig.h"
 #include "utils.h"
 #include "hal.h"
 #include "lcdi2c.h"
@@ -35,19 +35,12 @@ int main(void) {
     return 0;
 }
 
-void temp(){
 
-    while(1){
-        PORTBbits.RB8=1;
-    wait_ms(250);
-        PORTBbits.RB9=1;
-    wait_ms(250);
-        PORTBbits.RB8=0;
-    wait_ms(250);
-        PORTBbits.RB9=0;
-    wait_ms(250);
-    }
+void receiveNVerify(){
+    
 }
+
+
 
 void callFunc(int n) {
     switch (n) {
@@ -67,9 +60,7 @@ void callFunc(int n) {
         case 23:
             testPorts();
             break;
-        case 24:
-            temp();
-            break;
+
         default:
         {
             int i;

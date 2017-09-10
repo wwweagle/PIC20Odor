@@ -34,15 +34,15 @@
 #include <xc.h> // include processor files - each processor file is guarded.  
 
 
-#pragma config WDT=WDT_OFF
-#pragma config MCLRE = MCLR_EN
-#pragma config BODENV = BORV45  
-#pragma config BOREN = PBOR_ON
-#pragma config FPWRT = PWRT_64
-#pragma config FOSFPR = XT_PLL4 //8MHz
-#pragma config FCKSMEN = CSW_FSCM_OFF
-
-#pragma config PWMPIN = RST_IOPIN
+//#pragma config WDT=WDT_OFF
+//#pragma config MCLRE = MCLR_EN
+//#pragma config BODENV = BORV45  
+//#pragma config BOREN = PBOR_ON
+//#pragma config FPWRT = PWRT_64
+//#pragma config FOSFPR = XT_PLL4 //8MHz
+//#pragma config FCKSMEN = CSW_FSCM_OFF
+//
+//#pragma config PWMPIN = RST_IOPIN
 
 
 
