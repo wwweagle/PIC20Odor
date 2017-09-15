@@ -20,10 +20,10 @@ struct LinkedList {
 };
 typedef struct LinkedList LinkedList;
 
-struct LinkedListIterator {
+struct odorList {
    LinkedListElement* next;
 };
-typedef struct LinkedListIterator LinkedListIterator;
+typedef struct odorList odorList;
 
 /* Public: Allocate and initialize a new, empty LinkedList.
  *
@@ -121,9 +121,9 @@ int emlist_size(LinkedList* list);
  */
 bool emlist_is_empty(LinkedList* list);
 
-LinkedListIterator emlist_iterator(LinkedList* list);
+odorList emlist_iterator(LinkedList* list);
 
-LinkedListElement*  emlist_iterator_next(LinkedListIterator* iterator);
+LinkedListElement*  emlist_iterator_next(odorList* iterator);
 
 #ifdef __cplusplus
 }

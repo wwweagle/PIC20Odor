@@ -8,6 +8,7 @@
 
 #include "hal.h"
 #include <i2c.h>
+#include "utils.h"
 
 void initI2C(void) {
     unsigned int config2, config1;
@@ -357,6 +358,7 @@ void LCD_Init(void) {
 
 void LCD_Write_Char(char message) {
     LCDdataWrite((unsigned char) message);
+    protectedSerialSend_G2(SpLCD_Char, (unsigned char) message);
 }
 
 void LCD_Write_Str(const char *message) {
@@ -364,6 +366,11 @@ void LCD_Write_Str(const char *message) {
 
     while (*message_ptr)
         LCDdataWrite((unsigned char) (*message_ptr++));
+
+    int iter;
+    for (iter = 0; message[iter] && iter < 16; iter++) {
+        protectedSerialSend_G2(SpLCD_Char, (unsigned char) message[iter]);
+    }
 }
 
 void LCDclear(void) {
@@ -374,6 +381,7 @@ void LCDclear(void) {
 #else
     DelayMicroseconds(30000); // this command takes a long time!
 #endif
+    protectedSerialSend_G2(SpLCD_SET_XY, 0x20);
 }
 
 void LCDhome(void) {
@@ -384,6 +392,8 @@ void LCDhome(void) {
 #else
     DelayMicroseconds(30000); // this command takes a long time!
 #endif
+
+    protectedSerialSend_G2(SpLCD_SET_XY, 0x20);
 }
 
 void LCDsetCursor(unsigned char col, unsigned char row) {
@@ -391,8 +401,9 @@ void LCDsetCursor(unsigned char col, unsigned char row) {
     if (row >= _numlines) {
         row = _numlines - 1; // we count rows starting w/0
     }
-
     LCDcommandWrite(LCD_DD_RAM_ADDRESS | (col + row_offsets[row]));
+    int val = (((col & 0x0f) << 1) | (row & 0x01)) & 0x1F;
+    protectedSerialSend_G2(SpLCD_SET_XY, val);
 }
 
 // Turn the display on/off (quickly)
@@ -603,14 +614,14 @@ static void LCDwritePCF8574(unsigned char value) {
 void DelayMicroseconds(unsigned short t) {
     unsigned short i = 0;
     while (i < t) {
-//        Nop();
-//        Nop();
-//        Nop();
-//        Nop();
-//        Nop();
-//        Nop();
-//        Nop();
-//        Nop();
+        //        Nop();
+        //        Nop();
+        //        Nop();
+        //        Nop();
+        //        Nop();
+        //        Nop();
+        //        Nop();
+        //        Nop();
         Nop();
         Nop();
         Nop();
@@ -626,7 +637,7 @@ static unsigned char LCDreadPCF8574(void) {
     return I2C_Read_Byte_Single_Reg(LCD_PCF8574_ADDR);
 }
 
-void LCD_Write_Num(int val, int x, int y) {
+void lcdWriteNumber_G2(int val, int x, int y) {
 
     int tenK = val / 10000;
     int K = (val % 10000) / 1000;
@@ -657,5 +668,13 @@ void LCD_Write_Num(int val, int x, int y) {
     }
     LCD_Write_Char('0' + N);
 
+}
+
+void splash_G2(const char* line1, const char* line2) {
+    LCDhome();
+    LCDclear();
+    LCD_Write_Str(line1);
+    LCDsetCursor(0, 1);
+    LCD_Write_Str(line2);
 }
 

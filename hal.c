@@ -8,63 +8,17 @@
 
 #include "hal.h"
 #include "adc10.h"
+#include "utils.h"
 
 
-uint32_t timerCounterI, timerCounterJ;
+uint32_t timerCounterI, millisCounter;
 int u2Received = -1;
 volatile int adcdata;
+volatile int isSending;
+volatile int sendLick;
+int lickThresh = 400; // larger is more sensitive
 
-//void flashRB(int port) {
-//
-//    switch (port) {
-//        case 8:
-//            PORTBbits.RB8 = 1;
-//            wait_ms(50);
-//            PORTBbits.RB8 = 0;
-//            break;
-//        case 9:
-//            PORTBbits.RB9 = 1;
-//            wait_ms(50);
-//            PORTBbits.RB9 = 0;
-//            break;
-//        case 10:
-//            PORTBbits.RB10 = 1;
-//            wait_ms(50);
-//            PORTBbits.RB10 = 0;
-//            break;
-//        case 11:
-//            PORTBbits.RB11 = 1;
-//            wait_ms(50);
-//            PORTBbits.RB11 = 0;
-//            break;
-//            //        case 10:
-//            //            PORTBbits.RB8 = 1;
-//            //            wait_ms(50);
-//            //            PORTBbits.RB8 = 0;
-//            //            break;
-//            //        case 8:
-//            //            PORTBbits.RB8 = 1;
-//            //            wait_ms(50);
-//            //            PORTBbits.RB8 = 0;
-//            //            break;
-//            //        case 8:
-//            //            PORTBbits.RB8 = 1;
-//            //            wait_ms(50);
-//            //            PORTBbits.RB8 = 0;
-//            //            break;
-//            //        case 8:
-//            //            PORTBbits.RB8 = 1;
-//            //            wait_ms(50);
-//            //            PORTBbits.RB8 = 0;
-//            //            break;
-//            //        case 8:
-//            //            PORTBbits.RB8 = 1;
-//            //            wait_ms(50);
-//            //            PORTBbits.RB8 = 0;
-//            //            break;
-//    }
-//
-//}
+const _prog_addressT EE_Addr_G2 = 0x7ff000;
 
 void initPorts() {
     TRISA = 0x39FF;
@@ -93,26 +47,67 @@ void initTMR1(void) {
     T1CON = 0x8010; //FCY @ 1:8 prescale, 1K counter++ per ms
     ConfigIntTimer1(T1_INT_PRIOR_7 & T1_INT_ON);
     timerCounterI = 0u;
-    timerCounterJ = 0u;
+    millisCounter = 0u;
 
 }
 
 inline void tick(unsigned int i) {
 
     timerCounterI += (uint32_t) i;
-    timerCounterJ += (uint32_t) i;
-    PORTAbits.RA15 = (timerCounterJ & 0x0100) >> 8;
+    millisCounter += (uint32_t) i;
+    PORTAbits.RA15 = (millisCounter & 0x0100) >> 8;
+}
+
+inline int filtered_G2(void) {
+    return (millisCounter > lick_G2.filter + 50u);
 }
 
 void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
-    IFS0bits.T1IF = 0;
+
     tick(5u);
+
+    if (laser_G2.on) {
+        BNC_4 = 1;
+    } else {
+        BNC_4 = 0;
+    }
+    if (adcdata > lickThresh && lick_G2.current != LICKING_LEFT &&
+            filtered_G2()) { // Low is lick
+        lick_G2.filter = millisCounter;
+        lick_G2.current = LICKING_LEFT;
+        lick_G2.LCount++;
+        //  digitalWrite(38, HIGH);
+        if (isSending) {
+            sendLick = 1;
+        } else {
+            protectedSerialSend_G2(0, 2);
+            sendLick = 0;
+        }
+    } else if (lick_G2.current && (adcdata <= lickThresh)) {
+        lick_G2.current = 0;
+        //  digitalWrite(38, LOW);
+    }
+    //  if (Serial.peek() == 0x2a) {
+    //    protectedSerialSend_G2(61, 0);
+    //    Timer1.detachInterrupt();
+    //    callResetGen2();
+    //  }
+    //  if(sendFID && (millis()>fidTimeStamp+500)){
+    //    fidTimeStamp=millis();
+    //    FIDtest();
+    //  }
+
+
+
+
+
+    IFS0bits.T1IF = 0;
 }
 
 void __attribute__((__interrupt__, no_auto_psv)) _ADCInterrupt(void) {
     adcdata = ADCBUF0; //RB8
 
-    IFS0bits.ADIF = 0;  //After conversion ADIF is set to 1 and must be cleared
+    IFS0bits.ADIF = 0; //After conversion ADIF is set to 1 and must be cleared
 }
 
 //void __attribute__((__interrupt__, no_auto_psv)) _U2TXInterrupt(void)
@@ -152,7 +147,7 @@ void initUART2(void) {
 
     baudvalue = ((FCY / 16) / BAUDRATE) - 1;
     OpenUART2(U2MODEvalue, U2STAvalue, baudvalue);
-    u2send(61, 0);
+    protectedSerialSend_G2(61, 0);
 }
 
 void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void) {
@@ -160,19 +155,37 @@ void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void) {
         U2STAbits.OERR = 0;
     }
     if (0x2a == (u2Received = U2RXREG)) {
-        u2send(61, 0);
+        protectedSerialSend_G2(61, 0);
         wait_ms(50);
         asm("RESET");
     }
     IFS1bits.U2RXIF = 0;
 }
 
-void u2send(int u2Type, int u2Value) {
+void protectedSerialSend_G2(int u2Type, int u2Value) {
+
+    isSending = 1;
     while (BusyUART2());
     U2TXREG = (unsigned char) (u2Type & 0x7f);
     while (BusyUART2());
     U2TXREG = (unsigned char) (u2Value | 0x80);
     while (BusyUART2());
+
+    if (sendLick) {
+        U2TXREG = (unsigned char) (0);
+        while (BusyUART2());
+        U2TXREG = (unsigned char) (2 | 0x80);
+        while (BusyUART2());
+    }
+    sendLick = 0;
+    isSending = 0;
+
+
+
+
+
+
+
 }
 
 void set4076_4bit(int val) {
@@ -205,7 +218,7 @@ void muxDis(int val) {
     Nop();
 }
 
-void ADCinit(void) {
+void initADC(void) {
     ADCON1bits.ADSIDL = 0;
     ADCON1bits.FORM = 0;
     ADCON1bits.SSRC = 7;
@@ -237,4 +250,18 @@ void ADCinit(void) {
     IEC0bits.ADIE = 1;
 
     ADCON1bits.ADON = 1;
+}
+
+void write_eeprom_G2(int offset, int value) {
+
+    _erase_eedata(EE_Addr_G2 + offset, _EE_WORD);
+    _wait_eedata();
+    _write_eedata_word(EE_Addr_G2 + offset, value);
+    _wait_eedata();
+}
+
+int read_eeprom_G2(int offset) {
+    int temp;
+    _memcpy_p2d16(&temp, EE_Addr_G2 + offset, 2);
+    return temp;
 }

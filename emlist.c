@@ -31,7 +31,7 @@ void emlist_initialize(LinkedList* list) {
 }
 
 bool emlist_contains(LinkedList* list, void* value) {
-    LinkedListIterator iterator = emlist_iterator(list);
+    odorList iterator = emlist_iterator(list);
     LinkedListElement* candidate = NULL;
     while((candidate = emlist_iterator_next(&iterator)) != NULL) {
         if(candidate->value == value) {
@@ -50,7 +50,7 @@ bool emlist_insert(LinkedList* list, void* value) {
         if(emlist_is_empty(list)) {
             list->head = element;
         } else {
-            LinkedListIterator iterator = emlist_iterator(list);
+            odorList iterator = emlist_iterator(list);
             LinkedListElement* current = NULL;
             while((current = emlist_iterator_next(&iterator)) != NULL
                     && current->next != NULL) {
@@ -68,7 +68,7 @@ bool emlist_insert(LinkedList* list, void* value) {
 bool emlist_remove(LinkedList* list, void* value) {
     LinkedListElement* prev = NULL;
     LinkedListElement* next = NULL;
-    LinkedListIterator iterator = emlist_iterator(list);
+    odorList iterator = emlist_iterator(list);
     while((next = emlist_iterator_next(&iterator)) != NULL) {
         if(next->value == value) {
             if(prev == NULL) {
@@ -96,7 +96,7 @@ void* emlist_pop(LinkedList* list) {
 
 int emlist_size(LinkedList* list) {
     int size = 0;
-    LinkedListIterator iterator = emlist_iterator(list);
+    odorList iterator = emlist_iterator(list);
     LinkedListElement* element = NULL;
     while((element = emlist_iterator_next(&iterator)) != NULL) {
         ++size;
@@ -108,13 +108,13 @@ bool emlist_is_empty(LinkedList* list) {
     return list != NULL && list->head == NULL;
 }
 
-LinkedListIterator emlist_iterator(LinkedList* list) {
-    LinkedListIterator iterator;
+odorList emlist_iterator(LinkedList* list) {
+    odorList iterator;
     iterator.next = list != NULL ? list->head : NULL;
     return iterator;
 }
 
-LinkedListElement* emlist_iterator_next(LinkedListIterator* iterator) {
+LinkedListElement* emlist_iterator_next(odorList* iterator) {
     LinkedListElement* next = NULL;
     if(iterator != NULL) {
         next = iterator->next;

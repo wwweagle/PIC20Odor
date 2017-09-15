@@ -34,42 +34,42 @@
 #include <xc.h> // include processor files - each processor file is guarded.  
 
 
-  void LCD_Init(void);
-  void LCD_Write_Char(char message);
-  void LCD_Write_Str(const char *message);
+void LCD_Init(void);
+void LCD_Write_Char(char message);
+void LCD_Write_Str(const char *message);
 
-  void LCDclear(void);
-  void LCDhome(void);
+void LCDclear(void);
+void LCDhome(void);
 
-  void LCDdisplayOff(void);
-  void LCDdisplayOn(void);
-  void LCDblinkOff(void);
-  void LCDblinkOn(void);
-  void LCDcursorOff(void);
-  void LCDcursorOn(void);
-  void LCDscrollDisplayLeft(void);
-  void LCDscrollDisplayRight(void);
-  void LCDleftToRight(void);
-  void LCDrightToLeft(void);
-  void LCDnoBacklight(void);
-  void LCDbacklight(void);
-  void LCDautoscroll(void);
-  void LCDnoAutoscroll(void);
-  void LCDcreateChar(unsigned char location, unsigned char charmap[]);
-  void LCDsetCursor(unsigned char col, unsigned char row);
+void LCDdisplayOff(void);
+void LCDdisplayOn(void);
+void LCDblinkOff(void);
+void LCDblinkOn(void);
+void LCDcursorOff(void);
+void LCDcursorOn(void);
+void LCDscrollDisplayLeft(void);
+void LCDscrollDisplayRight(void);
+void LCDleftToRight(void);
+void LCDrightToLeft(void);
+void LCDnoBacklight(void);
+void LCDbacklight(void);
+void LCDautoscroll(void);
+void LCDnoAutoscroll(void);
+void LCDcreateChar(unsigned char location, unsigned char charmap[]);
+void LCDsetCursor(unsigned char col, unsigned char row);
 
-  inline void LCDcommandWrite(unsigned char value);
-  inline unsigned char LCDcommandRead(void);
-  inline void LCDdataWrite(unsigned char value);
-  inline unsigned char LCDdataRead(void);
-  unsigned char LCDbusy(void);
-  unsigned char LCDaddressCounter(void);
-  unsigned char LCDreadDDRam(unsigned char address);
-  unsigned char LCDreadCGRam(unsigned char address);
-  void DelayMicroseconds(unsigned short t);
-  void LCD_Write_Num(int val, int x, int y);
-  void initI2C();
-
+inline void LCDcommandWrite(unsigned char value);
+inline unsigned char LCDcommandRead(void);
+inline void LCDdataWrite(unsigned char value);
+inline unsigned char LCDdataRead(void);
+unsigned char LCDbusy(void);
+unsigned char LCDaddressCounter(void);
+unsigned char LCDreadDDRam(unsigned char address);
+unsigned char LCDreadCGRam(unsigned char address);
+void DelayMicroseconds(unsigned short t);
+void lcdWriteNumber_G2(int val, int x, int y);
+void initI2C();
+void splash_G2(const char* line1, const char* line2);
 
 
 // TODO Insert appropriate #include <>
