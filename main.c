@@ -149,8 +149,8 @@ void callFunc(int n) {
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
             taskParam.pairs1Count = 2;
             addAllOdor();
-            taskParam.delay1 = 5;
-            taskParam.ITI = 8;
+            taskParam.delay1 = getFuncNumber(1, "Delay duration");
+            taskParam.ITI = taskParam.delay1 > 5 ? 8 : taskParam.delay1;
             waterLen = getFuncNumber(1, "Water fold?") * waterLen;
             zxLaserSessions_G2(20, 20, setSessionNum_G2());
 
@@ -177,6 +177,21 @@ void callFunc(int n) {
         case 31:
             testLaser();
             break;
+            
+        case 32:
+        {
+            splash_G2("ODPA R_D", "REPEAT");
+            highLevelShuffleLength_G2 = 20;
+            laser_G2.laserSessionType = LASER_SESS_UNDEFINED;
+            taskType_G2 = ODPA_RD_SHAPING_TASK;
+            taskParam.falsePunish = 0;
+            taskParam.pairs1Count = 2;
+            addAllOdor();
+            taskParam.delay1 = 5;
+            taskParam.ITI = 8;
+            zxLaserSessions_G2(20, 100, setSessionNum_G2());
+            break;
+        }
         default:
         {
             int i;
@@ -494,8 +509,7 @@ void stim_G2(int place, int n, int type) {
 
 static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
     int rtn = 0;
-    int rewardWindow = (taskType_G2 == ODPA_RD_SHAPING_A_CATCH_LASER_TASK
-            || taskType_G2 == ODPA_RD_SHAPING_B_CATCH_LASER_TASK
+    int rewardWindow = (taskType_G2 == ODPA_RD_SHAPING_TASK
             || taskType_G2 == ODPA_RD_CATCH_LASER_TASK) ? 1000 : 500;
 
     lick_G2.portSide = 0;
@@ -599,8 +613,8 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
                     processMiss_G2(id);
                     if ((taskType_G2 == SHAPING_TASK || taskType_G2 == ODPA_SHAPING_TASK
                             || taskType_G2 == DUAL_TASK_LEARNING || taskType_G2 == DNMS_DUAL_TASK_LEARNING
-                            || taskType_G2 == ODPA_RD_SHAPING_A_CATCH_LASER_TASK
-                            || taskType_G2 == ODPA_RD_SHAPING_B_CATCH_LASER_TASK) && ((rand() % 3) == 0)) {
+                            || taskType_G2 == ODPA_RD_SHAPING_TASK
+                            ) && ((rand() % 3) == 0)) {
                         protectedSerialSend_G2(22, 1);
                         setWaterPortOpen(1);
                         protectedSerialSend_G2(SpWater, 1);
@@ -916,7 +930,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = (sample1 == taskParam.sample1s[0]) ? taskParam.test1s[1] : taskParam.test1s[0];
                         break;
-                    case ODPA_RD_SHAPING_A_CATCH_LASER_TASK:
+                    case ODPA_RD_SHAPING_TASK:
                         sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = (sample1 == taskParam.sample1s[0]) ? taskParam.test1s[1] : taskParam.test1s[0];
                         if (currentTrial > 15) {
