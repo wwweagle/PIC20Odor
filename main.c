@@ -14,7 +14,6 @@
 
 void callFunc(int n);
 void testOneValve(int n);
-void setValveOpen(int n);
 void testValveFast(int board, int valve, int keep);
 void testValveOnRA14();
 void readADCData();
@@ -117,7 +116,7 @@ void testVolume() {
 void callFunc(int n) {
     lickThresh = (read_eeprom_G2(EEP_LICK_THRESHOLD)) << 2;
     waterLen = read_eeprom_G2(EEP_WATER_LEN_MS);
-
+    srand((unsigned int) millisCounter);
     switch (n) {
         case 20:
             testValveOnRA14();
@@ -177,7 +176,7 @@ void callFunc(int n) {
         case 31:
             testLaser();
             break;
-            
+
         case 32:
         {
             splash_G2("ODPA R_D", "REPEAT");
@@ -215,9 +214,6 @@ void testValveOnRA14() {
         lcdWriteNumber_G2(isOn, 0, 0);
         wait_ms(500);
     }
-}
-
-void setValveOpen(int n) {
 }
 
 void testValveFast(int board, int valve, int keep) {
@@ -397,28 +393,6 @@ void testNSetThres() {
     asm("Reset");
 }
 
-static void processHit_G2(int id) {
-    protectedSerialSend_G2(22, 1);
-    setWaterPortOpen(1);
-    waitTimerJ_G2(waterLen);
-    setWaterPortOpen(0);
-    currentMiss = 0;
-    protectedSerialSend_G2(SpHit, id);
-    lcdWriteNumber_G2(++hit, 5, 0);
-}
-
-static void processFalse_G2(int id) {
-    currentMiss = 0;
-    protectedSerialSend_G2(SpFalseAlarm, id);
-    lcdWriteNumber_G2(++falseAlarm, 5, 1);
-}
-
-static void processMiss_G2(int id) {
-    currentMiss++;
-    protectedSerialSend_G2(SpMiss, id);
-    lcdWriteNumber_G2(++miss, 9, 0);
-}
-
 void stim_G2(int place, int n, int type) {
     if (place == 1 || place == 2) {
         set4076_4bit(n > 15 ? n - 16 : n);
@@ -457,6 +431,9 @@ void stim_G2(int place, int n, int type) {
             case 4:
                 stimSend = SpResponseCue;
                 break;
+            case 5:
+                stimSend = SpCorrectionCue;
+                break;
         }
         protectedSerialSend_G2(stimSend, n);
         LCDsetCursor(3, 0);
@@ -472,6 +449,9 @@ void stim_G2(int place, int n, int type) {
             case 4:
                 LCD_Write_Char('3');
                 waitTimerJ_G2(taskParam.respCueLength - 200);
+                break;
+            case 5:
+                waitTimerJ_G2(taskParam.correctionCueLength - 200);
                 break;
         }
 
@@ -505,6 +485,29 @@ void stim_G2(int place, int n, int type) {
                 break;
         }
     }
+}
+
+static void processHit_G2(int id) {
+    protectedSerialSend_G2(22, 1);
+    setWaterPortOpen(1);
+    waitTimerJ_G2(waterLen);
+    setWaterPortOpen(0);
+    currentMiss = 0;
+    protectedSerialSend_G2(SpHit, id);
+    lcdWriteNumber_G2(++hit, 5, 0);
+}
+
+static void processFalse_G2(int id) {
+    currentMiss = 0;
+    protectedSerialSend_G2(SpFalseAlarm, id);
+    lcdWriteNumber_G2(++falseAlarm, 5, 1);
+    stim_G2(5, taskParam.correctionCue, LASER_OFF);
+}
+
+static void processMiss_G2(int id) {
+    currentMiss++;
+    protectedSerialSend_G2(SpMiss, id);
+    lcdWriteNumber_G2(++miss, 9, 0);
 }
 
 static int waterNResult_G2(int firstOdor, int secondOdor, int id) {

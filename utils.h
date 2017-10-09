@@ -88,6 +88,7 @@ extern "C" {
 
 #define SpResponseCue 83
 #define SpAbortTrial 84
+#define SpCorrectionCue 85
 
 
 
@@ -279,6 +280,8 @@ typedef struct {
     int test2Length;
     int respCueLength;
     int falsePunish;
+    int correctionCue;
+    int correctionCueLength;
     int delay1;
     int delay2;
     int delay3;
