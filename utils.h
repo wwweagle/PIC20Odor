@@ -323,7 +323,7 @@ void feedWaterFast_G2();
 void setWaterPortOpen(int i);
 void sendLargeValue(int val);
 void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize);
-int waitTimerJ_G2(unsigned int dTime);
+int waitTaskTimer(unsigned int dTime);
 void assertLaser_G2(int type, int step);
 void waitTrial_G2();
 void turnOnLaser_G2();
