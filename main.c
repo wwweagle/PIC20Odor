@@ -29,7 +29,7 @@ void testLaser();
 
 
 unsigned int taskType_G2 = DNMS_TASK;
-const char odorTypes_G2[] = " WBYLRQHN0123456789012345678901234567890123456789";
+const char odorTypes_G2[] = "BYRQHNKLTXZdMAES0123456";
 
 int main(void) {
     initPorts();
@@ -132,7 +132,7 @@ void callFunc(int n) {
             feedWaterFast_G2(waterLen);
         case 26:
         {
-            splash_G2("ODPA R_D", "REPEAT");
+            splash_G2("ODPA R_D", "");
             highLevelShuffleLength_G2 = 20;
             laser_G2.laserSessionType = LASER_SESS_UNDEFINED;
             taskType_G2 = ODPA_RD_CATCH_LASER_TASK;
@@ -140,7 +140,7 @@ void callFunc(int n) {
             taskParam.pairs1Count = 2;
             addAllOdor();
             taskParam.delay1 = getFuncNumber(2, "Delay duration");
-            taskParam.ITI = taskParam.delay1;
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
             waterLen = getFuncNumber(1, "Water fold?") * waterLen;
             int sessNum=getFuncNumber(2,"Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
@@ -715,13 +715,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
                     //                    }
                     assertLaser_G2(laserType, atDelayMiddle); //13@6.5
                     if (taskParam.delay1 >= 12) {
-                        waitTaskTimer(500u); //13@7
-                        assertLaser_G2(laserType, atDelayMid500mSec);
-                        waitTaskTimer(500u); //13@7.5
-                        assertLaser_G2(laserType, atDelayMid1Sec);
-                        waitTaskTimer(500u); //13@8S
-                        assertLaser_G2(laserType, atDelayMid1_5Sec);
-                        waitTaskTimer(500u); //13@8.5
+                        waitTaskTimer(2000u); //13@7
                         assertLaser_G2(laserType, atDelayMid2Sec);
                         waitTaskTimer(500u); //distractor@9s//13@9
                         assertLaser_G2(laserType, atDelayMid2_5Sec);
@@ -774,7 +768,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
                 || taskType_G2 == DNMS_DUAL_TASK_LEARNING || taskType_G2 == DNMS_DUAL_TASK || taskType_G2 == DUAL_TASK_EVERY_TRIAL) ? 2 : 1;
         resultRtn = waterNResult_G2(s1, t1, id);
     }
-    waitTaskTimer(1050u); //water time sync
+    waitTaskTimer(1000u); //water time sync
     // Total Trials
     int totalTrials = hit + correctRejection + miss + falseAlarm + abortTrial;
     lcdWriteNumber_G2(totalTrials, 13, 1);
@@ -789,18 +783,13 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
     LCD_Write_Char('I');
 
     ///--ITI1---///
-    assertLaser_G2(laserType, atITIBeginning);
-    waitTaskTimer(1000u);
-    assertLaser_G2(laserType, atITIOneSecIn);
     if (resultRtn == SpFalseAlarm) {
         taskParam.falsePunish |= 1;
     } else {
         taskParam.falsePunish &= 0xFFFE;
     }
-
-
-    if (taskParam.ITI >= 5u) {
-        unsigned int trialITI = taskParam.ITI - 5u;
+    if (taskParam.ITI >= 4u) {
+        unsigned int trialITI = taskParam.ITI - 4u;
         while (trialITI > 60u) {
             waitTaskTimer(60u * 1000u);
             trialITI -= 60u;
@@ -1145,22 +1134,6 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                             laser_G2.side = isLikeOdorA_G2(sample1) ? 2 : 1;
                         } else {
                             laser_G2.side = isLikeOdorA_G2(sample1) ? 1 : 2;
-                        }
-                        break;
-                    case LASER_13s_EarlyMidLate:
-                        switch (currentTrial % 4) {
-                            case 0:
-                                laser_G2.laserTrialType = LASER_OFF;
-                                break;
-                            case 1:
-                                laser_G2.laserTrialType = laserDuring1Terice;
-                                break;
-                            case 2:
-                                laser_G2.laserTrialType = laserDuring2Terice;
-                                break;
-                            case 3:
-                                laser_G2.laserTrialType = laserDuring3Terice;
-                                break;
                         }
                         break;
                     case LASER_DUAL_TASK_ON_OFF:

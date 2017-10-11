@@ -145,7 +145,6 @@ extern "C" {
 #define LASER_LR_EVERYTRIAL 40
 #define LASER_LR_EVERY_OTHER_TRIAL 42
 #define LASER_INCONGRUENT_CATCH_TRIAL 45
-#define LASER_13s_EarlyMidLate 50
 #define LASER_DUAL_TASK_ON_OFF 60
 #define LASER_DUAL_TASK_ODAP_ON_OFF 61
 #define LASER_AFTER_DISTR_3X 65
@@ -179,9 +178,7 @@ extern "C" {
 #define laserNoDelayControlShort 69
 #define laserNoDelayControl 70
 #define laserDuringEarlyHalf 80
-#define laserDuring1Terice 81
-#define laserDuring2Terice 82
-#define laserDuring3Terice 83
+
 #define laserDuringLateHalf 90
 #define laserDuring1Quarter 91
 #define laserDuring2Quarter 92
@@ -232,9 +229,6 @@ extern "C" {
 #define atDelay1sToMiddle 224
 #define atDelay500msToMiddle 225
 #define atDelayMiddle 230
-#define atDelayMid500mSec 232
-#define atDelayMid1Sec 233
-#define atDelayMid1_5Sec 234
 #define atDelayMid2Sec 235
 #define atDelayMid2_5Sec 240
 #define atDelayMid3Sec 245
@@ -243,20 +237,14 @@ extern "C" {
 #define atDelayLast1_5SecBegin 61
 #define atDelayLastSecBegin 63
 #define atDelayLast500mSBegin 65
-//#define atDelayLast200mSBegin 68
 #define atSecondOdorBeginning 70
 #define atSecondOdorEnd 80
-//#define atRewardDelayBeginning 90
 #define atResponseCueBeginning 90
 #define atResponseCueEnd 95
 
 #define atRewardBeginning 100
 //#define atRewardBeginning 110
 #define atRewardEnd 120
-#define atITIBeginning 130
-#define atITIOneSecIn 140
-#define atITILastSecIn 150
-#define atITIEnd 160
 
 
 typedef struct {
