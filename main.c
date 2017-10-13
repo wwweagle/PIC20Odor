@@ -30,6 +30,7 @@ void testLaser();
 
 unsigned int taskType_G2 = DNMS_TASK;
 const char odorTypes_G2[] = "BYRQHNKLTXZdMAES0123456";
+int correctionRepeatCount=0;
 
 int main(void) {
     initPorts();
@@ -134,7 +135,8 @@ void callFunc(int n) {
         {
             splash_G2("ODPA R_D", "");
             highLevelShuffleLength_G2 = 20;
-            laser_G2.laserSessionType = LASER_SESS_UNDEFINED;
+            int noLaser = getFuncNumber(1, "Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
             taskType_G2 = ODPA_RD_CATCH_LASER_TASK;
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
             taskParam.pairs1Count = 2;
@@ -142,7 +144,7 @@ void callFunc(int n) {
             taskParam.delay1 = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
             waterLen = getFuncNumber(1, "Water fold?") * waterLen;
-            int sessNum=getFuncNumber(2,"Session number?");
+            int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
             break;
         }
@@ -179,7 +181,7 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.delay1 = 5;
             taskParam.ITI = 8;
-            int sessNum=getFuncNumber(2,"Session Number?");
+            int sessNum = getFuncNumber(2, "Session Number?");
             zxLaserSessions_G2(20, 100, sessNum);
             break;
         }
@@ -427,7 +429,7 @@ void stim_G2(int place, int odorPort, int type) {
                 break;
             case 5:
                 stimSend = SpCorrectionCue;
-                protectedSerialSend_G2(stimSend, 100+odorPort);
+                protectedSerialSend_G2(stimSend, 100 + odorPort);
                 break;
         }
         LCDsetCursor(3, 0);
@@ -785,6 +787,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
     ///--ITI1---///
     if (resultRtn == SpFalseAlarm) {
         taskParam.falsePunish |= 1;
+        correctionRepeatCount++;
     } else {
         taskParam.falsePunish &= 0xFFFE;
     }
@@ -928,14 +931,13 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         break;
 
                     case ODPA_RD_CATCH_LASER_TASK:
-                        if ((taskParam.falsePunish & 0x03) != 0x03) {
-                            //                            sample1 = (index == 0 || index == 2) ? *(taskParam.sample1s) : *(taskParam.sample1s+1);
-                            //                            test1 = (index == 1 || index == 2) ? *(taskParam.test1s) : *(taskParam.test1s+1);
+                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount>2) {
                             sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                            ;
                             test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                            correctionRepeatCount=0;
+                            
                         }
-                        if (currentTrial > 15) {
+                        if ((laser_G2.laserSessionType != LASER_NO_TRIAL) && currentTrial > 15) {
                             laser_G2.laserTrialType = laserDuringDelayChR2;
                         } else {
                             laser_G2.laserTrialType = LASER_OFF;
