@@ -30,7 +30,7 @@ void testLaser();
 
 unsigned int taskType_G2 = DNMS_TASK;
 const char odorTypes_G2[] = "BYRQHNKLTXZdMAES0123456";
-int correctionRepeatCount=0;
+int correctionRepeatCount = 0;
 
 int main(void) {
     initPorts();
@@ -42,38 +42,16 @@ int main(void) {
     while (1) {
         callFunc(getFuncNumber(2, "Main Func?"));
     }
-    //
-    //    StopI2C();
-    //    CloseI2C();
+
+    StopI2C();
+    CloseI2C();
     return 0;
-}
-
-void receiveNVerify() {
-
 }
 
 static int isLikeOdorA_G2(int odor) {
     if (odor == 3 || odor == 7) return 1; //B,R,H
     return 0;
 }
-
-//int addOdor(intNode* head) {
-//    int odor = getFuncNumber(2, "Add an odor");
-//    if(head->value<0){
-//        head->value=odor;
-//    }else{
-//        intNode* last=head->next;
-//        while(last->next!=NULL){
-//            last=last->next;
-//        }
-//        intNode* next=malloc(sizeof(intNode));
-//        next->value=odor;
-//        next->next=NULL;
-//        last->next=next;
-//       
-//    }
-
-//}
 
 void addAllOdor() {
     int odorPairs = taskParam.pairs1Count;
@@ -110,9 +88,6 @@ void callFunc(int n) {
     waterLen = read_eeprom_G2(EEP_WATER_LEN_MS);
     srand((unsigned int) millisCounter);
     switch (n) {
-        case 20:
-            testValveOnRA14();
-            break;
         case 21:
         {
             int b = getFuncNumber(1, "Board?");
@@ -135,7 +110,7 @@ void callFunc(int n) {
         {
             splash_G2("ODPA R_D", "");
             highLevelShuffleLength_G2 = 20;
-            int noLaser = getFuncNumber(1, "Laser?");
+            int noLaser = getFuncNumber(1, "No Laser?");
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
             taskType_G2 = ODPA_RD_CATCH_LASER_TASK;
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
@@ -185,6 +160,42 @@ void callFunc(int n) {
             zxLaserSessions_G2(20, 100, sessNum);
             break;
         }
+        case 33:
+        {
+            splash_G2("ODPA", "");
+            highLevelShuffleLength_G2 = 20;
+            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
+            taskType_G2 = ODPA_SHAPING_TASK;
+            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
+            taskParam.pairs1Count = 2;
+            taskParam.respCueLength=0;
+            addAllOdor();
+            taskParam.delay1 = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            waterLen = getFuncNumber(1, "Water fold?") * waterLen;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(20, 20, sessNum);
+            break;
+        }
+        case 34:
+        {
+            splash_G2("ODPA", "");
+            highLevelShuffleLength_G2 = 20;
+            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
+            taskType_G2 = ODPA_TASK;
+            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
+            taskParam.pairs1Count = 2;
+            taskParam.respCueLength=0;
+            addAllOdor();
+            taskParam.delay1 = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            waterLen = getFuncNumber(1, "Water fold?") * waterLen;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(20, 20, sessNum);
+            break;
+        }
         default:
         {
             int i;
@@ -196,18 +207,6 @@ void callFunc(int n) {
     }
     free(taskParam.sample1s);
     free(taskParam.test1s);
-}
-
-void testValveOnRA14() {
-    uint8_t isOn = 0;
-    LCDclear();
-    LCDhome();
-    while (1) {
-        PORTAbits.RA14 = isOn;
-        isOn = isOn ^ 0x01;
-        lcdWriteNumber_G2(isOn, 0, 0);
-        wait_ms(500);
-    }
 }
 
 void testValveFast(int board, int valve, int keep) {
@@ -515,57 +514,6 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
     lick_G2.portSide = 0;
     switch (taskType_G2) {
 
-            /*
-             *DNMS-LR
-             */
-        case DNMS_2AFC_TASK:
-            //
-            ///////////Detect/////////////////
-            for (timerCounterI = 0; timerCounterI < 500 && !(lick_G2.portSide == 2 || lick_G2.portSide == 3); lick_G2.portSide = lick_G2.current);
-            /////Reward
-            if (!lick_G2.portSide) {
-                processMiss_G2((firstOdor != secondOdor) ? 2 : 3);
-            } else if (!(lick_G2.portSide & 1) != !(firstOdor^secondOdor)) {
-                processHit_G2(lick_G2.portSide);
-            } else {
-                processFalse_G2(lick_G2.portSide == LICKING_LEFT ? 2 : 3);
-            }
-            break;
-
-            //        case DNMS_2AFC_TEACH:
-            //            //
-            //            ///////////Detect/////////////////
-            //            for (timerCounterI = 0; timerCounterI < 500 && !(lick_G2.flag == 2 || lick_G2.flag == 3); lick_G2.flag = lick_G2.current);
-            //            /////Reward
-            //            if (!lick_G2.flag) {
-            //                processMiss_G2((firstOdor != secondOdor) ? 2 : 3);
-            //                processLRTeaching_G2(waterPeroid, (firstOdor != secondOdor) ? 2 : 3);
-            //            } else if (!(lick_G2.flag & 1) != !(firstOdor^secondOdor)) {
-            //                processHit_G2(waterPeroid, lick_G2.flag & 1 ? 3 : 1, lick_G2.flag);
-            //            } else {
-            //                processFalse_G2(lick_G2.flag == LICKING_LEFT ? 2 : 3);
-            //                processLRTeaching_G2(waterPeroid, (firstOdor != secondOdor) ? 2 : 3);
-            //            }
-            //            break;
-
-        case GONOGO_LR_TASK:
-        case GONOGO_2AFC_TEACH:
-            //
-            ///////////Detect/////////////////
-            for (timerCounterI = 0; timerCounterI < 500 && !(lick_G2.portSide == 2 || lick_G2.portSide == 3); lick_G2.portSide = lick_G2.current);
-
-            /////Reward
-            if (lick_G2.portSide == LICKING_LEFT && isLikeOdorA_G2(firstOdor)) {
-                processHit_G2(2);
-            } else if (lick_G2.portSide == LICKING_RIGHT && !isLikeOdorA_G2(firstOdor)) {
-                processHit_G2(3);
-            } else if (lick_G2.portSide) {
-                processFalse_G2(lick_G2.portSide == LICKING_LEFT ? 2 : 3);
-            } else {
-                processMiss_G2(isLikeOdorA_G2(firstOdor) ? 2 : 3);
-            }
-            break;
-
         case GONOGO_TASK:
 
             for (timerCounterI = 0; timerCounterI < 500 && !lick_G2.portSide; lick_G2.portSide = lick_G2.current);
@@ -591,8 +539,7 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
              *//////////////
             //        case DNMS_TASK:
             //        case SHAPING_TASK:
-            //        case OPTO_ODPA_TASK:
-            //        case OPTO_ODPA_SHAPING_TASK:
+
             //        case NO_ODOR_CATCH_TRIAL_TASK:
             //        case VARY_ODOR_LENGTH_TASK:
             //        case DELAY_DISTRACTOR:
@@ -634,6 +581,10 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
     return rtn;
 }
 
+void dual_task_D_R(int type, int currentDistractor,
+        int distractorJudgingPair) {
+}
+
 static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
 
     protectedSerialSend_G2(Sptrialtype, laserType);
@@ -653,12 +604,8 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
 
 
     switch (taskType_G2) {
-
-
             //Do nothing during Go Nogo Tasks
-        case GONOGO_LR_TASK:
         case GONOGO_TASK:
-        case GONOGO_2AFC_TEACH:
             assertLaser_G2(laserType, atSecondOdorEnd);
             break;
 
@@ -674,45 +621,36 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
                 waitTaskTimer(500u);
                 assertLaser_G2(laserType, atDelay1SecIn); ////////////////1Sec////////////
 
-                if (taskParam.delay1 < 4) {
+                if (taskParam.delay1 <= 4) {
                     waitTaskTimer(taskParam.delay1 * 1000u - 2000u);
+                } else /*/////////////////////////////////////////////////
+      * ////////DISTRACTOR//////////////////////////////
+      * //////////////////////////////////////////////*/
+                    if (taskType_G2 == DUAL_TASK_LEARNING || taskType_G2 == DUAL_TASK ||
+                        //                        taskType_G2 == DUAL_TASK_CATCH_LASER ||
+                        taskType_G2 == DUAL_TASK_ON_OFF_LASER_TASK ||
+                        taskType_G2 == DUAL_TASK_ODAP_ON_OFF_LASER_TASK ||
+                        taskType_G2 == DNMS_DUAL_TASK_LEARNING ||
+                        taskType_G2 == DNMS_DUAL_TASK ||
+                        taskType_G2 == DUAL_TASK_EVERY_TRIAL) {
+                    waitTaskTimer(500u); //@500ms
+                    // assertLaser_G2(type, atPreDualTask); //@2s
+                    dual_task_D_R(laserType, taskParam.test2,
+                            taskParam.sample2);
+                    // waitTaskTimer_G2(1500u);
+                    assertLaser_G2(laserType, atPostDualTask); // distractor@ 4 sec
+                    if (taskParam.delay1 >= 8u) {
+                        waitTaskTimer((unsigned int) taskParam.delay1 * 1000 - 5000);
+                        assertLaser_G2(laserType, atDelayLastSecBegin);
+                        waitTaskTimer(500u);
+                    }
+                    // at test odor -500 ms
                 } else {
-
-                    //                    waitTimerJ_G2(500u);
-                    //                    assertLaser_G2(type, atDelay1_5SecIn); ////////////////1.5Sec////////////////
 
                     waitTaskTimer(1000u);
                     assertLaser_G2(laserType, atDelay2SecIn); /////////////2Sec/////////////
 
 
-
-                    /*/////////////////////////////////////////////////
-                     * ////////DISTRACTOR//////////////////////////////
-                     * //////////////////////////////////////////////*/
-                    //                    if (taskType_G2 == DUAL_TASK_LEARNING || taskType_G2 == DUAL_TASK
-                    //                            || taskType_G2 == DUAL_TASK_ON_OFF_LASER_TASK || taskType_G2 == DUAL_TASK_ODAP_ON_OFF_LASER_TASK
-                    //                            || taskType_G2 == DNMS_DUAL_TASK_LEARNING || taskType_G2 == DNMS_DUAL_TASK || taskType_G2 == DUAL_TASK_EVERY_TRIAL) {
-                    //                        assertLaser_G2(type, atPreDualTask); //@2s
-                    //                        distractor_G2(taskParam.test2, taskParam.sample2, waterLen);
-                    //                        waitTimerJ_G2(1500u);
-                    //                        assertLaser_G2(type, atPostDualTask); //distractor@3.5sec
-                    //                        if (taskParam.delay1 > 8u) {
-                    //                            waitTimerJ_G2((taskParam.delay1 - 8u)*500u);
-                    //                        }
-                    //                    } else 
-                    //                    if (taskParam.delay1 >= 12u) {
-                    //                        waitTimerJ_G2(500u);
-                    //                        assertLaser_G2(type, atDelay2_5SecIn);
-                    //                        waitTimerJ_G2(500u);
-                    //                        assertLaser_G2(type, atDelay3SecIn);
-                    //                        waitTimerJ_G2(500u); //->3.5s
-                    //                        assertLaser_G2(type, atDelay3_5SIn);
-                    //                        waitTimerJ_G2(1000u); //->4.5s
-                    //                        assertLaser_G2(type, atDelay4_5SIn);
-                    //                        waitTimerJ_G2(1000u);
-                    //                        waitTimerJ_G2((taskParam.delay1 - 12u)*500u);
-                    //                    } else 
-                    //                    {
                     waitTaskTimer(taskParam.delay1 * 500u - 2000u);
                     //                    }
                     assertLaser_G2(laserType, atDelayMiddle); //13@6.5
@@ -750,26 +688,30 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
             //////////////////////////////////////////
             break;
     }
-    int delayLick = waitTaskTimer(1000u);
-    stim_G2(3, taskParam.respCue, laserType);
-    delayLick |= waitTaskTimer(500u);
     int resultRtn = 0;
-    LCDsetCursor(3, 0);
-    if (delayLick) {
-        muxDis(0x0f);
-        protectedSerialSend_G2(SpAbortTrial, 1);
-        LCD_Write_Char('A');
-        waitTaskTimer(500u);
+    if (taskParam.respCueLength < 200) {
+        int delayLick = waitTaskTimer(1000u);
+        stim_G2(3, taskParam.respCue, laserType);
+        delayLick |= waitTaskTimer(500u);
+        LCDsetCursor(3, 0);
+        if (delayLick) {
+            muxDis(0x0f);
+            protectedSerialSend_G2(SpAbortTrial, 1);
+            LCD_Write_Char('A');
+            waitTaskTimer(500u);
+        } else {
+            LCD_Write_Char('R');
+            assertLaser_G2(laserType, atRewardBeginning);
+            stim_G2(4, taskParam.respCue, laserType);
+            //Assess Performance here
+            //            int id = (taskType_G2 == DUAL_TASK || taskType_G2 == DUAL_TASK_LEARNING
+            //                    || taskType_G2 == DUAL_TASK_ON_OFF_LASER_TASK || taskType_G2 == DUAL_TASK_ODAP_ON_OFF_LASER_TASK
+            //                    || taskType_G2 == DNMS_DUAL_TASK_LEARNING || taskType_G2 == DNMS_DUAL_TASK || taskType_G2 == DUAL_TASK_EVERY_TRIAL) ? 2 : 1;
+        }
     } else {
-        LCD_Write_Char('R');
-        assertLaser_G2(laserType, atRewardBeginning);
-        stim_G2(4, taskParam.respCue, laserType);
-        //Assess Performance here
-        int id = (taskType_G2 == DUAL_TASK || taskType_G2 == DUAL_TASK_LEARNING
-                || taskType_G2 == DUAL_TASK_ON_OFF_LASER_TASK || taskType_G2 == DUAL_TASK_ODAP_ON_OFF_LASER_TASK
-                || taskType_G2 == DNMS_DUAL_TASK_LEARNING || taskType_G2 == DNMS_DUAL_TASK || taskType_G2 == DUAL_TASK_EVERY_TRIAL) ? 2 : 1;
-        resultRtn = waterNResult_G2(s1, t1, id);
+        waitTaskTimer(1000u);
     }
+    resultRtn = waterNResult_G2(s1, t1, 1);
     waitTaskTimer(1000u); //water time sync
     // Total Trials
     int totalTrials = hit + correctRejection + miss + falseAlarm + abortTrial;
@@ -861,37 +803,6 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = 0;
                         break;
-                        //                    case DNMS_2AFC_TASK:
-                        //                    case DNMS_2AFC_TEACH:
-                        //                        if (hit > lastHit || currentTrial == 0) {
-                        //                            sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        //                            test1 = (index == 1 || index == 2) ? taskParam.sample1 : taskParam.test1;
-                        //                            lastOdor1 = sample1;
-                        //                            lastOdor2 = test1;
-                        //                        } else {
-                        //                            sample1 = lastOdor1;
-                        //                            test1 = lastOdor2;
-                        //                        }
-                        //
-                        //                        lastHit = hit;
-                        //                        break;
-                        //                    case GONOGO_2AFC_TEACH:
-                        //                        if (hit > lastHit || currentTrial == 0) {
-                        //                            sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        //                            lastOdor1 = sample1;
-                        //                            test1 = 0;
-                        //                        } else {
-                        //                            sample1 = lastOdor1;
-                        //                            test1 = 0;
-                        //                        }
-                        //
-                        //                        lastHit = hit;
-                        //                        break;
-                        //                    case NO_ODOR_CATCH_TRIAL_TASK:
-                        //                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        //                        test1 = (index == 1 || index == 2) ? taskParam.sample1 : taskParam.test1;
-                        //
-                        //                        break;
 
                     case VARY_ODOR_LENGTH_TASK:
                     {
@@ -931,11 +842,11 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         break;
 
                     case ODPA_RD_CATCH_LASER_TASK:
-                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount>2) {
+                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 2) {
                             sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                             test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
-                            correctionRepeatCount=0;
-                            
+                            correctionRepeatCount = 0;
+
                         }
                         if ((laser_G2.laserSessionType != LASER_NO_TRIAL) && currentTrial > 15) {
                             laser_G2.laserTrialType = laserDuringDelayChR2;
