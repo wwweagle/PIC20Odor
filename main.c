@@ -65,8 +65,10 @@ void addAllOdor() {
         odor = getFuncNumber(2, "Add an test");
         taskParam.test1s[i] = odor;
     }
-    odor = getFuncNumber(2, "Add an rsps cue");
-    taskParam.respCue = odor;
+    if (taskParam.respCueLength >= 200) {
+        odor = getFuncNumber(2, "Add an rsps cue");
+        taskParam.respCue = odor;
+    }
 }
 
 void bleedWater() {
@@ -169,7 +171,7 @@ void callFunc(int n) {
             taskType_G2 = ODPA_SHAPING_TASK;
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
             taskParam.pairs1Count = 2;
-            taskParam.respCueLength=0;
+            taskParam.respCueLength = 0;
             addAllOdor();
             taskParam.delay1 = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
@@ -187,7 +189,7 @@ void callFunc(int n) {
             taskType_G2 = ODPA_TASK;
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
             taskParam.pairs1Count = 2;
-            taskParam.respCueLength=0;
+            taskParam.respCueLength = 0;
             addAllOdor();
             taskParam.delay1 = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
@@ -689,7 +691,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
             break;
     }
     int resultRtn = 0;
-    if (taskParam.respCueLength < 200) {
+    if (taskParam.respCueLength >= 200) {
         int delayLick = waitTaskTimer(1000u);
         stim_G2(3, taskParam.respCue, laserType);
         delayLick |= waitTaskTimer(500u);
