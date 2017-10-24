@@ -49,7 +49,7 @@ int main(void) {
 }
 
 static int isLikeOdorA_G2(int odor) {
-    if (odor == 3 || odor == 7) return 1; //B,R,H
+    if (odor == 3 || odor == 7 || odor == 6) return 1; //B,R,H
     return 0;
 }
 
@@ -198,6 +198,25 @@ void callFunc(int n) {
             zxLaserSessions_G2(20, 20, sessNum);
             break;
         }
+
+        case 35:
+        {
+            splash_G2("ODPA R_D", "");
+            highLevelShuffleLength_G2 = 24;
+            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
+            taskType_G2 = ODPA_RD_CATCH_LASER_TASK;
+            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
+            taskParam.pairs1Count = 4;
+            addAllOdor();
+            taskParam.delay1 = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            waterLen = getFuncNumber(1, "Water fold?") * waterLen;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(20, 20, sessNum);
+            break;
+        }
+
         default:
         {
             int i;
@@ -790,6 +809,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
             for (iterOf4 = 0; iterOf4 < 4 && currentMiss < missLimit; iterOf4++) {
                 //                wait_ms(1000);
                 int index = shuffledList[iterOf4];
+                int hiIdx = shuffledLongList[currentTrial];
                 switch (taskType_G2) {
 
                     case DNMS_TASK:
@@ -845,10 +865,14 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
 
                     case ODPA_RD_CATCH_LASER_TASK:
                         if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 2) {
-                            sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                            test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                            if (taskParam.pairs1Count == 2) {
+                                sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                                test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                            } else if (taskParam.pairs1Count > 2) {
+                                sample1 = taskParam.sample1s[(hiIdx >> 1) % 4];
+                                test1 = taskParam.test1s[hiIdx & 1];
+                            }
                             correctionRepeatCount = 0;
-
                         }
                         if ((laser_G2.laserSessionType != LASER_NO_TRIAL) && currentTrial > 15) {
                             laser_G2.laserTrialType = laserDuringDelayChR2;
