@@ -131,6 +131,7 @@ extern "C" {
 #define LASER_OTHER_TRIAL 1
 #define LASER_NO_TRIAL 2
 #define LASER_EVERY_TRIAL 3
+#define LASER_CATCH_TRIAL 10
 //#define laserFollowOdorA 4
 //#define laserFollowOdorB 5
 //#define laser1and2Half 6

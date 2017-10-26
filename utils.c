@@ -81,6 +81,14 @@ int getFuncNumber(int targetDigits, const char* message) {
         protectedSerialSend_G2(1, bitValue[iter]);
 
     }
+
+    int lcdPos;
+    for (lcdPos = 0; lcdPos < targetDigits; lcdPos++) {
+        LCDsetCursor(lcdPos, 1);
+        LCD_Write_Char(bitValue[lcdPos] + 0x30);
+    }
+
+
     for (iter1 = 0; iter1 < targetDigits; iter1++) {
         n = n * 10 + bitValue[iter1];
     }
