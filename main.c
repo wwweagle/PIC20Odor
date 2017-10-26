@@ -227,6 +227,7 @@ void callFunc(int n) {
             laser_G2.laserSessionType = LASER_NO_TRIAL;
             laser_G2.laserTrialType = LASER_OFF;
             taskType_G2 = GONOGO_TASK;
+            taskParam.respCueLength=0;
             taskParam.falsePunish = 0;
             taskParam.pairs1Count = 2;
             addAllOdor();
