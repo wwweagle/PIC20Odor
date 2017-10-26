@@ -186,6 +186,7 @@ void callFunc(int n) {
             highLevelShuffleLength_G2 = 20;
             int noLaser = getFuncNumber(1, "No Laser?");
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
+            laser_G2.laserTrialType = laserDuringDelayChR2;
             taskType_G2 = ODPA_TASK;
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
             taskParam.pairs1Count = 2;
@@ -988,7 +989,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         laser_G2.laserTrialType = (currentTrial % 2) == 0 ? LASER_OFF : laserOnType;
                         break;
                     case LASER_CATCH_TRIAL:
-                        laser_G2.laserTrialType = (currentTrial >15) ? LASER_OFF : laserOnType;
+                        laser_G2.laserTrialType = (currentTrial > 15) ? laserOnType : LASER_OFF;
                         break;
 
                     case LASER_LR_EACH_QUARTER:
