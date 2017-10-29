@@ -13,7 +13,7 @@
 #include "lcdi2c.h"
 
 void callFunc(int n);
-void testOneValve(int n);
+void testOneValve(int n,int iti);
 void testValveFast(int board, int valve, int keep);
 void testValveOnRA14();
 void readADCData();
@@ -128,10 +128,11 @@ void callFunc(int n) {
         }
         case 27:
         {
-            int dpadrOdors[] = {3, 2, 7, 1, 13};
+            int iti = getFuncNumber(2, "Interval?");
+            int dpadrOdors[] = {0, 1, 2, 3, 7};
             int i;
             for (i = 0; i < 5; i++) {
-                testOneValve(dpadrOdors[i]);
+                testOneValve(dpadrOdors[i],iti);
             }
             break;
         }
@@ -222,12 +223,13 @@ void callFunc(int n) {
 
         case 36:
         {
-            splash_G2("GO-Nogo", "");
+            splash_G2("GO-Nogo", "(RD)");
             highLevelShuffleLength_G2 = 24;
             laser_G2.laserSessionType = LASER_NO_TRIAL;
             laser_G2.laserTrialType = LASER_OFF;
             taskType_G2 = GONOGO_TASK;
-            taskParam.respCueLength=0;
+            int rd = getFuncNumber(1, "Resp delay?");
+            taskParam.respCueLength = rd ? 1000 : 0;
             taskParam.falsePunish = 0;
             taskParam.pairs1Count = 2;
             addAllOdor();
@@ -244,7 +246,7 @@ void callFunc(int n) {
         {
             int i;
             for (i = n; i < n + 4; i++)
-                testOneValve(i);
+                testOneValve(i, 8);
         }
             break;
 
@@ -275,11 +277,11 @@ void testValveFast(int board, int valve, int keep) {
 
 }
 
-void testOneValve(int valve) {
+void testOneValve(int valve, int iti) {
     const int preCharge = 500;
 
     int repeat = 10;
-    int iti = 8;
+    //    int iti = 8;
     const int onTime = 1000;
     int closingAdvance = 195;
     //    int valve;
@@ -637,7 +639,6 @@ void dual_task_D_R(int type, int currentDistractor,
 }
 
 static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
-
     protectedSerialSend_G2(Sptrialtype, laserType);
     protectedSerialSend_G2(Splaser, (laserType != LASER_OFF));
     assertLaser_G2(laserType, at4SecBeforeS1);
@@ -749,7 +750,8 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
             muxDis(0x0f);
             protectedSerialSend_G2(SpAbortTrial, 1);
             LCD_Write_Char('A');
-            waitTaskTimer(500u);
+            stim_G2(5, taskParam.correctionCue, LASER_OFF);
+            abortTrial++;
         } else {
             LCD_Write_Char('R');
             assertLaser_G2(laserType, atRewardBeginning);
@@ -823,7 +825,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
         splash_G2("    H___M___ __%", "S__ F___C___t___");
 
         lcdWriteNumber_G2(currentSession, 1, 1);
-        hit = miss = falseAlarm = correctRejection = 0;
+        hit = miss = falseAlarm = correctRejection = abortTrial = 0;
         //        unsigned int lastHit = 0;
         unsigned int shuffledList[4];
         unsigned int shuffledLongList[highLevelShuffleLength_G2];

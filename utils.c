@@ -414,6 +414,7 @@ void waitTrial_G2() {
 
     while (u2Received != 0x31) {
         protectedSerialSend_G2(20, 1);
+        wait_ms(100);
     }
     u2Received = -1;
 }

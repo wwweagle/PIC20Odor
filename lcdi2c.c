@@ -676,5 +676,6 @@ void splash_G2(const char* line1, const char* line2) {
     LCD_Write_Str(line1);
     LCDsetCursor(0, 1);
     LCD_Write_Str(line2);
+    wait_Sec(1);
 }
 
