@@ -102,7 +102,7 @@ extern "C" {
 #define DNMS_2AFC_TEACH 38
 #define DNMS_LR_LEARNING_TASK 39
 #define DNMS_2AFC_TASK 40
-#define GONOGO_2AFC_TEACH 49
+#define GONOGO_Seq2AFC_TEACH 49
 #define GONOGO_LR_TASK 50
 #define NO_ODOR_CATCH_TRIAL_TASK 60
 #define VARY_ODOR_LENGTH_TASK 70
@@ -260,7 +260,8 @@ typedef struct {
     int pairs1Count;
     int sample2;
     int test2;
-    int respCue;
+    int *respCue;
+    int respCount;
     int sample1Length;
     int sample2Length;
     int test1Length;
