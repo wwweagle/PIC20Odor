@@ -670,13 +670,13 @@ static void seq2AFCResult(int firstOdor, int laserType) {
             waitTaskTimer(500u);
             stim_G2(4, taskParam.respCue[cueSeq[0]], laserType);
             LCDsetCursor(3, 0);
-            int rtn = waterNResult_G2(firstOdor, cueSeq[0], 4);
+            int rtn = waterNResult_G2(firstOdor, taskParam.respCue[cueSeq[0]], 4);
             waitTaskTimer(500u);
             if (rtn == SpCorrectRejection || rtn == SpMiss) {
                 stim_G2(3, taskParam.respCue[cueSeq[1]], laserType);
                 waitTaskTimer(500u);
                 stim_G2(4, taskParam.respCue[cueSeq[1]], laserType);
-                waterNResult_G2(firstOdor, cueSeq[1], 5);
+                waterNResult_G2(firstOdor, taskParam.respCue[cueSeq[1]], 5);
             }
         }
     }
