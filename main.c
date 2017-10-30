@@ -257,7 +257,7 @@ void callFunc(int n) {
             taskParam.ITI = 4;
             waterLen = getFuncNumber(1, "Water fold?") * waterLen;
             int sessNum = getFuncNumber(2, "Session number?");
-            zxLaserSessions_G2(20, 20, sessNum);
+            zxLaserSessions_G2(20, 100, sessNum);
             break;
         }
 
@@ -726,6 +726,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
     switch (taskType_G2) {
             //Do nothing during Go Nogo Tasks
         case GONOGO_TASK:
+        case GONOGO_Seq2AFC_TEACH:
             assertLaser_G2(laserType, atSecondOdorEnd);
             break;
 
@@ -913,6 +914,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         test1 = (sample1 == taskParam.sample1s[0]) ? taskParam.test1s[0] : taskParam.test1s[1];
                         break;
                     case GONOGO_TASK:
+                    case GONOGO_Seq2AFC_TEACH:
                     case GONOGO_LR_TASK:
                         sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = 0;
