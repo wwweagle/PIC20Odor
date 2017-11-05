@@ -15,7 +15,7 @@
 
 
 LICK_T_G2 lick_G2 = {
-    .current = 0u, .filter = 0u, .portSide = 0u, .LCount = 0u, .RCount = 0u
+    .current = 0u, .stable = 0u, .filter = 0u, .portSide = 0u, .LCount = 0u, .RCount = 0u
 };
 
 LASER_T_G2 laser_G2 = {.laserSessionType = LASER_NO_TRIAL, .laserTrialType = LASER_OFF,
@@ -409,13 +409,14 @@ void waitTrial_G2() {
         if (!waitingLickRelease) {
             protectedSerialSend_G2(20, 100);
             waitingLickRelease = 1;
+            wait_ms(200);
         }
     }
     waitingLickRelease = 0;
 
     while (u2Received != 0x31) {
         protectedSerialSend_G2(20, 1);
-        wait_ms(100);
+        wait_ms(200);
     }
     u2Received = -1;
 }

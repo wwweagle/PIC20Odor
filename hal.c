@@ -71,20 +71,25 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     } else {
         BNC_4 = 0;
     }
-    if (adcdata > lickThresh && lick_G2.current != LICKING_LEFT &&
-            filtered_G2()) { // Low is lick
+    if (adcdata > lickThresh && lick_G2.current == 0 &&
+            filtered_G2()) { // HIGH is lick
         lick_G2.filter = millisCounter;
-        lick_G2.current = LICKING_LEFT;
-        lick_G2.LCount++;
-        //  digitalWrite(38, HIGH);
-        if (isSending) {
-            sendLick = 1;
-        } else {
-            protectedSerialSend_G2(0, 2);
-            sendLick = 0;
+        lick_G2.current = LICKING_DETECTED;
+    } else if (adcdata > lickThresh && lick_G2.current == LICKING_DETECTED) {
+        if (millisCounter > lick_G2.filter + 5) {
+            lick_G2.stable = 1;
+            lick_G2.LCount++;
+            lick_G2.current=LICKING_SENT;
+            if (isSending) {
+                sendLick = 1;
+            } else {
+                protectedSerialSend_G2(0, 2);
+                sendLick = 0;
+            }
         }
-    } else if (lick_G2.current && (adcdata <= lickThresh)) {
+    } else if (adcdata <= lickThresh) {
         lick_G2.current = 0;
+        lick_G2.stable = 0;
         //  digitalWrite(38, LOW);
     }
     //  if (Serial.peek() == 0x2a) {

@@ -578,9 +578,10 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
             || taskType_G2 == ODPA_RD_TASK) ? 1000 : 500;
 
     lick_G2.portSide = 0;
+
     switch (taskType_G2) {
         case GONOGO_TASK:
-            for (timerCounterI = 0; timerCounterI < 500 && !lick_G2.portSide; lick_G2.portSide = lick_G2.current);
+            for (timerCounterI = 0; timerCounterI < 500 && !lick_G2.portSide; lick_G2.portSide = lick_G2.stable);
 
             /////Reward
             if (!lick_G2.portSide) {
@@ -620,7 +621,7 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
             //        
 
             ///////////Detect/////////////////
-            for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.portSide; lick_G2.portSide = lick_G2.current);
+            for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.portSide; lick_G2.portSide = lick_G2.stable);
 
             /////Reward
             if (!lick_G2.portSide) {

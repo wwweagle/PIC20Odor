@@ -248,6 +248,7 @@ extern "C" {
 
 typedef struct {
     volatile unsigned int current;
+    volatile unsigned int stable;
     volatile uint32_t filter;
     unsigned int portSide;
     volatile unsigned int LCount;
@@ -303,8 +304,9 @@ extern int hit, miss, falseAlarm, correctRejection, abortTrial;
 
 extern unsigned int highLevelShuffleLength_G2;
 
-#define LICKING_LEFT 2
+#define LICKING_DETECTED 2
 #define LICKING_RIGHT 3
+#define LICKING_SENT 8
 #define LICKING_BOTH 127
 
 void feedWaterFast_G2();
