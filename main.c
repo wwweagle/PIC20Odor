@@ -215,6 +215,7 @@ void callFunc(int n) {
             taskType_G2 = ODPA_RD_TASK;
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
             taskParam.pairs1Count = 4;
+            taskParam.respCount = 0;
             addAllOdor();
             taskParam.delay1 = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
@@ -260,6 +261,8 @@ void callFunc(int n) {
             zxLaserSessions_G2(20, 100, sessNum);
             break;
         }
+
+
 
 
         default:
@@ -960,12 +963,20 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
 
                     case ODPA_RD_TASK:
                         if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 2) {
-                            if (taskParam.pairs1Count == 2) {
-                                sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                                test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
-                            } else if (taskParam.pairs1Count > 2) {
-                                sample1 = taskParam.sample1s[(hiIdx >> 1) % 4];
-                                test1 = taskParam.test1s[hiIdx & 1];
+                            switch (taskParam.pairs1Count) {
+                                case 2:
+                                    sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                                    test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                                    break;
+                                case 4:
+                                    sample1 = taskParam.sample1s[index];
+                                    if (((index == 1 || index == 2) && (currentTrial % 8) < 4)
+                                            || ((index == 0 || index == 3) && (currentTrial % 8) > 3)) {
+                                        test1 = taskParam.test1s[0];
+                                    } else {
+                                        test1 = taskParam.test1s[1];
+                                    }
+                                    break;
                             }
                             correctionRepeatCount = 0;
                         }
