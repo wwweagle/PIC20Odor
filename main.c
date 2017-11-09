@@ -254,8 +254,8 @@ void callFunc(int n) {
             taskParam.falsePunish = 0;
             taskParam.pairs1Count = 2;
             addAllOdor();
-            taskParam.delay1 = 0;
-            taskParam.ITI = 4;
+            taskParam.delay1 = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
             waterLen = getFuncNumber(1, "Water fold?") * waterLen;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 100, sessNum);
@@ -732,6 +732,8 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
         case GONOGO_TASK:
         case GONOGO_Seq2AFC_TEACH:
             assertLaser_G2(laserType, atSecondOdorEnd);
+            if (taskParam.delay1 > 1)
+                waitTaskTimer(taskParam.delay1 * 1000u);
             break;
 
 
@@ -906,7 +908,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
             for (iterOf4 = 0; iterOf4 < 4 && currentMiss < missLimit; iterOf4++) {
                 //                wait_ms(1000);
                 int index = shuffledList[iterOf4];
-                int hiIdx = shuffledLongList[currentTrial];
+                //                int hiIdx = shuffledLongList[currentTrial];
                 switch (taskType_G2) {
 
                     case DNMS_TASK:
