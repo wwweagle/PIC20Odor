@@ -105,7 +105,7 @@ extern "C" {
 #define GONOGO_Seq2AFC_TEACH 49
 #define GONOGO_LR_TASK 50
 #define NO_ODOR_CATCH_TRIAL_TASK 60
-#define VARY_ODOR_LENGTH_TASK 70
+//#define VARY_ODOR_LENGTH_TASK 70
 #define DUAL_TASK_LEARNING 90
 #define DUAL_TASK 93
 #define DUAL_TASK_ON_OFF_LASER_TASK 95
@@ -276,6 +276,7 @@ typedef struct {
     int delay3;
     int ITI;
     int waitForTrial;
+    int minBlock;
 
 } TASK_T;
 
@@ -301,8 +302,6 @@ extern int waterLen;
 extern int currentMiss, correctRatio;
 
 extern int hit, miss, falseAlarm, correctRejection, abortTrial;
-
-extern unsigned int highLevelShuffleLength_G2;
 
 #define LICKING_DETECTED 2
 #define LICKING_RIGHT 3
