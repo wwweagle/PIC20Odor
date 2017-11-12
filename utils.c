@@ -41,15 +41,14 @@ TASK_T taskParam = {
     .delay2 = 0,
     .delay3 = 0,
     .ITI = 8,
-    .waitForTrial = 1
+    .waitForTrial = 1,
+    .minBlock = 4
 };
 
 int waterLen = 50;
 int hit, miss, falseAlarm, correctRejection, abortTrial;
 
 int currentMiss, correctRatio;
-
-unsigned int highLevelShuffleLength_G2 = 12u;
 
 int getFuncNumber(int targetDigits, const char* message) {
     int bitValue[targetDigits];

@@ -114,7 +114,6 @@ void callFunc(int n) {
         case 26:
         {
             splash_G2("ODPA R_D", "");
-            highLevelShuffleLength_G2 = 20;
             int noLaser = getFuncNumber(1, "No Laser?");
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
             laser_G2.laserTrialType = laserDuringDelayChR2;
@@ -155,7 +154,6 @@ void callFunc(int n) {
         case 32:
         {
             splash_G2("ODPA R_D", "REPEAT");
-            highLevelShuffleLength_G2 = 20;
             laser_G2.laserSessionType = LASER_SESS_UNDEFINED;
             taskType_G2 = ODPA_RD_SHAPING_TASK;
             taskParam.falsePunish = 0;
@@ -170,7 +168,6 @@ void callFunc(int n) {
         case 33:
         {
             splash_G2("ODPA", "");
-            highLevelShuffleLength_G2 = 20;
             int noLaser = getFuncNumber(1, "No Laser?");
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
             taskType_G2 = ODPA_SHAPING_TASK;
@@ -188,7 +185,6 @@ void callFunc(int n) {
         case 34:
         {
             splash_G2("ODPA", "");
-            highLevelShuffleLength_G2 = 20;
             int noLaser = getFuncNumber(1, "No Laser?");
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
             laser_G2.laserTrialType = laserDuringDelayChR2;
@@ -207,8 +203,7 @@ void callFunc(int n) {
 
         case 35:
         {
-            splash_G2("ODPA R_D", "");
-            highLevelShuffleLength_G2 = 24;
+            splash_G2("ODPA Multi Samp", "4 Sample");
             int noLaser = getFuncNumber(1, "No Laser?");
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
             laser_G2.laserTrialType = laserDuringDelayChR2;
@@ -221,14 +216,13 @@ void callFunc(int n) {
             taskParam.ITI = getFuncNumber(2, "ITI duration");
             waterLen = getFuncNumber(1, "Water fold?") * waterLen;
             int sessNum = getFuncNumber(2, "Session number?");
-            zxLaserSessions_G2(24, 20, sessNum);
+            zxLaserSessions_G2(40, 20, sessNum);
             break;
         }
 
         case 36:
         {
             splash_G2("GO-Nogo", "(RD)");
-            highLevelShuffleLength_G2 = 24;
             laser_G2.laserSessionType = LASER_NO_TRIAL;
             laser_G2.laserTrialType = LASER_OFF;
             taskType_G2 = GONOGO_TASK;
@@ -246,7 +240,6 @@ void callFunc(int n) {
         case 37:
         {
             splash_G2("Seq 2AFC", "");
-            highLevelShuffleLength_G2 = 20;
             laser_G2.laserSessionType = LASER_NO_TRIAL;
             laser_G2.laserTrialType = LASER_OFF;
             taskType_G2 = GONOGO_Seq2AFC_TEACH;
@@ -262,6 +255,25 @@ void callFunc(int n) {
             break;
         }
 
+        case 38:
+        {
+            splash_G2("ODPA Multi Samp", "6 Sample");
+            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
+            laser_G2.laserTrialType = laserDuringDelayChR2;
+            taskType_G2 = ODPA_RD_TASK;
+            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
+            taskParam.pairs1Count = 6;
+            taskParam.minBlock = 6;
+            taskParam.respCount = 0;
+            addAllOdor();
+            taskParam.delay1 = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            waterLen = getFuncNumber(1, "Water fold?") * waterLen;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(60, 20, sessNum);
+            break;
+        }
 
 
 
@@ -894,9 +906,9 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
         lcdWriteNumber_G2(currentSession, 1, 1);
         hit = miss = falseAlarm = correctRejection = abortTrial = 0;
         //        unsigned int lastHit = 0;
-        unsigned int shuffledList[4];
-        unsigned int shuffledLongList[highLevelShuffleLength_G2];
-        shuffleArray_G2(shuffledLongList, highLevelShuffleLength_G2);
+        unsigned int* shuffledList = malloc(taskParam.minBlock * sizeof (unsigned int));
+        //        unsigned int* shuffledLongList = malloc(highLevelShuffleLength_G2 * sizeof (unsigned int));
+        //        shuffleArray_G2(shuffledLongList, highLevelShuffleLength_G2);
         int sample1, test1, sample2, test2;
         sample2 = 0;
         test2 = 0;
@@ -904,57 +916,57 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
         //        int lastOdor2;
         for (currentTrial = 0; currentTrial < trialsPerSession && currentMiss < missLimit;) {
             shuffleArray_G2(shuffledList, 4);
-            int iterOf4;
-            for (iterOf4 = 0; iterOf4 < 4 && currentMiss < missLimit; iterOf4++) {
+            int idxInMinBlock;
+            for (idxInMinBlock = 0; idxInMinBlock < taskParam.minBlock && currentMiss < missLimit; idxInMinBlock++) {
                 //                wait_ms(1000);
-                int index = shuffledList[iterOf4];
+                int shuffledMinBlock = shuffledList[idxInMinBlock];
                 //                int hiIdx = shuffledLongList[currentTrial];
                 switch (taskType_G2) {
 
                     case DNMS_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                        sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        test1 = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
                         break;
                     case SHAPING_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = (sample1 == taskParam.sample1s[0]) ? taskParam.test1s[0] : taskParam.test1s[1];
                         break;
                     case GONOGO_TASK:
                     case GONOGO_Seq2AFC_TEACH:
                     case GONOGO_LR_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = 0;
                         break;
 
-                    case VARY_ODOR_LENGTH_TASK:
-                    {
-                        static int varyLengths[] = {250, 500, 750, 1000};
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
-                        unsigned int idxO1 = shuffledLongList[currentTrial]&0x03;
-                        unsigned int idxO2 = shuffledLongList[currentTrial] >> 2;
-                        taskParam.sample1Length = varyLengths[idxO1];
-                        taskParam.test1Length = varyLengths[idxO2];
-                        //                        lcdWriteNumber(idxO1,2,13,2);
-                        //                        lcdWriteNumber(idxO2,2,15,2);
-                        //                        lcdWriteNumber(odors.odor1Length,4,1,2);
-                        //                        lcdWriteNumber(odors.odor2Length,4,5,2);
-
-                        break;
-                    }
+                        //                    case VARY_ODOR_LENGTH_TASK:
+                        //                    {
+                        //                        static int varyLengths[] = {250, 500, 750, 1000};
+                        //                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        //                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                        //                        unsigned int idxO1 = shuffledLongList[currentTrial]&0x03;
+                        //                        unsigned int idxO2 = shuffledLongList[currentTrial] >> 2;
+                        //                        taskParam.sample1Length = varyLengths[idxO1];
+                        //                        taskParam.test1Length = varyLengths[idxO2];
+                        //                        //                        lcdWriteNumber(idxO1,2,13,2);
+                        //                        //                        lcdWriteNumber(idxO2,2,15,2);
+                        //                        //                        lcdWriteNumber(odors.odor1Length,4,1,2);
+                        //                        //                        lcdWriteNumber(odors.odor2Length,4,5,2);
+                        //
+                        //                        break;
+                        //                    }
 
 
                     case ODPA_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                        sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        test1 = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
                         break;
 
                     case ODPA_SHAPING_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = (sample1 == taskParam.sample1s[0]) ? taskParam.test1s[1] : taskParam.test1s[0];
                         break;
                     case ODPA_RD_SHAPING_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = (sample1 == taskParam.sample1s[0]) ? taskParam.test1s[1] : taskParam.test1s[0];
                         if (currentTrial > 15) {
                             laser_G2.laserTrialType = laserDuringDelayChR2;
@@ -967,114 +979,124 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 2) {
                             switch (taskParam.pairs1Count) {
                                 case 2:
-                                    sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                                    test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                                    sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                                    test1 = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
                                     break;
                                 case 4:
-                                    sample1 = taskParam.sample1s[index];
-                                    if (((index == 1 || index == 2) && (currentTrial % 8) < 4)
-                                            || ((index == 0 || index == 3) && (currentTrial % 8) > 3)) {
+                                    sample1 = taskParam.sample1s[shuffledMinBlock];
+                                    if (((shuffledMinBlock == 1 || shuffledMinBlock == 2) && (currentTrial % 8) < 4)
+                                            || ((shuffledMinBlock == 0 || shuffledMinBlock == 3) && (currentTrial % 8) > 3)) {
                                         test1 = taskParam.test1s[0];
                                     } else {
                                         test1 = taskParam.test1s[1];
                                     }
                                     break;
+                                case 6:
+                                    sample1 = taskParam.sample1s[shuffledMinBlock];
+                                    if (((shuffledMinBlock < 3) && (currentTrial % 12) < 6)
+                                            || ((shuffledMinBlock >= 3) && (currentTrial % 12) >= 6)) {
+                                        test1 = taskParam.test1s[0];
+                                    } else {
+                                        test1 = taskParam.test1s[1];
+                                    }
+                                    break;
+
                             }
                             correctionRepeatCount = 0;
                         }
 
                         break;
 
-                    case DUAL_TASK_LEARNING:
-                    case DUAL_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
-                        switch (shuffledLongList[currentTrial] % 3) {
-                            case 0:
-                                taskParam.test2 = 0u;
-                                break;
-                            case 1:
-                                taskParam.test2 = 7u;
-                                break;
-                            case 2:
-                                taskParam.test2 = 8u;
-                                break;
-                        }
-                        break;
-                    case DUAL_TASK_EVERY_TRIAL:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
-                        if (shuffledLongList[currentTrial] % 2)
-                            taskParam.test2 = 7u;
-                        else
-                            taskParam.test2 = 8u;
-                        break;
-
-
-                    case DUAL_TASK_ON_OFF_LASER_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
-                        switch (shuffledLongList[currentTrial] % 8) {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 3:
-                                taskParam.test2 = 0u;
-                                break;
-                            case 4:
-                            case 6:
-                                taskParam.test2 = 7u;
-                                break;
-                            case 5:
-                            case 7:
-                                taskParam.test2 = 8u;
-                                break;
-                        }
-                        break;
-
-                    case DUAL_TASK_ODAP_ON_OFF_LASER_TASK:
-                        taskParam.test2 = (index % 2) ? 7u : 8u;
-                        switch (shuffledLongList[currentTrial] % 8) {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 3:
-                                sample1 = test1 = 20u;
-                                break;
-                            case 4:
-                                sample1 = taskParam.sample1s[0];
-                                test1 = taskParam.test1s[0];
-                                break;
-                            case 5:
-                                sample1 = taskParam.sample1s[0];
-                                test1 = taskParam.test1s[1];
-                                break;
-                            case 6:
-                                sample1 = taskParam.sample1s[1];
-                                test1 = taskParam.test1s[0];
-                                break;
-                            case 7:
-                                sample1 = taskParam.sample1s[1];
-                                test1 = taskParam.test1s[1];
-                                break;
-                        }
-                        break;
-                    case DNMS_DUAL_TASK_LEARNING:
-                    case DNMS_DUAL_TASK:
-                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
-                        switch (shuffledLongList[currentTrial] % 3) {
-                            case 0:
-                                taskParam.test2 = 0u;
-                                break;
-                            case 1:
-                                taskParam.test2 = 7u;
-                                break;
-                            case 2:
-                                taskParam.test2 = 8u;
-                                break;
-                        }
-                        break;
+                        //                    case DUAL_TASK_LEARNING:
+                        //                    case DUAL_TASK:
+                        //                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        //                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                        //                        switch (shuffledLongList[currentTrial] % 3) {
+                        //                            case 0:
+                        //                                taskParam.test2 = 0u;
+                        //                                break;
+                        //                            case 1:
+                        //                                taskParam.test2 = 7u;
+                        //                                break;
+                        //                            case 2:
+                        //                                taskParam.test2 = 8u;
+                        //                                break;
+                        //                        }
+                        //                        break;
+                        //                    case DUAL_TASK_EVERY_TRIAL:
+                        //                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        //                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                        //                        if (shuffledLongList[currentTrial] % 2)
+                        //                            taskParam.test2 = 7u;
+                        //                        else
+                        //                            taskParam.test2 = 8u;
+                        //                        break;
+                        //
+                        //
+                        //                    case DUAL_TASK_ON_OFF_LASER_TASK:
+                        //                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        //                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                        //                        switch (shuffledLongList[currentTrial] % 8) {
+                        //                            case 0:
+                        //                            case 1:
+                        //                            case 2:
+                        //                            case 3:
+                        //                                taskParam.test2 = 0u;
+                        //                                break;
+                        //                            case 4:
+                        //                            case 6:
+                        //                                taskParam.test2 = 7u;
+                        //                                break;
+                        //                            case 5:
+                        //                            case 7:
+                        //                                taskParam.test2 = 8u;
+                        //                                break;
+                        //                        }
+                        //                        break;
+                        //
+                        //                    case DUAL_TASK_ODAP_ON_OFF_LASER_TASK:
+                        //                        taskParam.test2 = (index % 2) ? 7u : 8u;
+                        //                        switch (shuffledLongList[currentTrial] % 8) {
+                        //                            case 0:
+                        //                            case 1:
+                        //                            case 2:
+                        //                            case 3:
+                        //                                sample1 = test1 = 20u;
+                        //                                break;
+                        //                            case 4:
+                        //                                sample1 = taskParam.sample1s[0];
+                        //                                test1 = taskParam.test1s[0];
+                        //                                break;
+                        //                            case 5:
+                        //                                sample1 = taskParam.sample1s[0];
+                        //                                test1 = taskParam.test1s[1];
+                        //                                break;
+                        //                            case 6:
+                        //                                sample1 = taskParam.sample1s[1];
+                        //                                test1 = taskParam.test1s[0];
+                        //                                break;
+                        //                            case 7:
+                        //                                sample1 = taskParam.sample1s[1];
+                        //                                test1 = taskParam.test1s[1];
+                        //                                break;
+                        //                        }
+                        //                        break;
+                        //                    case DNMS_DUAL_TASK_LEARNING:
+                        //                    case DNMS_DUAL_TASK:
+                        //                        sample1 = (index == 0 || index == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
+                        //                        test1 = (index == 1 || index == 2) ? taskParam.test1s[0] : taskParam.test1s[1];
+                        //                        switch (shuffledLongList[currentTrial] % 3) {
+                        //                            case 0:
+                        //                                taskParam.test2 = 0u;
+                        //                                break;
+                        //                            case 1:
+                        //                                taskParam.test2 = 7u;
+                        //                                break;
+                        //                            case 2:
+                        //                                taskParam.test2 = 8u;
+                        //                                break;
+                        //                        }
+                        //                        break;
                 }
                 LCDsetCursor(0, 0);
                 LCD_Write_Char(odorTypes_G2[sample1]);
@@ -1092,8 +1114,11 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         laser_G2.laserTrialType = (currentTrial % 2) == 0 ? LASER_OFF : laserOnType;
                         break;
                     case LASER_CATCH_TRIAL:
-                        laser_G2.laserTrialType = (currentTrial > 15) ? laserOnType : LASER_OFF;
+                    {
+                        int toCatch = trialsPerSession * 2 / 10;
+                        laser_G2.laserTrialType = ((trialsPerSession - currentTrial) <= toCatch) ? laserOnType : LASER_OFF;
                         break;
+                    }
 
                     case LASER_LR_EACH_QUARTER:
                         laser_G2.side = isLikeOdorA_G2(sample1) ? 1 : 2;
@@ -1182,24 +1207,24 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                             laser_G2.side = isLikeOdorA_G2(sample1) ? 1 : 2;
                         }
                         break;
-                    case LASER_DUAL_TASK_ON_OFF:
-                        switch (shuffledLongList[currentTrial] % 8) {
-                            case 0:
-                            case 1:
-                            case 4:
-                            case 5:
-                                laser_G2.laserTrialType = LASER_OFF;
-                                break;
-                            case 2:
-                            case 3:
-                            case 6:
-                            case 7:
-                                laser_G2.laserTrialType = laserCoverDistractor;
-                                break;
-                        }
-                        break;
+                        //                    case LASER_DUAL_TASK_ON_OFF:
+                        //                        switch (shuffledLongList[currentTrial] % 8) {
+                        //                            case 0:
+                        //                            case 1:
+                        //                            case 4:
+                        //                            case 5:
+                        //                                laser_G2.laserTrialType = LASER_OFF;
+                        //                                break;
+                        //                            case 2:
+                        //                            case 3:
+                        //                            case 6:
+                        //                            case 7:
+                        //                                laser_G2.laserTrialType = laserCoverDistractor;
+                        //                                break;
+                        //                        }
+                        //                        break;
                     case LASER_DUAL_TASK_ODAP_ON_OFF:
-                        laser_G2.laserTrialType = (index < 2) ? LASER_OFF : laserCoverDistractor;
+                        laser_G2.laserTrialType = (shuffledMinBlock < 2) ? LASER_OFF : laserCoverDistractor;
                         break;
                     case LASER_OTHER_BLOCK:
                         if (rand()&0x1)
