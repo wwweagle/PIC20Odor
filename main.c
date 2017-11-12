@@ -1244,9 +1244,9 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                 //                zxLaserTrial_G2(laser_G2.laserTrialType, firstOdor, taskParam, taskParam.delay1, secondOdor, WaterLen, taskParam.ITI);
                 zxLaserTrial_G2(sample1, test1, sample2, test2, laser_G2.laserTrialType);
                 currentTrial++;
-                sendChart(correctRatio,0);
-                sendChart(miss,1);
             }
+            sendChart(correctRatio, 0);
+            sendChart(miss, 1);
         }
         protectedSerialSend_G2(SpSess, 0);
 
