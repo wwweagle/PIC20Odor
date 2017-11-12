@@ -39,6 +39,7 @@ int main(void) {
     initI2C();
     LCD_Init();
     initADC();
+    splash_G2(__DATE__, __TIME__);
     while (1) {
         callFunc(getFuncNumber(2, "Main Func?"));
     }
@@ -49,8 +50,15 @@ int main(void) {
 }
 
 static int isLikeOdorA_G2(int odor) {
-    if (odor == 3 || odor == 7 || odor == 6) return 1; //B,R,H
+    if (odor == 3 || odor == 4 || odor == 7 || odor == 6) return 1; //B,R,H
     return 0;
+}
+
+void sendChart(int val, int idx){
+    int high=((val & 0x0fc0)>>6)+(idx==1?0x40:0);
+    protectedSerialSend_G2(SpChartHigh,high);
+    int low=(val & 0x3f)+(idx==1?0x40:0);
+    protectedSerialSend_G2(SpChartLow,low);
 }
 
 void addAllOdor() {
@@ -1236,6 +1244,8 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                 //                zxLaserTrial_G2(laser_G2.laserTrialType, firstOdor, taskParam, taskParam.delay1, secondOdor, WaterLen, taskParam.ITI);
                 zxLaserTrial_G2(sample1, test1, sample2, test2, laser_G2.laserTrialType);
                 currentTrial++;
+                sendChart(correctRatio,0);
+                sendChart(miss,1);
             }
         }
         protectedSerialSend_G2(SpSess, 0);
@@ -1244,6 +1254,8 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
     protectedSerialSend_G2(SpTrain, 0); // send it's the end
     u2Received = -1;
 }
+
+
 
 void testLaser() {
     int i = 0;
