@@ -51,7 +51,8 @@ extern "C" {
 
 #define SpLick 	 0 	//        !PORTDbits.RD8  
 #define SpKey 	 1  	//Keypad #[ZX]
-
+#define SpDebugInfo 2
+#define SpIO 3
 
 
 #define SpFalseAlarm		 4	// false alarm

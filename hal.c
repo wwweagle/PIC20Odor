@@ -83,7 +83,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
             if (isSending) {
                 sendLick = 1;
             } else {
-                protectedSerialSend_G2(0, 2);
+                serialSend(0, 2);
                 sendLick = 0;
             }
         }
@@ -152,7 +152,7 @@ void initUART2(void) {
 
     baudvalue = ((FCY / 16) / BAUDRATE) - 1;
     OpenUART2(U2MODEvalue, U2STAvalue, baudvalue);
-    protectedSerialSend_G2(61, 0);
+    serialSend(61, 0);
 }
 
 void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void) {
@@ -160,14 +160,14 @@ void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void) {
         U2STAbits.OERR = 0;
     }
     if (0x2a == (u2Received = U2RXREG)) {
-        protectedSerialSend_G2(61, 0);
+        serialSend(61, 0);
         wait_ms(50);
         asm("RESET");
     }
     IFS1bits.U2RXIF = 0;
 }
 
-void protectedSerialSend_G2(int u2Type, int u2Value) {
+void serialSend(int u2Type, int u2Value) {
 
     isSending = 1;
     while (BusyUART2());
@@ -184,10 +184,6 @@ void protectedSerialSend_G2(int u2Type, int u2Value) {
     }
     sendLick = 0;
     isSending = 0;
-
-
-
-
 
 
 

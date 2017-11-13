@@ -49,7 +49,7 @@ void initPorts(void);
 void initTMR1(void);
 void wait_ms(int time);
 void wait_Sec(int time);
-void protectedSerialSend_G2(int u2Type, int u2Value);
+void serialSend(int u2Type, int u2Value);
 void initUART2(void);
 void set4076_4bit(int val);
 void muxDis(int val);

@@ -78,7 +78,7 @@ int getFuncNumber(int targetDigits, const char* message) {
                 u2Received = -1;
             }
         }
-        protectedSerialSend_G2(1, bitValue[iter]);
+        serialSend(1, bitValue[iter]);
 
     }
 
@@ -102,8 +102,8 @@ void setWaterPortOpen(int i) {
 void sendLargeValue(int val) {
     char valHigh = (char) (val / 100);
     char valLow = (char) (val % 100);
-    protectedSerialSend_G2(23, valHigh);
-    protectedSerialSend_G2(24, valLow);
+    serialSend(23, valHigh);
+    serialSend(24, valLow);
 }
 
 void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize) {
@@ -406,7 +406,7 @@ void waitTrial_G2() {
     }
     while (adcdata > lickThresh) {
         if (!waitingLickRelease) {
-            protectedSerialSend_G2(20, 100);
+            serialSend(20, 100);
             waitingLickRelease = 1;
             wait_ms(200);
         }
@@ -414,7 +414,7 @@ void waitTrial_G2() {
     waitingLickRelease = 0;
 
     while (u2Received != 0x31) {
-        protectedSerialSend_G2(20, 1);
+        serialSend(20, 1);
         wait_ms(200);
     }
     u2Received = -1;

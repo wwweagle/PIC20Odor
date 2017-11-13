@@ -54,11 +54,11 @@ static int isLikeOdorA_G2(int odor) {
     return 0;
 }
 
-void sendChart(int val, int idx){
-    int high=((val & 0x0fc0)>>6)+(idx==1?0x40:0);
-    protectedSerialSend_G2(SpChartHigh,high);
-    int low=(val & 0x3f)+(idx==1?0x40:0);
-    protectedSerialSend_G2(SpChartLow,low);
+void sendChart(int val, int idx) {
+    int high = ((val & 0x0fc0) >> 6)+(idx == 1 ? 0x40 : 0);
+    serialSend(SpChartHigh, high);
+    int low = (val & 0x3f)+(idx == 1 ? 0x40 : 0);
+    serialSend(SpChartLow, low);
 }
 
 void addAllOdor() {
@@ -80,6 +80,8 @@ void addAllOdor() {
             taskParam.respCue[i] = odor;
         }
     }
+
+
 }
 
 void bleedWater() {
@@ -279,6 +281,13 @@ void callFunc(int n) {
             taskParam.ITI = getFuncNumber(2, "ITI duration");
             waterLen = getFuncNumber(1, "Water fold?") * waterLen;
             int sessNum = getFuncNumber(2, "Session number?");
+            ////////DEBUG////////////////////////
+            int cnt;
+            for (cnt = 0; cnt < taskParam.pairs1Count; cnt++) {
+                serialSend(SpDebugInfo, taskParam.sample1s[cnt]);
+                serialSend(SpDebugInfo, taskParam.test1s[cnt]);
+            }
+            /////////////////////////////////////
             zxLaserSessions_G2(60, 20, sessNum);
             break;
         }
@@ -336,13 +345,13 @@ void testOneValve(int valve, int iti) {
         LCDsetCursor(0, 1);
         LCD_Write_Str("Repeat");
         lcdWriteNumber_G2(rpt + 1, 7, 1);
-        protectedSerialSend_G2(3, rpt + 1);
+//        serialSend(3, rpt + 1);
         //        for (valve = 0; valve < 20; valve++) {
         lcdWriteNumber_G2(valve, 6, 0);
-        protectedSerialSend_G2(2, valve);
         int P10Val = valve < 16 ? valve : valve - 16;
         int boardA = valve < 16 ? 1 : 4;
         int boardB = valve < 16 ? 2 : 8;
+        serialSend(SpIO, valve);
         set4076_4bit(P10Val);
         muxDis(~boardA);
         wait_ms(preCharge);
@@ -362,6 +371,7 @@ void testOneValve(int valve, int iti) {
         wait_ms(closingAdvance);
         BNC_2 = 0;
         muxDis(0x0F);
+        serialSend(SpIO,0);
         BNC_1 = 0;
         wait_ms(iti * 1000 - preCharge);
 
@@ -374,8 +384,8 @@ void readADCData(void) {
         int highByte = temp / 100;
         int lowByte = temp % 100;
 
-        protectedSerialSend_G2(23, highByte);
-        protectedSerialSend_G2(24, lowByte);
+        serialSend(23, highByte);
+        serialSend(24, lowByte);
         wait_ms(50);
 
     }
@@ -471,7 +481,7 @@ void testNSetThres() {
     int newThres = getFuncNumber(3, "New Lick Thres?");
     sendLargeValue(newThres);
     write_eeprom_G2(EEP_LICK_THRESHOLD, newThres >> 2);
-    protectedSerialSend_G2(61, 0);
+    serialSend(61, 0);
     asm("Reset");
 }
 
@@ -509,15 +519,15 @@ void stim_G2(int place, int odorPort, int type) {
                     stimSend = 10;
                     BNC_3 = 1;
                 }
-                protectedSerialSend_G2(stimSend, odorPort);
+                serialSend(stimSend, odorPort);
                 break;
             case 4:
                 stimSend = SpResponseCue;
-                protectedSerialSend_G2(stimSend, odorPort);
+                serialSend(stimSend, odorPort);
                 break;
             case 5:
                 stimSend = SpCorrectionCue;
-                protectedSerialSend_G2(stimSend, 100 + odorPort);
+                serialSend(stimSend, 100 + odorPort);
                 break;
         }
         LCDsetCursor(3, 0);
@@ -548,7 +558,7 @@ void stim_G2(int place, int odorPort, int type) {
         BNC_3 = 0;
         Nop();
         Nop();
-        protectedSerialSend_G2(stimSend, 0);
+        serialSend(stimSend, 0);
         LCDsetCursor(3, 0);
         switch (place) {
             case 1:
@@ -572,18 +582,18 @@ void stim_G2(int place, int odorPort, int type) {
 }
 
 static void processHit_G2(int id) {
-    protectedSerialSend_G2(22, 1);
+    serialSend(22, 1);
     setWaterPortOpen(1);
     waitTaskTimer(waterLen);
     setWaterPortOpen(0);
     currentMiss = 0;
-    protectedSerialSend_G2(SpHit, id);
+    serialSend(SpHit, id);
     lcdWriteNumber_G2(++hit, 5, 0);
 }
 
 static void processFalse_G2(int id) {
     currentMiss = 0;
-    protectedSerialSend_G2(SpFalseAlarm, id);
+    serialSend(SpFalseAlarm, id);
     lcdWriteNumber_G2(++falseAlarm, 5, 1);
     stim_G2(5, taskParam.correctionCue, LASER_OFF);
     waitTaskTimer(4000);
@@ -591,7 +601,7 @@ static void processFalse_G2(int id) {
 
 static void processMiss_G2(int id) {
     currentMiss++;
-    protectedSerialSend_G2(SpMiss, id);
+    serialSend(SpMiss, id);
     lcdWriteNumber_G2(++miss, 9, 0);
 }
 
@@ -609,14 +619,14 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
             /////Reward
             if (!lick_G2.portSide) {
                 if (!isLikeOdorA_G2(firstOdor)) {
-                    protectedSerialSend_G2(SpCorrectRejection, 1);
+                    serialSend(SpCorrectRejection, 1);
                     lcdWriteNumber_G2(++correctRejection, 9, 1);
                 } else {
                     processMiss_G2(1);
                     if ((rand() % 3) == 0) {
-                        protectedSerialSend_G2(22, 1);
+                        serialSend(22, 1);
                         setWaterPortOpen(1);
-                        protectedSerialSend_G2(SpWater, 1);
+                        serialSend(SpWater, 1);
                         waitTaskTimer(waterLen);
                         setWaterPortOpen(0);
                     }
@@ -649,7 +659,7 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
             /////Reward
             if (!lick_G2.portSide) {
                 if (isLikeOdorA_G2(firstOdor) == isLikeOdorA_G2(secondOdor)) {
-                    protectedSerialSend_G2(SpCorrectRejection, id);
+                    serialSend(SpCorrectRejection, id);
                     lcdWriteNumber_G2(++correctRejection, 9, 1);
                     rtn = SpCorrectRejection;
                 } else {
@@ -659,9 +669,9 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
                             || taskType_G2 == DUAL_TASK_LEARNING || taskType_G2 == DNMS_DUAL_TASK_LEARNING
                             || taskType_G2 == ODPA_RD_SHAPING_TASK || taskType_G2 == GONOGO_Seq2AFC_TEACH
                             ) && ((rand() % 3) == 0)) {
-                        protectedSerialSend_G2(22, 1);
+                        serialSend(22, 1);
                         setWaterPortOpen(1);
-                        protectedSerialSend_G2(SpWater, 1);
+                        serialSend(SpWater, 1);
                         waitTaskTimer(waterLen);
                         setWaterPortOpen(0);
                     }
@@ -718,7 +728,7 @@ void delayedRspsDelay(int laserType) {
         LCDsetCursor(3, 0);
         if (delayLick) {
             muxDis(0x0f);
-            protectedSerialSend_G2(SpAbortTrial, 1);
+            serialSend(SpAbortTrial, 1);
             LCD_Write_Char('A');
             stim_G2(5, taskParam.correctionCue, LASER_OFF);
             abortTrial++;
@@ -731,8 +741,8 @@ void delayedRspsDelay(int laserType) {
 }
 
 static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
-    protectedSerialSend_G2(Sptrialtype, laserType);
-    protectedSerialSend_G2(Splaser, (laserType != LASER_OFF));
+    serialSend(Sptrialtype, laserType);
+    serialSend(Splaser, (laserType != LASER_OFF));
     assertLaser_G2(laserType, at4SecBeforeS1);
     waitTaskTimer(1000u);
     assertLaser_G2(laserType, at3SecBeforeS1);
@@ -881,7 +891,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
         }
         waitTaskTimer(trialITI * 1000u); //another 4000 is at the beginning of the trials.
     }
-    protectedSerialSend_G2(SpITI, 0);
+    serialSend(SpITI, 0);
 
     waitTrial_G2();
 }
@@ -891,7 +901,7 @@ void setWaterLen() {
     int newWaterLen = getFuncNumber(3, "New water len?");
     sendLargeValue(waterLen);
     write_eeprom_G2(EEP_WATER_LEN_MS, newWaterLen);
-    protectedSerialSend_G2(61, 0);
+    serialSend(61, 0);
     asm("Reset");
 }
 
@@ -902,33 +912,23 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
     int currentTrial = 0;
     int currentSession = 0;
     int laserOnType = laser_G2.laserTrialType;
-
-    protectedSerialSend_G2(SpTaskType, taskType_G2);
-
+    unsigned int* shuffledList = malloc(taskParam.minBlock * sizeof (unsigned int));
+    serialSend(SpTaskType, taskType_G2);
     while ((currentMiss < missLimit) && (currentSession++ < totalSession)) {
-        //        protectedSerialSend(SpOdorDelay, delay);
-        protectedSerialSend_G2(SpSess, 1);
+        serialSend(SpSess, 1);
 
         splash_G2("    H___M___ __%", "S__ F___C___t___");
 
         lcdWriteNumber_G2(currentSession, 1, 1);
         hit = miss = falseAlarm = correctRejection = abortTrial = 0;
-        //        unsigned int lastHit = 0;
-        unsigned int* shuffledList = malloc(taskParam.minBlock * sizeof (unsigned int));
-        //        unsigned int* shuffledLongList = malloc(highLevelShuffleLength_G2 * sizeof (unsigned int));
-        //        shuffleArray_G2(shuffledLongList, highLevelShuffleLength_G2);
         int sample1, test1, sample2, test2;
         sample2 = 0;
         test2 = 0;
-        //        int lastOdor1;
-        //        int lastOdor2;
         for (currentTrial = 0; currentTrial < trialsPerSession && currentMiss < missLimit;) {
-            shuffleArray_G2(shuffledList, 4);
+            shuffleArray_G2(shuffledList, taskParam.minBlock);
             int idxInMinBlock;
             for (idxInMinBlock = 0; idxInMinBlock < taskParam.minBlock && currentMiss < missLimit; idxInMinBlock++) {
-                //                wait_ms(1000);
                 int shuffledMinBlock = shuffledList[idxInMinBlock];
-                //                int hiIdx = shuffledLongList[currentTrial];
                 switch (taskType_G2) {
 
                     case DNMS_TASK:
@@ -1245,17 +1245,19 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                 zxLaserTrial_G2(sample1, test1, sample2, test2, laser_G2.laserTrialType);
                 currentTrial++;
             }
-            sendChart(correctRatio, 0);
-            sendChart(miss, 1);
         }
-        protectedSerialSend_G2(SpSess, 0);
-
+//        serialSend()
+        serialSend(SpSess, 0);
+        sendChart(correctRatio, 0);
+        sendChart(miss * 100 / (miss + hit), 1);
     }
-    protectedSerialSend_G2(SpTrain, 0); // send it's the end
+    serialSend(SpTrain, 0); // send it's the end
     u2Received = -1;
+    free(shuffledList);
+    free(taskParam.sample1s);
+    free(taskParam.test1s);
+    free(taskParam.respCue);
 }
-
-
 
 void testLaser() {
     int i = 0;
@@ -1270,12 +1272,12 @@ void turnOnLaser_G2(int type) {
     laser_G2.on = 1;
     LCDsetCursor(3, 0);
     LCD_Write_Char('L');
-    protectedSerialSend_G2(SpLaserSwitch, 1);
+    serialSend(SpLaserSwitch, 1);
 }
 
 void turnOffLaser_G2() {
     laser_G2.on = 0;
     LCDsetCursor(3, 0);
     LCD_Write_Char('.');
-    protectedSerialSend_G2(SpLaserSwitch, 0);
+    serialSend(SpLaserSwitch, 0);
 }
