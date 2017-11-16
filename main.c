@@ -249,13 +249,15 @@ void callFunc(int n) {
         }
         case 37:
         {
-            splash_G2("Seq 2AFC", "");
-            laser_G2.laserSessionType = LASER_NO_TRIAL;
-            laser_G2.laserTrialType = LASER_OFF;
-            taskType_G2 = GONOGO_Seq2AFC_TEACH;
-            taskParam.respCount = 2;
+            splash_G2("Seq 2AFC", "Multi Sample");
+            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
+            laser_G2.laserTrialType = laserDuringDelayChR2;
+            taskType_G2 = Seq2AFC_TEACH;
+            taskParam.respCount = 0;
             taskParam.falsePunish = 0;
-            taskParam.pairs1Count = 2;
+            taskParam.pairs1Count = 6;
+            taskParam.minBlock = 6;
             addAllOdor();
             taskParam.delay1 = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
@@ -281,13 +283,6 @@ void callFunc(int n) {
             taskParam.ITI = getFuncNumber(2, "ITI duration");
             waterLen = getFuncNumber(1, "Water fold?") * waterLen;
             int sessNum = getFuncNumber(2, "Session number?");
-            ////////DEBUG////////////////////////
-            int cnt;
-            for (cnt = 0; cnt < taskParam.pairs1Count; cnt++) {
-                serialSend(SpDebugInfo, taskParam.sample1s[cnt]);
-                serialSend(SpDebugInfo, taskParam.test1s[cnt]);
-            }
-            /////////////////////////////////////
             zxLaserSessions_G2(60, 20, sessNum);
             break;
         }
@@ -667,7 +662,7 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
                     rtn = SpMiss;
                     if ((taskType_G2 == SHAPING_TASK || taskType_G2 == ODPA_SHAPING_TASK
                             || taskType_G2 == DUAL_TASK_LEARNING || taskType_G2 == DNMS_DUAL_TASK_LEARNING
-                            || taskType_G2 == ODPA_RD_SHAPING_TASK || taskType_G2 == GONOGO_Seq2AFC_TEACH
+                            || taskType_G2 == ODPA_RD_SHAPING_TASK || taskType_G2 == Seq2AFC_TEACH
                             ) && ((rand() % 3) == 0)) {
                         serialSend(22, 1);
                         setWaterPortOpen(1);
@@ -689,32 +684,32 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id) {
     return rtn;
 }
 
-static void seq2AFCResult(int firstOdor, int laserType) {
-    switch (taskType_G2) {
-        case GONOGO_Seq2AFC_TEACH:
-            //            if (taskParam.respCueLength >= 200) {
-        {
-            int cueSeq[] = {0, 1};
-            if (rand() % 2) {
-                cueSeq[0] = 1;
-                cueSeq[1] = 0;
-            }
-            waitTaskTimer(500u);
-            stim_G2(3, taskParam.respCue[cueSeq[0]], laserType);
-            waitTaskTimer(500u);
-            stim_G2(4, taskParam.respCue[cueSeq[0]], laserType);
-            LCDsetCursor(3, 0);
-            int rtn = waterNResult_G2(firstOdor, taskParam.respCue[cueSeq[0]], 4);
-            waitTaskTimer(500u);
-            if (rtn == SpCorrectRejection || rtn == SpMiss) {
-                stim_G2(3, taskParam.respCue[cueSeq[1]], laserType);
-                waitTaskTimer(500u);
-                stim_G2(4, taskParam.respCue[cueSeq[1]], laserType);
-                waterNResult_G2(firstOdor, taskParam.respCue[cueSeq[1]], 5);
-            }
-        }
-    }
-}
+//static void seq2AFCResult(int firstOdor, int laserType) {
+//    switch (taskType_G2) {
+//        case Seq2AFC_TEACH:
+//            //            if (taskParam.respCueLength >= 200) {
+//        {
+//            int cueSeq[] = {0, 1};
+//            if (rand() % 2) {
+//                cueSeq[0] = 1;
+//                cueSeq[1] = 0;
+//            }
+//            waitTaskTimer(500u);
+//            stim_G2(3, taskParam.respCue[cueSeq[0]], laserType);
+//            waitTaskTimer(500u);
+//            stim_G2(4, taskParam.respCue[cueSeq[0]], laserType);
+//            LCDsetCursor(3, 0);
+//            int rtn = waterNResult_G2(firstOdor, taskParam.respCue[cueSeq[0]], 4);
+//            waitTaskTimer(500u);
+//            if (rtn == SpCorrectRejection || rtn == SpMiss) {
+//                stim_G2(3, taskParam.respCue[cueSeq[1]], laserType);
+//                waitTaskTimer(500u);
+//                stim_G2(4, taskParam.respCue[cueSeq[1]], laserType);
+//                waterNResult_G2(firstOdor, taskParam.respCue[cueSeq[1]], 5);
+//            }
+//        }
+//    }
+//}
 
 void dual_task_D_R(int type, int currentDistractor,
         int distractorJudgingPair) {
@@ -760,7 +755,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
     switch (taskType_G2) {
             //Do nothing during Go Nogo Tasks
         case GONOGO_TASK:
-        case GONOGO_Seq2AFC_TEACH:
+//        case Seq2AFC_TEACH:
             assertLaser_G2(laserType, atSecondOdorEnd);
             if (taskParam.delay1 > 1)
                 waitTaskTimer(taskParam.delay1 * 1000u);
@@ -852,14 +847,23 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
             LCDsetCursor(3, 0);
             LCD_Write_Char('R');
             resultRtn = waterNResult_G2(s1, t1, 1);
+            //DPA 2AFC HERE
+            if (taskType_G2 == Seq2AFC_TEACH && (SpCorrectRejection || resultRtn == SpMiss)) {
+                int t2 = (t1 == taskParam.test1s[0]) ? taskParam.test1s[1] : taskParam.test1s[0];
+                stim_G2(3, t2, laserType);
+                waitTaskTimer(500u);
+                stim_G2(4, t2, laserType);
+                resultRtn = waterNResult_G2(s1, t2, 5);
+            }
+            ///////////////
             break;
         case 1:
             delayedRspsDelay(laserType);
             resultRtn = waterNResult_G2(s1, t1, 1);
             break;
-        case 2:
-            seq2AFCResult(s1, laserType);
-            break;
+        //case 2:
+        //    seq2AFCResult(s1, laserType);
+         //   break;
 
     }
     waitTaskTimer(1000u); //water time sync
@@ -940,7 +944,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         test1 = (sample1 == taskParam.sample1s[0]) ? taskParam.test1s[0] : taskParam.test1s[1];
                         break;
                     case GONOGO_TASK:
-                    case GONOGO_Seq2AFC_TEACH:
+//                    case Seq2AFC_TEACH:
                     case GONOGO_LR_TASK:
                         sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
                         test1 = 0;
@@ -984,6 +988,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         break;
 
                     case ODPA_RD_TASK:
+                    case Seq2AFC_TEACH:
                         if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 2) {
                             switch (taskParam.pairs1Count) {
                                 case 2:
