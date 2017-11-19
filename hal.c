@@ -11,7 +11,7 @@
 #include "utils.h"
 
 
-uint32_t timerCounterI, millisCounter;
+uint32_t timerCounterI, millisCounter, taskTimeCounter;
 int u2Received = -1;
 volatile int adcdata;
 volatile int isSending;
@@ -48,7 +48,6 @@ void initTMR1(void) {
     ConfigIntTimer1(T1_INT_PRIOR_7 & T1_INT_ON);
     timerCounterI = 0u;
     millisCounter = 0u;
-
 }
 
 inline void tick(unsigned int i) {

@@ -126,8 +126,8 @@ void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize) {
 
 int waitTaskTimer(unsigned int dTime) {
     int currLick = lick_G2.LCount;
-    uint32_t newTime = millisCounter + dTime;
-    while (millisCounter < newTime);
+    taskTimeCounter += dTime;
+    while (millisCounter < taskTimeCounter);
 
     return lick_G2.LCount>currLick;
 }
