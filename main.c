@@ -32,7 +32,6 @@ unsigned int taskType_G2 = DNMS_TASK;
 const char odorTypes_G2[] = "BYRQHNKLTXZdMAES0123456";
 int correctionRepeatCount = 0;
 
-
 int main(void) {
     initPorts();
     initTMR1();
@@ -581,11 +580,25 @@ void stim_G2(int place, int odorPort, int type) {
     }
 }
 
-static void processHit_G2(int id) {
+static void processHit_G2(int id, int ratio) {
     serialSend(22, 1);
-    setWaterPortOpen(1);
-    waitTaskTimer(waterLen);
-    setWaterPortOpen(0);
+    if (ratio > 0 || (ratio == 0 && rand() % 2)) {
+        serialSend(SpDebugInfo, 121);
+        setWaterPortOpen(1);
+        waitTaskTimer(waterLen);
+        setWaterPortOpen(0);
+    } else {
+        serialSend(SpDebugInfo, 120);
+        waitTaskTimer(waterLen);
+    }
+    if (ratio == 2) {
+        serialSend(SpDebugInfo, 122);
+        waitTaskTimer(500);
+        setWaterPortOpen(1);
+        waitTaskTimer(waterLen);
+        setWaterPortOpen(0);
+    }
+
     currentMiss = 0;
     serialSend(SpHit, id);
     lcdWriteNumber_G2(++hit, 5, 0);
@@ -605,7 +618,7 @@ static void processMiss_G2(int id) {
     lcdWriteNumber_G2(++miss, 9, 0);
 }
 
-static int waterNResult_G2(int firstOdor, int secondOdor, int id, int rewardWindow) {
+static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
     int rtn = 0;
 
     lick_G2.portSide = 0;
@@ -616,7 +629,7 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id, int rewardWind
 
             /////Reward
             if (!lick_G2.portSide) {
-                if (!isLikeOdorA_G2(firstOdor)) {
+                if (!isLikeOdorA_G2(sample)) {
                     serialSend(SpCorrectRejection, 1);
                     lcdWriteNumber_G2(++correctRejection, 9, 1);
                 } else {
@@ -629,10 +642,10 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id, int rewardWind
                         setWaterPortOpen(0);
                     }
                 }
-            } else if (!isLikeOdorA_G2(firstOdor)) {
+            } else if (!isLikeOdorA_G2(sample)) {
                 processFalse_G2(1);
             } else {
-                processHit_G2(1);
+                processHit_G2(1, 1);
             }
             break;
 
@@ -656,7 +669,7 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id, int rewardWind
 
             /////Reward
             if (!lick_G2.portSide) {
-                if (isLikeOdorA_G2(firstOdor) == isLikeOdorA_G2(secondOdor)) {
+                if (isLikeOdorA_G2(sample) == isLikeOdorA_G2(test)) {
                     serialSend(SpCorrectRejection, id);
                     lcdWriteNumber_G2(++correctRejection, 9, 1);
                     rtn = SpCorrectRejection;
@@ -674,11 +687,21 @@ static int waterNResult_G2(int firstOdor, int secondOdor, int id, int rewardWind
                         setWaterPortOpen(0);
                     }
                 }
-            } else if (isLikeOdorA_G2(firstOdor) == isLikeOdorA_G2(secondOdor)) {
+            } else if (isLikeOdorA_G2(sample) == isLikeOdorA_G2(test)) {
                 processFalse_G2(id);
                 rtn = SpFalseAlarm;
             } else {
-                processHit_G2(id);
+                if (taskType_G2 == Seq2AFC_TEACH) {
+                    if (sample == taskParam.sample1s[0] || sample == taskParam.sample1s[1]) {
+                        processHit_G2(id, 1);
+                    } else if (sample == taskParam.sample1s[2] || sample == taskParam.sample1s[3])
+                        processHit_G2(id, 2);
+                    else {
+                        processHit_G2(id, 0);
+                    }
+                } else {
+                    processHit_G2(id, 1);
+                }
                 rtn = SpHit;
             }
             break;
@@ -740,7 +763,7 @@ void delayedRspsDelay(int laserType) {
 }
 
 static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
-    taskTimeCounter=millisCounter;
+    taskTimeCounter = millisCounter;
     serialSend(Sptrialtype, laserType);
     serialSend(Splaser, (laserType != LASER_OFF));
     assertLaser_G2(laserType, at4SecBeforeS1);
@@ -871,7 +894,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
             //   break;
 
     }
-//    waitTaskTimer(1000u); //water time sync
+    //    waitTaskTimer(1000u); //water time sync
     // Total Trials
     int totalTrials = hit + correctRejection + miss + falseAlarm + abortTrial;
     lcdWriteNumber_G2(totalTrials, 13, 1);
