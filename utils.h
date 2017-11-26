@@ -103,6 +103,7 @@ extern "C" {
 #define DNMS_2AFC_TEACH 38
 #define DNMS_LR_LEARNING_TASK 39
 #define DNMS_2AFC_TASK 40
+#define Seq2AFC_TASK 48
 #define Seq2AFC_TEACH 49
 #define GONOGO_LR_TASK 50
 #define NO_ODOR_CATCH_TRIAL_TASK 60
