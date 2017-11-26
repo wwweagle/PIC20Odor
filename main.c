@@ -626,7 +626,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
     switch (taskType_G2) {
         case GONOGO_TASK:
             for (timerCounterI = 0; timerCounterI < 500 && !lick_G2.portSide; lick_G2.portSide = lick_G2.stable);
-
+            taskTimeCounter = millisCounter;
             /////Reward
             if (!lick_G2.portSide) {
                 if (!isLikeOdorA_G2(sample)) {
@@ -666,7 +666,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
 
             ///////////Detect/////////////////
             for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.portSide; lick_G2.portSide = lick_G2.stable);
-
+            taskTimeCounter = millisCounter;
             /////Reward
             if (!lick_G2.portSide) {
                 if (isLikeOdorA_G2(sample) == isLikeOdorA_G2(test)) {
