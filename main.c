@@ -725,7 +725,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
             break;
 
     }
-    waitTaskTimer(rewardWindow);
+//    waitTaskTimer(rewardWindow);
     return rtn;
 }
 
@@ -897,6 +897,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
             if ((taskType_G2 == Seq2AFC_TEACH || taskType_G2 == Seq2AFC_TASK ) 
                     && (resultRtn == SpCorrectRejection || resultRtn == SpMiss)) {
                 int t2 = (t1 == taskParam.test1s[0]) ? taskParam.test1s[1] : taskParam.test1s[0];
+                waitTaskTimer(1000u);
                 stim_G2(3, t2, laserType);
                 waitTaskTimer(500u);
                 stim_G2(4, t2, laserType);
