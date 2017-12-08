@@ -13,7 +13,7 @@
 #include "lcdi2c.h"
 
 void callFunc(int n);
-void testOneValve(int n, int iti);
+void testOneValve(int n, int iti, int repeat);
 void testValveFast(int board, int valve, int keep);
 void testValveOnRA14();
 void readADCData();
@@ -140,11 +140,10 @@ void callFunc(int n) {
         }
         case 27:
         {
-            int iti = getFuncNumber(2, "Interval?");
-            int dpadrOdors[] = {0, 1, 2, 3, 7};
+            int dpadrOdors[] = {0, 1, 2, 3, 4, 5, 6, 7, 12};
             int i;
-            for (i = 0; i < 5; i++) {
-                testOneValve(dpadrOdors[i], iti);
+            for (i = 0; i < (sizeof (dpadrOdors) / sizeof (int)); i++) {
+                testOneValve(dpadrOdors[i], 10, 1);
             }
             break;
         }
@@ -292,7 +291,7 @@ void callFunc(int n) {
         {
             splash_G2("Seq 2AFC", "6 Samp Var Rwd");
             int noLaser = getFuncNumber(1, "No Laser?");
-            laser_G2.laserSessionType = noLaser?LASER_NO_TRIAL:LASER_OTHER_TRIAL; 
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_OTHER_TRIAL;
             laser_G2.laserTrialType = laserDuringDelayChR2;
             taskType_G2 = Seq2AFC_TASK;
             taskParam.respCount = 0;
@@ -311,7 +310,7 @@ void callFunc(int n) {
         {
             int i;
             for (i = n; i < n + 4; i++)
-                testOneValve(i, 8);
+                testOneValve(i, 8, 10);
         }
             break;
 
@@ -342,10 +341,10 @@ void testValveFast(int board, int valve, int keep) {
 
 }
 
-void testOneValve(int valve, int iti) {
+void testOneValve(int valve, int iti, int repeat) {
     const int preCharge = 500;
 
-    int repeat = 10;
+    //    int repeat = 10;
     //    int iti = 8;
     const int onTime = 1000;
     int closingAdvance = 195;
@@ -709,7 +708,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
                 processFalse_G2(id);
                 rtn = SpFalseAlarm;
             } else {
-                if (taskType_G2 == Seq2AFC_TEACH|| taskType_G2 == Seq2AFC_TASK) {
+                if (taskType_G2 == Seq2AFC_TEACH || taskType_G2 == Seq2AFC_TASK) {
                     if (sample == taskParam.sample1s[0] || sample == taskParam.sample1s[1]) {
                         processHit_G2(id, 1);
                     } else if (sample == taskParam.sample1s[2] || sample == taskParam.sample1s[3])
@@ -725,7 +724,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
             break;
 
     }
-//    waitTaskTimer(rewardWindow);
+    //    waitTaskTimer(rewardWindow);
     return rtn;
 }
 
@@ -894,7 +893,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
             LCD_Write_Char('R');
             resultRtn = waterNResult_G2(s1, t1, 1, 1000);
             //DPA 2AFC HERE
-            if ((taskType_G2 == Seq2AFC_TEACH || taskType_G2 == Seq2AFC_TASK ) 
+            if ((taskType_G2 == Seq2AFC_TEACH || taskType_G2 == Seq2AFC_TASK)
                     && (resultRtn == SpCorrectRejection || resultRtn == SpMiss)) {
                 int t2 = (t1 == taskParam.test1s[0]) ? taskParam.test1s[1] : taskParam.test1s[0];
                 waitTaskTimer(1000u);
