@@ -64,7 +64,8 @@ extern "C" {
 
 #define SpOdor_A             9         
 #define SpOdor_B	10
-
+#define Sp_DistractorSample 11
+#define Sp_DistractorTest 12
 
 #define SpTrialWait 	 20
 #define SpPermInfo   21 
