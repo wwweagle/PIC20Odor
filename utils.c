@@ -38,7 +38,7 @@ TASK_T taskParam = {
     .correctionCue = 0,
     .correctionCueLength = 1000,
     .delay1 = 5,
-    .delay2 = 0,
+    .delay2 = 1500,
     .delay3 = 0,
     .ITI = 8,
     .waitForTrial = 1,
@@ -144,7 +144,7 @@ void assertLaser_G2(int type, int step) {
             }
             break;
         case laserDuringDelayChR2:
-            if (step == atDelay1SecIn) {
+            if (step == atDelay1SecIn || step==atPostDualTask) {
                 turnOnLaser_G2(3);
             } else if (step == atDelayLastSecBegin) {
                 turnOffLaser_G2();

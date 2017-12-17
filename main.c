@@ -140,7 +140,7 @@ void callFunc(int n) {
         }
         case 27:
         {
-            int dpadrOdors[] = {0, 1, 2, 3, 4, 5, 6, 7, 12};
+            int dpadrOdors[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13};
             int i;
             for (i = 0; i < (sizeof (dpadrOdors) / sizeof (int)); i++) {
                 testOneValve(dpadrOdors[i], 10, 1);
@@ -306,6 +306,28 @@ void callFunc(int n) {
             zxLaserSessions_G2(60, 20, sessNum);
             break;
         }
+
+        case 40:
+        {
+            splash_G2("Seq 2AFC w/dstrc", "6 Samp Var Rwd");
+            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_OTHER_TRIAL;
+            laser_G2.laserTrialType = laserDuringDelayChR2;
+            taskType_G2 = Seq2AFC_TASK;
+            taskParam.respCount = 0;
+            taskParam.falsePunish = 0;
+            taskParam.pairs1Count = 6;
+            taskParam.minBlock = 6;
+            addAllOdor();
+            taskParam.sample2 = 8;
+            taskParam.delay1 = 12;
+            taskParam.ITI = 5;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(60, 20, sessNum);
+            break;
+        }
+
+            //        DELAY_DISTRACTOR
         default:
         {
             int i;
@@ -517,9 +539,9 @@ void stim_G2(int place, int odorPort, int laserType) {
                 break;
             case 4:
                 assertLaser_G2(laserType, atResponseCueBeginning);
-            case 6:
-                //TODO: Laser at Distractor
-                //                assertLaser_G2(laserType, atResponseCueBeginning);
+//            case 6:
+//                //TODO: Laser at Distractor
+//                //                assertLaser_G2(laserType, atResponseCueBeginning);
                 break;
         }
 
@@ -547,6 +569,7 @@ void stim_G2(int place, int odorPort, int laserType) {
             case 5:
                 stimSend = SpCorrectionCue;
                 serialSend(stimSend, 100 + odorPort);
+                break;
             case 6:
                 stimSend = Sp_DistractorSample;
                 serialSend(stimSend, odorPort);
@@ -605,7 +628,7 @@ void stim_G2(int place, int odorPort, int laserType) {
                 LCD_Write_Char('R');
                 break;
             case 6:
-//                assertLaser_G2(laserType, atResponseCueEnd);
+                //                assertLaser_G2(laserType, atResponseCueEnd);
                 LCD_Write_Char('d');
                 break;
         }
@@ -772,29 +795,27 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
 
 void dual_task_D_R(int laserType, int sample2, int test2) {
     // delay+0.5s
+    stim_G2(6, sample2, laserType); //delay+2s w/1000ms sample
+    LCDsetCursor(3, 0);
+    LCD_Write_Char('D');
     if (test2 == 0) {
-        waitTaskTimer(3550u); // delay+4s
+        waitTaskTimer(3000u); //delay+5000ms, func return
     } else {
-        //    Valve_ON(distractOdor + 10);
-        //    waitTaskTimer(500u); // delay+1s
-        //    Valve_ON(distractOdor);
-        stim_G2(6, sample2, laserType);
-//        serialSend(isLikeOdorA_G2(sample2) ? SpOdor_C : SpOdor_D,
-//                sample2);
-//        lcdWriteChar_G2(isLikeOdorA_G2(sample2) ? '.' : ':', 4, 1);
-//        waitTaskTimer(stims_G2.distractorLength - 100u);
-//        Valve_OFF(distractOdor + 10);
-//        waitTaskTimer(100u);
-//        serialSend(isLikeOdorA_G2(sample2) ? SpOdor_C : SpOdor_D,
-//                0);
-//        Valve_OFF(distractOdor); 
-        // delay+1.5s //@D+2s w/1000ms sample2 len
-        LCDsetCursor(3, 0);
-        LCD_Write_Char('D');
-        if (cleanResponseDelay(laserType, 3)) { // delay+3.5s
-            waterNResult_G2(sample2, test2, waterLen, 3); // delay+4s
+        /*
+         * int licked = waitTaskTimer(1000u); //delay+3s;
+        set4076_4bit(test2 > 15 ? test2 - 16 : test2);
+        muxDis(test2 < 16 ? (~1) : (~4)); // 1* 2 4* 8
+        licked |= waitTaskTimer(500); //delay+3.5s
+        if (!licked) { //test and reward
+            muxDis(test2 < 16 ? (~3) : (~0x0c));
+            waitTaskTimer(1000u - 200u);
+            muxDis(test2 < 16 ? (~2) : (~8));
+            waitTaskTimer(200u);
+            muxDis(0x0f);
+        } else {//abortTrial
+
         }
-        waitTaskTimer(550u);
+         * */
     }
 
 
@@ -860,26 +881,15 @@ static void zxLaserTrial_G2(int s1, int t1, int laserType) {
                     /*/////////////////////////////////////////////////
                      * ////////DISTRACTOR//////////////////////////////
                      * //////////////////////////////////////////////*/
-                    if (taskType_G2 == DUAL_TASK_LEARNING || taskType_G2 == DUAL_TASK
-                        //                            ||
-                        //                        taskType_G2 == DUAL_TASK_CATCH_LASER ||
-                        //                        taskType_G2 == DUAL_TASK_ON_OFF_LASER_TASK ||
-                        //                        taskType_G2 == DUAL_TASK_ODAP_ON_OFF_LASER_TASK ||
-                        //                        taskType_G2 == DNMS_DUAL_TASK_LEARNING ||
-                        //                        taskType_G2 == DNMS_DUAL_TASK ||
-                        //                        taskType_G2 == DUAL_TASK_EVERY_TRIAL
-                        ) {
-
+                    if (taskParam.sample2 != 0) {
                     /////////DISTRACTOR TIMELINE @Delay+0/////////////
                     waitTaskTimer(500u); //@D+500ms
                     // assertLaser_G2(type, atPreDualTask); //@2s
-                    dual_task_D_R(laserType, taskParam.sample2, taskParam.test2);
+                    dual_task_D_R(laserType, taskParam.sample2, taskParam.test2); //Delay+5000ms
                     // waitTaskTimer_G2(1500u);
-                    assertLaser_G2(laserType, atPostDualTask); // distractor@ 4 sec
+                    assertLaser_G2(laserType, atPostDualTask);
                     if (taskParam.delay1 >= 8u) {
-                        waitTaskTimer((unsigned int) taskParam.delay1 * 1000 - 5000);
-                        assertLaser_G2(laserType, atDelayLastSecBegin);
-                        waitTaskTimer(500u);
+                        waitTaskTimer((unsigned int) taskParam.delay1 * 1000 - 6000);
                     }
                     // at test odor -1000 ms
                 } else {
