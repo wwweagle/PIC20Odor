@@ -27,7 +27,7 @@ void initPorts() {
     LATB = 0x0300;
     TRISC = 0xFFFF;
     LATC = 0;
-    TRISD = 0xCFF0;
+    TRISD = 0x0FF0;
     LATD = 0x3000;
     TRISE = 0;
     LATE = 0;
@@ -54,7 +54,13 @@ inline void tick(unsigned int i) {
 
     timerCounterI += (uint32_t) i;
     millisCounter += (uint32_t) i;
-    PORTAbits.RA15 = (millisCounter & 0x0100) >> 8;
+    PORTDbits.RD14 = (millisCounter & 0x0200) >> 9;
+    Nop();
+    Nop();
+    PORTDbits.RD15 = (millisCounter & 0x0200) >> 9;
+    Nop();
+    Nop();
+    
 }
 
 inline int filtered_G2(void) {
