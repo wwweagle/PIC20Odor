@@ -250,6 +250,10 @@ extern "C" {
 #define atRewardEnd 120
 
 
+#define OUTCOME_WMDelay 1
+#define OUTCOM_2AFC 2
+#define OUTCOM_DUAL 3
+
 typedef struct {
     volatile unsigned int current;
     volatile unsigned int stable;
@@ -263,8 +267,9 @@ typedef struct {
     int *sample1s;
     int *test1s;
     int pairs1Count;
-    int sample2;
-    int test2;
+    int *sample2s;
+    int *test2s;
+    int pairs2Count;
     int *respCue;
     int respCount;
     int sample1Length;
@@ -276,8 +281,8 @@ typedef struct {
     int correctionCue;
     int correctionCueLength;
     int delay1;
-    int delay2;
-    int delay3;
+//    int delay2;
+//    int delay3;
     int ITI;
     int waitForTrial;
     int minBlock;
