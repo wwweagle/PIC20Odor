@@ -105,12 +105,12 @@ extern "C" {
 #define DNMS_LR_LEARNING_TASK 39
 #define DNMS_2AFC_TASK 40
 #define Seq2AFC_TASK 48
-#define Seq2AFC_TEACH 49
+//#define Seq2AFC_TEACH 49
 #define GONOGO_LR_TASK 50
 #define NO_ODOR_CATCH_TRIAL_TASK 60
 //#define VARY_ODOR_LENGTH_TASK 70
 #define DELAY_DISTRACTOR 80
-#define DUAL_TASK_LEARNING 90
+//#define DUAL_TASK_LEARNING 90
 #define DUAL_TASK 93
 #define DUAL_TASK_ON_OFF_LASER_TASK 95
 #define DUAL_TASK_ODAP_ON_OFF_LASER_TASK 96
@@ -119,7 +119,7 @@ extern "C" {
 #define ODPA_RD_SHAPING_TASK 100
 #define ODPA_RD_TASK 102
 #define ODPA_TASK 110
-#define DNMS_DUAL_TASK_LEARNING 120
+//#define DNMS_DUAL_TASK_LEARNING 120
 #define DNMS_DUAL_TASK 125
 #define DUAL_TASK_EVERY_TRIAL  130
 
@@ -286,7 +286,7 @@ typedef struct {
     int ITI;
     int waitForTrial;
     int minBlock;
-
+    int teaching;
 } TASK_T;
 
 typedef struct {
