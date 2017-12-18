@@ -866,7 +866,11 @@ void dual_task_D_R(int laserType, int sample2, int test2) {
             waterNResult_G2(sample2, test2, OUTCOM_DUAL, 500); //delay+5s
 
         } else {//abortTrial
-
+            muxDis(0x0f);
+            serialSend(SpAbortTrial,OUTCOM_DUAL);
+            LCDsetCursor(3, 0);
+            LCD_Write_Char('A');
+            waitTaskTimer(1500u);
         }
 
     }
