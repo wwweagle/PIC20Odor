@@ -31,6 +31,7 @@ void testLaser();
 unsigned int taskType_G2 = DNMS_TASK;
 const char odorTypes_G2[] = "BYRQHNKLTXZdMAES0123456";
 int correctionRepeatCount = 0;
+//int alterOdorPath=0;
 
 int main(void) {
     initPorts();
@@ -47,6 +48,16 @@ int main(void) {
     StopI2C();
     CloseI2C();
     return 0;
+}
+
+void switchOdorPath() {
+    while (1) {
+        LATD = 0x30F0;
+        wait_Sec(4);
+        LATD = 0x3000;
+        wait_Sec(4);
+    }
+
 }
 
 static int isLikeOdorA_G2(int odor) {
@@ -123,7 +134,8 @@ void callFunc(int n) {
             readADCData();
             break;
         case 23:
-            testPorts();
+            //            testPorts();
+            switchOdorPath();
             break;
         case 24:
             testNSetThres();

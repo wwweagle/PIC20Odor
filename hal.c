@@ -27,7 +27,7 @@ void initPorts() {
     LATB = 0x0300;
     TRISC = 0xFFFF;
     LATC = 0;
-    TRISD = 0x0FF0;
+    TRISD = 0x0F00;
     LATD = 0x3000;
     TRISE = 0;
     LATE = 0;
