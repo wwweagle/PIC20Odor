@@ -169,21 +169,21 @@ void callFunc(int n) {
             testLaser();
             break;
 
-//        case 32:
-//        {
-//            splash_G2("ODPA R_D SHAP", "REPEAT");
-//            laser_G2.laserSessionType = LASER_SESS_UNDEFINED;
-//            taskType_G2 = ODPA_RD_SHAPING_TASK;
-//            taskParam.teaching = 1;
-//            taskParam.falsePunish = 0;
-//            taskParam.pairs1Count = 2;
-//            addAllOdor();
-//            taskParam.delay1 = 5;
-//            taskParam.ITI = 8;
-//            int sessNum = getFuncNumber(2, "Session Number?");
-//            zxLaserSessions_G2(20, 100, sessNum);
-//            break;
-//        }
+            //        case 32:
+            //        {
+            //            splash_G2("ODPA R_D SHAP", "REPEAT");
+            //            laser_G2.laserSessionType = LASER_SESS_UNDEFINED;
+            //            taskType_G2 = ODPA_RD_SHAPING_TASK;
+            //            taskParam.teaching = 1;
+            //            taskParam.falsePunish = 0;
+            //            taskParam.pairs1Count = 2;
+            //            addAllOdor();
+            //            taskParam.delay1 = 5;
+            //            taskParam.ITI = 8;
+            //            int sessNum = getFuncNumber(2, "Session Number?");
+            //            zxLaserSessions_G2(20, 100, sessNum);
+            //            break;
+            //        }
         case 33:
         {
             splash_G2("ODPA", "");
@@ -346,7 +346,27 @@ void callFunc(int n) {
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_OTHER_TRIAL;
             laser_G2.laserTrialType = laserDuringDelayChR2;
             taskType_G2 = Seq2AFC_TASK;
-            taskParam.teaching=1;
+            taskParam.teaching = 1;
+            taskParam.respCount = 0;
+            taskParam.falsePunish = 0;
+            taskParam.pairs1Count = 6;
+            taskParam.pairs2Count = 2;
+            taskParam.minBlock = 6;
+            addAllOdor();
+            taskParam.delay1 = 12;
+            taskParam.ITI = 5;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(60, 20, sessNum);
+            break;
+        }
+
+        case 42:
+        {
+            splash_G2("Seq 2AFC +DR", "6 Samp Var Rwd");
+            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_OTHER_TRIAL;
+            laser_G2.laserTrialType = laserDuringDelayChR2;
+            taskType_G2 = Seq2AFC_TASK;
             taskParam.respCount = 0;
             taskParam.falsePunish = 0;
             taskParam.pairs1Count = 6;
@@ -573,9 +593,8 @@ void stim_G2(int place, int odorPort, int laserType) {
                 break;
             case 4:
                 assertLaser_G2(laserType, atResponseCueBeginning);
-                //            case 6:
-                //                //TODO: Laser at Distractor
-                //                //                assertLaser_G2(laserType, atResponseCueBeginning);
+            case 6:
+                assertLaser_G2(laserType, atPreDualTask);
                 break;
                 //            case 7:
                 //                break; //TODO fix laser
@@ -856,18 +875,11 @@ void dual_task_D_R(int laserType, int sample2, int test2) {
         muxDis(test2 < 16 ? (~1) : (~4)); // 1* 2 4* 8
         licked |= waitTaskTimer(500); //delay+3.5s
         if (!licked) { //test and reward
-            stim_G2(7, sample2, 0); //TODO fix laser
-            //            muxDis(test2 < 16 ? (~3) : (~0x0c));
-            //            waitTaskTimer(taskParam.test2Length - 200u);
-            //            muxDis(test2 < 16 ? (~2) : (~8));
-            //            waitTaskTimer(200u);
-            //            muxDis(0x0f); //delay+4.5s
-            //water n result
+            stim_G2(7, test2, laserType);
             waterNResult_G2(sample2, test2, OUTCOM_DUAL, 500); //delay+5s
-
         } else {//abortTrial
             muxDis(0x0f);
-            serialSend(SpAbortTrial,OUTCOM_DUAL);
+            serialSend(SpAbortTrial, OUTCOM_DUAL);
             LCDsetCursor(3, 0);
             LCD_Write_Char('A');
             waitTaskTimer(1500u);
