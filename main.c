@@ -58,6 +58,15 @@ void switchOdorPath() {
     PORTDbits.RD7 = ~i;
 }
 
+void testWaterDual() {
+    int i = getFuncNumber(1, "Pump #?");
+    if (i == 1) {
+        PORTDbits.RD4 = 1;
+    } else if (i == 2) {
+        PORTDbits.RD5 = 1;
+    }
+}
+
 static int isLikeOdorClassA(int odor) {
     if (odor == 3 || odor == 4 || odor == 7 || odor == 6 || odor == 10) return 1;
     return 0;
@@ -413,6 +422,12 @@ void callFunc(int n) {
             break;
 
 
+        case 44:
+        {
+            testWaterDual();
+            break;
+        }
+
             //        DELAY_DISTRACTOR
         default:
         {
@@ -606,14 +621,13 @@ void testNSetThres() {
 }
 
 void stim_G2(int place, int odorPort, int laserType) {
+    set4076_4bit(odorPort > 15 ? odorPort - 16 : odorPort);
     if (place == 1 || place == 2 || place == 6) {
-        set4076_4bit(odorPort > 15 ? odorPort - 16 : odorPort);
         muxDis(odorPort < 16 ? (~1) : (~4));
         waitTaskTimer(500);
     }
     if (place == 3) {
         serialSend(SpIO, odorPort);
-        set4076_4bit(odorPort > 15 ? odorPort - 16 : odorPort);
         muxDis(odorPort < 16 ? (~1) : (~4));
     } else {
         switch (place) {
@@ -949,7 +963,7 @@ int delayedRspsDelay(int laserType) {
             stim_G2(4, taskParam.respCue[0], laserType);
             return 1;
         }
-    }else{
+    } else {
         return 0;
     }
 }
