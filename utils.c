@@ -406,7 +406,7 @@ void waitTrial_G2() {
     if (!taskParam.waitForTrial) {
         return;
     }
-    while (adcdata > lickThresh) {
+    while (adcdataA > lickThresh) {
         if (!waitingLickRelease) {
             serialSend(20, 100);
             waitingLickRelease = 1;

@@ -41,7 +41,8 @@ extern _prog_addressT _memcpy_helper(_prog_addressT src, void *dst,
 extern int lickThresh;
 
 extern int u2Received;
-extern volatile int adcdata;
+extern volatile int adcdataA;
+extern volatile int adcdataB;
 extern uint32_t timerCounterI, millisCounter,taskTimeCounter;
 
 

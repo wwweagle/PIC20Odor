@@ -514,8 +514,9 @@ void testOneValve(int valve, int iti, int repeat) {
 }
 
 void readADCData(void) {
+    int i=getFuncNumber(1,"ADC channel");
     while (1) {
-        volatile int temp = adcdata;
+        volatile int temp = i==0?adcdataA:adcdataB;
         int highByte = temp / 100;
         int lowByte = temp % 100;
 
@@ -606,7 +607,7 @@ void testNSetThres() {
         int sum = 0;
         int i = 0;
         for (; i < 15; i++) {
-            sum += adcdata;
+            sum += adcdataA;
         }
         int val = sum / 15;
         sendLargeValue(val);
