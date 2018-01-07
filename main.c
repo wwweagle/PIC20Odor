@@ -50,8 +50,8 @@ int main(void) {
     return 0;
 }
 
-void switchOdorPath() {
-    int i = getFuncNumber(1, "Alt Path");
+void switchOdorPath(int i) {
+    //    int i = getFuncNumber(1, "Alt Path");
     PORTDbits.RD6 = i;
     Nop();
     Nop();
@@ -142,7 +142,7 @@ void callFunc(int n) {
             break;
         case 23:
             //            testPorts();
-            switchOdorPath();
+            switchOdorPath(getFuncNumber(1, "Path 1/0?"));
             break;
         case 24:
             testNSetThres();
@@ -428,6 +428,26 @@ void callFunc(int n) {
             break;
         }
 
+
+        case 45:
+        {
+            splash_G2("Seq 2AFC", "6 Samp Var Rwd");
+            int noLaser = getFuncNumber(1, "No Laser?");
+            taskParam.teaching=noLaser;
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_OTHER_TRIAL;
+            laser_G2.laserTrialType = laserDuringDelayChR2;
+            taskType_G2 = Seq2AFC_TASK;
+            taskParam.respCount = 0;
+            taskParam.falsePunish = 0;
+            taskParam.pairs1Count = 2;
+            addAllOdor();
+            taskParam.delay1 = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(20, 20, sessNum);
+            break;
+        }
+
             //        DELAY_DISTRACTOR
         default:
         {
@@ -514,9 +534,9 @@ void testOneValve(int valve, int iti, int repeat) {
 }
 
 void readADCData(void) {
-    int i=getFuncNumber(1,"ADC channel");
+    int i = getFuncNumber(1, "ADC channel");
     while (1) {
-        volatile int temp = i==0?adcdataA:adcdataB;
+        volatile int temp = i == 0 ? adcdataA : adcdataB;
         int highByte = temp / 100;
         int lowByte = temp % 100;
 
@@ -978,6 +998,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
     assertLaser_G2(laserType, at3SecBeforeS1);
     waitTaskTimer(2000u);
     assertLaser_G2(laserType, at1SecBeforeS1);
+    switchOdorPath(1);
     waitTaskTimer(500u);
     assertLaser_G2(laserType, at500msBeforeS1);
     //    waitTimerJ_G2(500u);
@@ -1125,6 +1146,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
     } else {
         taskParam.falsePunish &= 0xFFFE;
     }
+    switchOdorPath(0);
     if (taskParam.ITI >= 4u) {
         unsigned int trialITI = taskParam.ITI - 4u;
         while (trialITI > 60u) {

@@ -99,6 +99,7 @@ int getFuncNumber(int targetDigits, const char* message) {
 
 void setWaterPortOpen(int i) {
     PORTAbits.RA14 = i;
+    PORTDbits.RD4=i;
 }
 
 void sendLargeValue(int val) {
