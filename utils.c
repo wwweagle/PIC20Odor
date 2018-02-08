@@ -199,7 +199,7 @@ void assertLaser_G2(int type, int step) {
         case laserDuringLateHalf:
             if (step == atDelayMiddle) {
                 turnOnLaser_G2(3);
-            } else if (step == atDelayLast500mSBegin) {
+            } else if (step == atDelayLastSecBegin) {
                 turnOffLaser_G2();
             }
             break;
@@ -274,13 +274,13 @@ void assertLaser_G2(int type, int step) {
                 turnOffLaser_G2();
             }
             break;
-        case laserNoDelayControlShort:
-            if (step == atS1Beginning) {
-                turnOnLaser_G2(3);
-            } else if (step == atSecondOdorEnd) {
-                turnOffLaser_G2();
-            }
-            break;
+//        case laserNoDelayControlShort:
+//            if (step == atS1Beginning) {
+//                turnOnLaser_G2(3);
+//            } else if (step == atSecondOdorEnd) {
+//                turnOffLaser_G2();
+//            }
+//            break;
         case laserDuringBaseline:
             if (step == at3SecBeforeS1) {
                 turnOnLaser_G2(3);

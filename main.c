@@ -466,6 +466,24 @@ void callFunc(int n) {
             break;
         }
 
+        case 46:
+        {
+            splash_G2("Seq 2AFC", "Early Late");
+            laser_G2.laserSessionType = LASER_HALF_HALF;
+            taskType_G2 = Seq2AFC_TASK;
+            taskParam.respCount = 0;
+            taskParam.falsePunish = 0;
+            taskParam.pairs1Count = 6;
+            taskParam.minBlock = 6;
+            addAllOdor();
+            taskParam.delay1 = 8;
+            taskParam.ITI = 5;
+            int sessNum = 30;
+            zxLaserSessions_G2(60, 20, sessNum);
+            break;
+        }
+
+
             //        DELAY_DISTRACTOR
         default:
         {
@@ -1044,9 +1062,9 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
             break; //next line just before waterNresult
 
 
-        default:////////////////////////////////////DELAY/////////////////////
+        default://///////////////////////// NO DELAY /////////////////////
             if (taskParam.delay1 == 0) {
-                waitTaskTimer(200u); ////////////////NO DELAY////////////////////
+                waitTaskTimer(200u); //////////////// DELAY////////////////////
             } else {
                 if (taskParam.delay1 <= 4) {
                     waitTaskTimer(taskParam.delay1 * 1000u - 1000u);
@@ -1065,7 +1083,7 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
                         waitTaskTimer((unsigned int) taskParam.delay1 * 1000 - 6000);
                     }
                     // at test odor -1000 ms
-                } else {
+                } else {////// Pairs 2 count==0, no cues in DPA delay
 
                     assertLaser_G2(laserType, atDelayBegin);
                     waitTaskTimer(500u);
@@ -1077,9 +1095,8 @@ static void zxLaserTrial_G2(int s1, int t1, int s2, int t2, int laserType) {
                     waitTaskTimer(1000u);
                     assertLaser_G2(laserType, atDelay2SecIn); /////////////2Sec/////////////
 
-
                     waitTaskTimer(taskParam.delay1 * 500u - 2000u);
-                    //                    }
+
                     assertLaser_G2(laserType, atDelayMiddle); //13@6.5
                     if (taskParam.delay1 >= 12) {
                         waitTaskTimer(2000u); //13@7
@@ -1376,6 +1393,23 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                                 break;
                             case 4:
                                 laser_G2.laserTrialType = laser_5sRamp;
+                                break;
+                        }
+                        break;
+
+                    case LASER_HALF_HALF:
+                        switch (currentTrial % 6) {
+                            case 0:
+                            case 3:
+                                laser_G2.laserTrialType = LASER_OFF;
+                                break;
+                            case 1:
+                            case 5:
+                                laser_G2.laserTrialType = laserDuringEarlyHalf;
+                                break;
+                            case 2:
+                            case 4:
+                                laser_G2.laserTrialType = laserDuringLateHalf;
                                 break;
                         }
                         break;

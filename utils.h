@@ -132,7 +132,7 @@ extern "C" {
 #define LASER_CATCH_TRIAL 10
 //#define laserFollowOdorA 4
 //#define laserFollowOdorB 5
-//#define laser1and2Half 6
+#define LASER_HALF_HALF 15
 //#define laser3and4Quarter 10
 #define LASER_LR_EACH_QUARTER 20
 #define LASER_EACH_QUARTER 21
@@ -169,14 +169,14 @@ extern "C" {
 #define laserDuring1stOdor 21
 #define laserDuring2ndOdor 22
 #define laserDuringBeginningToOneSecInITI 30
-#define laserDuringEarlyDelay 40
-#define laserDuringMidDelay 50
-#define laserDuringLateDelay 60
-#define laserNoDelayControlShort 69
+//#define laserDuringEarlyDelay 40
+//#define laserDuringMidDelay 50
+//#define laserDuringLateDelay 60
+//#define laserNoDelayControlShort 69
 #define laserNoDelayControl 70
 #define laserDuringEarlyHalf 80
-
 #define laserDuringLateHalf 90
+
 #define laserDuring1Quarter 91
 #define laserDuring2Quarter 92
 #define laserDuring3Quarter 93
@@ -219,8 +219,8 @@ extern "C" {
 #define atDelay2SecIn 210
 #define atDelay2_5SecIn 212
 #define atDelay3SecIn 214
-#define atDelay3_5SIn 216
-#define atDelay4_5SIn 218
+//#define atDelay3_5SIn 216
+//#define atDelay4_5SIn 218
 #define atPreDualTask 220
 #define atPostDualTask 222
 #define atDelay1sToMiddle 224
