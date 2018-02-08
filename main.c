@@ -22,9 +22,10 @@ void testNSetThres();
 void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession);
 void addAllOdor();
 void bleedWater();
-void testVolume();
+void testVolume(int repeat);
 void setWaterLen();
 void testLaser();
+void switchOdorPath(int i);
 
 
 
@@ -41,6 +42,7 @@ int main(void) {
     LCD_Init();
     initADC();
     splash_G2(__DATE__, __TIME__);
+    switchOdorPath(1);
     while (1) {
         callFunc(getFuncNumber(2, "Main Func?"));
     }
@@ -68,7 +70,7 @@ void testWaterDual() {
 }
 
 static int isLikeOdorClassA(int odor) {
-    if (odor == 3 || odor == 4 || odor == 7 || odor == 6 || odor == 10) return 1;
+    if (odor == 3 || odor == 4 || odor == 7 || odor == 6 || odor == 10 || odor == 16) return 1;
     return 0;
 }
 
@@ -115,9 +117,9 @@ void bleedWater() {
     setWaterPortOpen(1);
 }
 
-void testVolume() {
+void testVolume(int repeat) {
     int i;
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < repeat; i++) {
         setWaterPortOpen(1);
         wait_ms(waterLen);
         setWaterPortOpen(0);
@@ -148,7 +150,9 @@ void callFunc(int n) {
             testNSetThres();
             break;
         case 25:
+            testVolume(10);
             feedWaterFast_G2(waterLen);
+            break;
         case 26:
         {
             splash_G2("ODPA R_D", "");
@@ -186,7 +190,7 @@ void callFunc(int n) {
             bleedWater();
             break;
         case 29:
-            testVolume();
+            testVolume(100);
             break;
         case 30:
             setWaterLen();
@@ -431,20 +435,34 @@ void callFunc(int n) {
 
         case 45:
         {
-            splash_G2("Seq 2AFC", "6 Samp Var Rwd");
+            splash_G2("Seq 2AFC", "Mult Samp VarRwd");
             int noLaser = getFuncNumber(1, "No Laser?");
-            taskParam.teaching=noLaser;
+            taskParam.teaching = noLaser;
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_OTHER_TRIAL;
             laser_G2.laserTrialType = laserDuringDelayChR2;
             taskType_G2 = Seq2AFC_TASK;
             taskParam.respCount = 0;
             taskParam.falsePunish = 0;
-            taskParam.pairs1Count = 2;
+            taskParam.pairs1Count = getFuncNumber(1, "S/T Pairs?");
             addAllOdor();
+            int trialPerSess = 0;
+            switch (taskParam.pairs1Count) {
+                case 2:
+                    trialPerSess = 20;
+                    break;
+                case 4:
+                    trialPerSess = 40;
+                    break;
+                case 6:
+                    taskParam.minBlock = 6;
+                    trialPerSess = 60;
+                    break;
+            }
             taskParam.delay1 = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
             int sessNum = getFuncNumber(2, "Session number?");
-            zxLaserSessions_G2(20, 20, sessNum);
+
+            zxLaserSessions_G2(trialPerSess, 20, sessNum);
             break;
         }
 
