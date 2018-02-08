@@ -159,7 +159,7 @@ extern "C" {
 #define laserDuringDelay_Odor2 6
 #define laserDuringBaseAndResponse 7
 #define laserDuringBaselineNDelay 9
-#define laserDuringDelay 10
+//#define laserDuringDelay 10
 #define laserDuringDelayChR2 11
 
 #define laserRampDuringDelay 14

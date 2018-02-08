@@ -139,13 +139,13 @@ void assertLaser_G2(int type, int step) {
     switch (type) {
         case LASER_OFF:
             break;
-        case laserDuringDelay:
-            if (step == atDelay1SecIn) {
-                turnOnLaser_G2(3);
-            } else if (step == atDelayLast500mSBegin) {
-                turnOffLaser_G2();
-            }
-            break;
+//        case laserDuringDelay:
+//            if (step == atDelay1SecIn) {
+//                turnOnLaser_G2(3);
+//            } else if (step == atDelayLast500mSBegin) {
+//                turnOffLaser_G2();
+//            }
+//            break;
         case laserDuringDelayChR2:
             if (step == atDelay1SecIn || step == atPostDualTask) {
                 turnOnLaser_G2(3);
@@ -189,7 +189,7 @@ void assertLaser_G2(int type, int step) {
             }
             break;
         case laserDuringEarlyHalf:
-            if (step == atDelayBegin) {
+            if (step == atDelay1SecIn) {
                 turnOnLaser_G2(3);
             } else if (step == atDelayMiddle) {
                 turnOffLaser_G2();
