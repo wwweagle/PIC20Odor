@@ -47,7 +47,8 @@ TASK_T taskParam = {
     .teaching = 0
 };
 
-int waterLen = 50;
+int waterLenL = 50;
+int waterLenR = 50;
 int hit, miss, falseAlarm, correctRejection, abortTrial;
 
 int currentMiss, correctRatio;
@@ -75,6 +76,12 @@ int getFuncNumber(int targetDigits, const char* message) {
         }
 
         while (bitValue[iter] < 0) {
+            int kb = checkKeyboard();
+            if (kb > 0) {
+                serialSend(1, 100 + kb);
+                return 100 + kb;
+            }
+
             if (u2Received > 0) {
                 bitValue[iter] = u2Received - 0x30;
                 u2Received = -1;
@@ -97,9 +104,15 @@ int getFuncNumber(int targetDigits, const char* message) {
     return n;
 }
 
-void setWaterPortOpen(int i) {
-    PORTAbits.RA14 = i;
-    PORTDbits.RD4=i;
+void setWaterPortOpen(int side, int i) {
+    if (side == LICKING_LEFT) {
+        PORTAbits.RA14 = i;
+        PORTDbits.RD4 = i;
+    } else if (side == LICKING_RIGHT) {
+        PORTAbits.RA15 = i;
+        PORTDbits.RD5 = i;
+    }
+    BNC_2 = i;
 }
 
 void sendLargeValue(int val) {
@@ -139,13 +152,13 @@ void assertLaser_G2(int type, int step) {
     switch (type) {
         case LASER_OFF:
             break;
-//        case laserDuringDelay:
-//            if (step == atDelay1SecIn) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
+        case laserDuringDelay:
+            if (step == atDelayBegin) {
+                turnOnLaser_G2(3);
+            } else if (step == atDelayLast500mSBegin) {
+                turnOffLaser_G2();
+            }
+            break;
         case laserDuringDelayChR2:
             if (step == atDelay1SecIn || step == atPostDualTask) {
                 turnOnLaser_G2(3);
@@ -274,13 +287,13 @@ void assertLaser_G2(int type, int step) {
                 turnOffLaser_G2();
             }
             break;
-//        case laserNoDelayControlShort:
-//            if (step == atS1Beginning) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atSecondOdorEnd) {
-//                turnOffLaser_G2();
-//            }
-//            break;
+            //        case laserNoDelayControlShort:
+            //            if (step == atS1Beginning) {
+            //                turnOnLaser_G2(3);
+            //            } else if (step == atSecondOdorEnd) {
+            //                turnOffLaser_G2();
+            //            }
+            //            break;
         case laserDuringBaseline:
             if (step == at3SecBeforeS1) {
                 turnOnLaser_G2(3);
@@ -407,7 +420,8 @@ void waitTrial_G2() {
     if (!taskParam.waitForTrial) {
         return;
     }
-    while (adcdataA > lickThresh) {
+
+    while (adcdataL > lickThreshL || adcdataR > lickThreshR) {
         if (!waitingLickRelease) {
             serialSend(20, 100);
             waitingLickRelease = 1;

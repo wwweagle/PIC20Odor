@@ -26,8 +26,12 @@
 #define _write_eedata_word  _eedata_helper3
 
 
-#define EEP_LICK_THRESHOLD 0
-#define EEP_WATER_LEN_MS 2
+#define EEP_LICK_THRESHOLD_L 0
+#define EEP_WATER_LEN_MS_L 2
+#define EEP_LICK_THRESHOLD_R 10
+#define EEP_WATER_LEN_MS_R 12
+
+
 
 
 typedef unsigned long _prog_addressT;
@@ -38,11 +42,12 @@ extern _prog_addressT _memcpy_helper(_prog_addressT src, void *dst,
         unsigned int len, int flags);
 
 
-extern int lickThresh;
+extern int lickThreshL;
+extern int lickThreshR;
 
 extern int u2Received;
-extern volatile int adcdataA;
-extern volatile int adcdataB;
+extern volatile int adcdataL;
+extern volatile int adcdataR;
 extern uint32_t timerCounterI, millisCounter,taskTimeCounter;
 
 
@@ -60,6 +65,7 @@ void initADC(void);
 void write_eeprom_G2(int offset, int value) ;
 
 int read_eeprom_G2(int offset) ;
+int checkKeyboard();
 
 #endif	//HAL_H
 

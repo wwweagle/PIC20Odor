@@ -103,10 +103,11 @@ extern "C" {
 #define DNMS_LR_LEARNING_TASK 39
 #define DNMS_2AFC_TASK 40
 #define Seq2AFC_TASK 48
-//#define GONOGO_LR_TASK 50
+#define GONOGO_LR_TASK 50
 #define NO_ODOR_CATCH_TRIAL_TASK 60
 #define DELAY_DISTRACTOR 80
 #define DUAL_TASK 93
+#define DUAL_TASK_SHAPING 94
 #define DUAL_TASK_ON_OFF_LASER_TASK 95
 #define DUAL_TASK_ODAP_ON_OFF_LASER_TASK 96
 #define DUAL_TASK_DISTRx3_TASK 98
@@ -116,6 +117,7 @@ extern "C" {
 #define ODPA_TASK 110
 #define DNMS_DUAL_TASK 125
 #define DUAL_TASK_EVERY_TRIAL  130
+#define Mixed_oder 131
 
 
 
@@ -159,7 +161,7 @@ extern "C" {
 #define laserDuringDelay_Odor2 6
 #define laserDuringBaseAndResponse 7
 #define laserDuringBaselineNDelay 9
-//#define laserDuringDelay 10
+#define laserDuringDelay 10
 #define laserDuringDelayChR2 11
 
 #define laserRampDuringDelay 14
@@ -275,11 +277,12 @@ typedef struct {
     int correctionCue;
     int correctionCueLength;
     int delay1;
-//    int delay2;
-//    int delay3;
+    //    int delay2;
+    //    int delay3;
     int ITI;
     int waitForTrial;
     int minBlock;
+    int minBlock2;
     int teaching;
 } TASK_T;
 
@@ -300,7 +303,7 @@ extern LASER_T_G2 laser_G2;
 
 extern TASK_T taskParam;
 
-extern int waterLen;
+extern int waterLenL, waterLenR;
 
 extern int currentMiss, correctRatio;
 
@@ -308,11 +311,12 @@ extern int hit, miss, falseAlarm, correctRejection, abortTrial;
 
 #define LICKING_DETECTED 2
 #define LICKING_RIGHT 3
-#define LICKING_SENT 8
+#define LICKING_LEFT 4
+#define LICK_SENT 8
 #define LICKING_BOTH 127
 
 void feedWaterFast_G2();
-void setWaterPortOpen(int i);
+void setWaterPortOpen(int side, int i);
 void sendLargeValue(int val);
 void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize);
 int waitTaskTimer(unsigned int dTime);

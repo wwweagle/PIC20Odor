@@ -13,19 +13,20 @@
 
 uint32_t timerCounterI, millisCounter, taskTimeCounter;
 int u2Received = -1;
-volatile int adcdataA;
-volatile int adcdataB;
+volatile int adcdataL;
+volatile int adcdataR;
 volatile int isSending;
 volatile int sendLick;
-int lickThresh = 400; // larger is more sensitive
+int lickThreshL = 400; // larger is more sensitive
+int lickThreshR = 400; // larger is more sensitive
 
 const _prog_addressT EE_Addr_G2 = 0x7ff000;
 
 void initPorts() {
     TRISA = 0x39FF;
     LATA = 0;
-    TRISB = 0xFCFF;
-    LATB = 0x0300;
+    TRISB = 0xFC0F;
+    LATB = 0x030F;
     TRISC = 0xFFFF;
     LATC = 0;
     TRISD = 0x0F00;
@@ -64,10 +65,6 @@ inline void tick(unsigned int i) {
 
 }
 
-inline int filtered_G2(void) {
-    return (millisCounter > lick_G2.filter + 50u);
-}
-
 void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
 
     tick(5u);
@@ -77,26 +74,34 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     } else {
         BNC_4 = 0;
     }
-    if (adcdataA > lickThresh && lick_G2.current == 0 &&
-            filtered_G2()) { // HIGH is lick
+    if ((adcdataL > lickThreshL && adcdataR > lickThreshR)
+            || (adcdataL <= lickThreshL && adcdataR <= lickThreshR)) {
+        lick_G2.current = 0;
+        lick_G2.stable = 0;
+        BNC_1 = 0;
+    } else if (lick_G2.current == 0) {
         lick_G2.filter = millisCounter;
         lick_G2.current = LICKING_DETECTED;
-    } else if (adcdataA > lickThresh && lick_G2.current == LICKING_DETECTED) {
-        if (millisCounter > lick_G2.filter + 5) {
+    } else if (lick_G2.current == LICKING_DETECTED) {
+        if (millisCounter > lick_G2.filter + 10) {
             lick_G2.stable = 1;
-            lick_G2.LCount++;
-            lick_G2.current = LICKING_SENT;
-            if (isSending) {
-                sendLick = 1;
+            BNC_1 = 1;
+            char sendSide = 2;
+            if (adcdataL > lickThreshL) {
+                lick_G2.LCount++;
+                sendSide = 'L';
             } else {
-                serialSend(0, 2);
+                lick_G2.RCount++;
+                sendSide = 'R';
+            }
+            lick_G2.current = LICK_SENT;
+            if (isSending) {
+                sendLick = sendSide;
+            } else {
+                serialSend(0, sendSide);
                 sendLick = 0;
             }
         }
-    } else if (adcdataA <= lickThresh) {
-        lick_G2.current = 0;
-        lick_G2.stable = 0;
-        //  digitalWrite(38, LOW);
     }
     //  if (Serial.peek() == 0x2a) {
     //    protectedSerialSend_G2(61, 0);
@@ -115,9 +120,9 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     IFS0bits.T1IF = 0;
 }
 
-  void __attribute__((__interrupt__, no_auto_psv)) _ADCInterrupt(void) {
-    adcdataB = ADCBUF0; //RB14
-    adcdataA = ADCBUF1;//RB15
+void __attribute__((__interrupt__, no_auto_psv)) _ADCInterrupt(void) {
+    adcdataR = ADCBUF0; //RB14
+    adcdataL = ADCBUF1; //RB15
     IFS0bits.ADIF = 0; //After conversion ADIF is set to 1 and must be cleared
 }
 
@@ -182,10 +187,10 @@ void serialSend(int u2Type, int u2Value) {
     U2TXREG = (unsigned char) (u2Value | 0x80);
     while (BusyUART2());
 
-    if (sendLick) {
+    if (sendLick > 0) {
         U2TXREG = (unsigned char) (0);
         while (BusyUART2());
-        U2TXREG = (unsigned char) (2 | 0x80);
+        U2TXREG = (unsigned char) (sendLick | 0x80);
         while (BusyUART2());
     }
     sendLick = 0;
@@ -238,6 +243,9 @@ void initADC(void) {
     //    ADCHSbits.CH0SA = 0x0F;///CH0SA<3:0>: Channel 0 Positive Input Select for MUX A Multiplexer Setting bits
     ADCHSbits.CH0NA = 0; //Select VREF- for CH0- input
     ADCON2bits.CSCNA = 1; //Scan Input Selections for CH0+ S/H Input for MUX A Input Multiplexer Setting bit
+    //    The CSCNA bit
+    //(ADCON2<10>) enables the CH0 channel inputs to be scanned across a selected number of
+    //analog inputs. When CSCNA is set, the CH0SA<3:0> bits are ignored.
 
     ADCSSL = 0xC000; //CSSL<15:0>: A/D Input Pin Scan Selection bits
     //1 = Select ANx for input scan
@@ -256,16 +264,6 @@ void initADC(void) {
     ADCON2bits.VCFG = 0; //VCFG<2:0>: Voltage Reference Configuration bits 
     //1 = Scan inputs
     //0 = Do not scan inputs
-
-    //    The CSCNA bit
-    //(ADCON2<10>) enables the CH0 channel inputs to be scanned across a selected number of
-    //analog inputs. When CSCNA is set, the CH0SA<3:0> bits are ignored.
-
-
-
-    ADCON2bits.BUFM = 0; //    bit 1 BUFM: Buffer Mode Select bit
-    //1 = Buffer configured as two 8-word buffers ADCBUF(15...8), ADCBUF(7...0)
-    //0 = Buffer configured as one 16-word buffer ADCBUF(15...0.)
 
     ADCON2bits.ALTS = 0; //ALTS: Alternate Input Sample Mode Select bit
     //1 = Uses MUX A input multiplexer settings for first sample, then alternate between MUX B and MUX A input
@@ -314,4 +312,22 @@ int read_eeprom_G2(int offset) {
     int temp;
     _memcpy_p2d16(&temp, EE_Addr_G2 + offset, 2);
     return temp;
+}
+
+int checkKeyboard() {
+
+    int out = 0;
+    if (PORTBbits.RB0 == 0) {
+        out += 1;
+    }
+    if (PORTBbits.RB1 == 0) {
+        out += 2;
+    }
+    if (PORTBbits.RB2 == 0) {
+        out += 4;
+    }
+    if (PORTBbits.RB3 == 0) {
+        out += 8;
+    }
+    return out;
 }
