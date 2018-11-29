@@ -17,8 +17,8 @@ volatile int adcdataL;
 volatile int adcdataR;
 volatile int isSending;
 volatile int sendLick;
-int lickThreshL = 400; // larger is more sensitive
-int lickThreshR = 400; // larger is more sensitive
+int lickThreshL = 1023; // larger is more sensitive
+int lickThreshR = 1023; // larger is more sensitive
 
 const _prog_addressT EE_Addr_G2 = 0x7ff000;
 
@@ -84,14 +84,15 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
         lick_G2.current = LICKING_DETECTED;
     } else if (lick_G2.current == LICKING_DETECTED) {
         if (millisCounter > lick_G2.filter + 10) {
-            lick_G2.stable = 1;
             BNC_1 = 1;
             char sendSide = 2;
             if (adcdataL > lickThreshL) {
                 lick_G2.LCount++;
                 sendSide = 'L';
+                lick_G2.stable = 'L';
             } else {
                 lick_G2.RCount++;
+                lick_G2.stable = 'R';
                 sendSide = 'R';
             }
             lick_G2.current = LICK_SENT;
@@ -215,7 +216,7 @@ void set4076_4bit(int val) {
     Nop();
 }
 
-void muxDis(int val) {
+void muxOff(int val) {
     PORTDbits.RD12 = (val & 0x1);
     Nop();
     Nop();

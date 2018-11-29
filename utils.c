@@ -15,19 +15,19 @@
 
 
 LICK_T_G2 lick_G2 = {
-    .current = 0u, .stable = 0u, .filter = 0u, .portSide = 0u, .LCount = 0u, .RCount = 0u
+    .current = 0u, .stable = 0u, .filter = 0u, .lickSide = 0u, .LCount = 0u, .RCount = 0u
 };
 
 LASER_T_G2 laser_G2 = {.laserSessionType = LASER_NO_TRIAL, .laserTrialType = LASER_OFF,
     .timer = 0u, .onTime = 65535u, .offTime = 0u, .on = 0u, .side = 1u}; //1L,2R,3LR
 
 TASK_T taskParam = {
-    .sample1s = NULL,
-    .test1s = NULL,
-    .pairs1Count = 0,
-    .sample2s = NULL,
-    .test2s = NULL,
-    .pairs2Count = 0,
+    .outSamples = NULL,
+    .outTests = NULL,
+    .outTaskPairs = 0,
+    .innerSamples = NULL,
+    .innerTests = NULL,
+    .innerTaskPairs = 0,
     .respCue = NULL,
     .respCount = 0,
     .sample1Length = 1000,
@@ -38,7 +38,7 @@ TASK_T taskParam = {
     .falsePunish = 0,
     .correctionCue = 0,
     .correctionCueLength = 1000,
-    .delay1 = 5,
+    .outDelay = 5,
     //    .delay2 = 1500,
     //    .delay3 = 0,
     .ITI = 8,
@@ -112,7 +112,6 @@ void setWaterPortOpen(int side, int i) {
         PORTAbits.RA15 = i;
         PORTDbits.RD5 = i;
     }
-    BNC_2 = i;
 }
 
 void sendLargeValue(int val) {
@@ -141,11 +140,12 @@ void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize) {
 }
 
 int waitTaskTimer(unsigned int dTime) {
-    int currLick = lick_G2.LCount;
+    int currLickL = lick_G2.LCount;
+    int currLickR = lick_G2.RCount;
     taskTimeCounter += dTime;
     while (millisCounter < taskTimeCounter);
 
-    return lick_G2.LCount>currLick;
+    return (lick_G2.LCount>currLickL || lick_G2.RCount>currLickR);
 }
 
 void assertLaser_G2(int type, int step) {

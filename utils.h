@@ -103,7 +103,8 @@ extern "C" {
 #define DNMS_LR_LEARNING_TASK 39
 #define DNMS_2AFC_TASK 40
 #define Seq2AFC_TASK 48
-#define GONOGO_LR_TASK 50
+#define GONOGO_2AFC_TASK 50
+#define ODR_2AFC_TASK 55
 #define NO_ODOR_CATCH_TRIAL_TASK 60
 #define DELAY_DISTRACTOR 80
 #define DUAL_TASK 93
@@ -247,25 +248,25 @@ extern "C" {
 
 
 #define OUTCOME_WMDelay 1
-#define OUTCOM_2AFC 2
-#define OUTCOM_DUAL 3
+#define OUTCOME_2AFC 2
+#define OUTCOME_DUAL 3
 
 typedef struct {
     volatile unsigned int current;
     volatile unsigned int stable;
     volatile uint32_t filter;
-    unsigned int portSide;
+    unsigned int lickSide;
     volatile unsigned int LCount;
     volatile unsigned int RCount;
 } LICK_T_G2;
 
 typedef struct {
-    int *sample1s;
-    int *test1s;
-    int pairs1Count;
-    int *sample2s;
-    int *test2s;
-    int pairs2Count;
+    int *outSamples;
+    int *outTests;
+    int outTaskPairs;
+    int *innerSamples;
+    int *innerTests;
+    int innerTaskPairs;
     int *respCue;
     int respCount;
     int sample1Length;
@@ -276,7 +277,7 @@ typedef struct {
     int falsePunish;
     int correctionCue;
     int correctionCueLength;
-    int delay1;
+    int outDelay;
     //    int delay2;
     //    int delay3;
     int ITI;

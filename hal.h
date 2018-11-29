@@ -58,7 +58,7 @@ void wait_Sec(int time);
 void serialSend(int u2Type, int u2Value);
 void initUART2(void);
 void set4076_4bit(int val);
-void muxDis(int val);
+void muxOff(int val);
 void initADC(void);
 
 
