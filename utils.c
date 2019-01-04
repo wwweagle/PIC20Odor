@@ -15,7 +15,8 @@
 
 
 LICK_T_G2 lick_G2 = {
-    .current = 0u, .stable = 0u, .filter = 0u, .lickSide = 0u, .LCount = 0u, .RCount = 0u
+    .current = 0u, .stable = 0u, .filter = 0u, .lickSide = 0u,
+    .LCount = 0u, .RCount = 0u, .refreshLickReading = 0
 };
 
 LASER_T_G2 laser_G2 = {.laserSessionType = LASER_NO_TRIAL, .laserTrialType = LASER_OFF,
@@ -121,6 +122,13 @@ void sendLargeValue(int val) {
     serialSend(24, valLow);
 }
 
+void sendChart(int val, int idx) {
+    int high = ((val & 0x0fc0) >> 6)+(idx == 1 ? 0x40 : 0);
+    serialSend(SpChartHigh, high);
+    int low = (val & 0x3f)+(idx == 1 ? 0x40 : 0);
+    serialSend(SpChartLow, low);
+}
+
 void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize) {
     if (arraySize == 0 || arraySize == 1)
         return;
@@ -145,7 +153,7 @@ int waitTaskTimer(unsigned int dTime) {
     taskTimeCounter += dTime;
     while (millisCounter < taskTimeCounter);
 
-    return (lick_G2.LCount>currLickL || lick_G2.RCount>currLickR);
+    return (lick_G2.LCount > currLickL || lick_G2.RCount > currLickR);
 }
 
 void assertLaser_G2(int type, int step) {
@@ -421,12 +429,15 @@ void waitTrial_G2() {
         return;
     }
 
-    while (adcdataL > lickThreshL || adcdataR > lickThreshR) {
+    //    while (adcdataL > lickThreshL || adcdataR > lickThreshR) {
+    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+    while (sel > lickThreshL || sel < lickThreshR) {
         if (!waitingLickRelease) {
             serialSend(20, 100);
             waitingLickRelease = 1;
             wait_ms(200);
         }
+        sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
     }
     waitingLickRelease = 0;
 

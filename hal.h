@@ -40,6 +40,7 @@ extern void _eedata_helper1(_prog_addressT dst, int len);
 extern void _eedata_helper3(_prog_addressT dst, int dat);
 extern _prog_addressT _memcpy_helper(_prog_addressT src, void *dst,
         unsigned int len, int flags);
+extern unsigned char LCD_PCF8574_ADDR;  // Modify this if the default address is altered 
 
 
 extern int lickThreshL;
@@ -66,6 +67,7 @@ void write_eeprom_G2(int offset, int value) ;
 
 int read_eeprom_G2(int offset) ;
 int checkKeyboard();
+unsigned char getLCDAddr();
 
 #endif	//HAL_H
 

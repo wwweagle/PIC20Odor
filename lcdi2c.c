@@ -60,13 +60,14 @@ void I2C_Write_Byte_Single_Reg(unsigned char deviceADDR, unsigned char val) {
     while (!IFS0bits.MI2CIF); // Wait for 9th clock cycle
 
     IFS0bits.MI2CIF = 0; // Clear interrupt flag 
-
+    
+    
     while (I2CSTATbits.ACKSTAT);
-
+    
     /* Transmit string of data */
 
     MasterWriteI2C(val);
-
+    
     StopI2C();
 
     /* Wait till stop sequence is completed */
@@ -200,7 +201,7 @@ unsigned char I2C_Read_Byte_Single_Reg(unsigned char deviceADDR) {
 #define LCD_8BIT_INIT 0b00110000 // Used to initialise the interface at the LCD
 #define LCD_4BIT_INIT 0b00100000 // Used to initialise the interface at the LCD
 
-#define LCD_PCF8574_ADDR         0x7E  // Modify this if the default address is altered 
+//#define LCD_PCF8574_ADDR         0x4E  // Modify this if the default address is altered 
 #define LCD_PCF8574_WEAK_PU      0b11110000 // Used to turn on PCF8574 Bits 7-4 on. To allow for read of LCD.
 
 #define LCD_BUSY_FLAG_MASK       0b10000000 // Used to mask off the status of the busy flag

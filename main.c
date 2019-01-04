@@ -31,20 +31,24 @@ void testNewPorts();
 static void feedWaterLR();
 
 
+
 unsigned int taskType_G2 = DNMS_TASK;
 const char odorTypes_G2[] = "BYRQHNKLTXZdMAES0123456";
 int correctionRepeatCount = 0;
 int currentSession;
-int totalSession;
+int isLRLED;
+//int totalSession;
 //int alterOdorPath=0;
 
 int main(void) {
     initPorts();
+    initADC();
     initTMR1();
     initUART2();
     initI2C();
+    LCD_PCF8574_ADDR = getLCDAddr();
+    //    serialSend(SpDebugInfo,20+(LCD_PCF8574_ADDR>>4));
     LCD_Init();
-    initADC();
     splash_G2(__DATE__, __TIME__);
     //    switchOdorPath(1);
     while (1) {
@@ -78,13 +82,6 @@ static int isLikeOdorClassL(int odor) {
     //    (odor == 0 || odor == 2 || odor == 7 || odor == 10) return 1;
     //    (odor == 3 || odor == 4 || odor == 7 || odor == 6 || odor == 10 || odor == 16)
     return 0;
-}
-
-void sendChart(int val, int idx) {
-    int high = ((val & 0x0fc0) >> 6)+(idx == 1 ? 0x40 : 0);
-    serialSend(SpChartHigh, high);
-    int low = (val & 0x3f)+(idx == 1 ? 0x40 : 0);
-    serialSend(SpChartLow, low);
 }
 
 void addAllOdor() {
@@ -122,13 +119,24 @@ void addAllOdor() {
     }
 }
 
-void bleedWater() {
-    int s = getFuncNumber(1, "1-Left 2-Right");
-    if (s == 1)
-        setWaterPortOpen(LICKING_LEFT, 1);
-    else if (s == 2)
-        setWaterPortOpen(LICKING_RIGHT, 1);
-
+void bleedWater() { //menu 28
+    int s = getFuncNumber(1, "1-L 2-R 3-Both");
+    switch (s) {
+        case 1:
+            setWaterPortOpen(LICKING_LEFT, 1);
+            break;
+        case 2:
+            setWaterPortOpen(LICKING_RIGHT, 1);
+            break;
+        case 3:
+            setWaterPortOpen(LICKING_LEFT, 1);
+            Nop();
+            Nop();
+            Nop();
+            Nop();
+            setWaterPortOpen(LICKING_RIGHT, 1);
+            break;
+    }
 }
 
 void testVolume(int repeat, int side) {
@@ -593,17 +601,19 @@ void callFunc(int n) {
             break;
 
         case 52:
+            lick_G2.refreshLickReading = 1;
             feedWaterLR();
             break;
 
         case 53:
         {
+            lick_G2.refreshLickReading = 1;
             splash_G2("ODR 2AFC", "");
             laser_G2.laserSessionType = LASER_NO_TRIAL;
             taskType_G2 = ODR_2AFC_TASK;
-            taskParam.teaching = getFuncNumber(1,"1-Teach  0-Test");
-            taskParam.waitForTrial=getFuncNumber(1,"TrialWait 1Y 0N");
-            taskParam.falsePunish = 0;
+            taskParam.teaching = getFuncNumber(1, "0Tst 1Tch 23NoPu");
+            taskParam.waitForTrial = getFuncNumber(1, "TrialWait 1Y 0N");
+            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
             taskParam.outTaskPairs = 2;
             taskParam.respCount = 1;
             addAllOdor();
@@ -611,6 +621,37 @@ void callFunc(int n) {
             taskParam.ITI = getFuncNumber(2, "ITI duration");
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 100, sessNum);
+            lick_G2.refreshLickReading = 0;
+            break;
+        }
+        case 54:
+        {
+            lick_G2.refreshLickReading = 1;
+            splash_G2("ODR 2AFC SWCH", "");
+            laser_G2.laserSessionType = LASER_NO_TRIAL;
+            taskType_G2 = ODR_2AFC_TASK;
+            taskParam.teaching = getFuncNumber(1, "0Tst 1Tch 23NoPu");
+            taskParam.waitForTrial = getFuncNumber(1, "TrialWait 1Y 0N");
+            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 2;
+            taskParam.respCount = 1;
+            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            int sessNum = getFuncNumber(2, "Session number?");
+            int sessRpt = getFuncNumber(2, "Session repeat?");
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.respCue = malloc(taskParam.respCount * sizeof (int));
+            taskParam.respCue[0] = 0;
+            for (; sessRpt > 0; sessRpt--) {
+                int odor = (sessRpt % 2) == 0 ? 6 : 7;
+                taskParam.outSamples[0] = odor;
+                taskParam.outSamples[1] = odor;
+
+                zxLaserSessions_G2(4, 100, sessNum);
+
+            }
+            lick_G2.refreshLickReading = 0;
             break;
         }
         default:
@@ -624,6 +665,8 @@ void callFunc(int n) {
     }
     free(taskParam.outSamples);
     free(taskParam.outTests);
+    free(taskParam.respCue);
+
 }
 
 void testValveFast(int board, int valve, int keep) {
@@ -709,6 +752,21 @@ void readADCData(void) {
         wait_ms(50);
 
     }
+}
+
+int readADCDataNorm(void) {
+    while (1) {
+        volatile int temp = (((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512;
+        int highByte = temp / 100;
+        int lowByte = temp % 100;
+
+        serialSend(23, highByte);
+        serialSend(24, lowByte);
+        wait_ms(25);
+        sendChart(temp, 0);
+        wait_ms(25);
+    }
+    return 0;
 }
 
 void testPorts() {
@@ -798,13 +856,7 @@ static void feedWaterLR() {
     splash_G2("L       R", "W");
 
     timerCounterI = interval * 100;
-    uint32_t adcTimer = millisCounter;
     while (1) {
-        if (millisCounter - adcTimer > 50) {
-            sendChart(adcdataL, 0);
-            sendChart(adcdataR, 1);
-            adcTimer = millisCounter;
-        }
         if (lick_G2.LCount > lastL) {
             if (timerCounterI > interval * 100 && lastLocation != LICKING_LEFT) {
                 serialSend(22, 1);
@@ -855,11 +907,9 @@ static void feedWaterLR() {
 }
 
 void testNSetThres() {
+    sendLargeValue(lickThreshL);
+    sendLargeValue(lickThreshR);
     int side = getFuncNumber(1, "1-LEFT 2-RIGHT");
-    if (side == 1)
-        sendLargeValue(lickThreshL);
-    else if (side == 2)
-        sendLargeValue(lickThreshR);
     int newThres = getFuncNumber(3, "New Lick Thres?");
     sendLargeValue(newThres);
     if (side == 1)
@@ -882,7 +932,7 @@ void stim_G2(int place, int odorPort, int laserType) {
     if (place != 3)
         BNC_2 = 1;
     if (place == 3) {
-        serialSend(SpIO, odorPort);
+        serialSend(SpIO, odorPort > 0 ? odorPort : odorPort + 100);
         muxOff(odorPort < 16 ? (~1) : (~4));
     } else {
         switch (place) {
@@ -1036,11 +1086,14 @@ static void processMiss_G2(int id) {
     currentMiss++;
     serialSend(SpMiss, id);
     lcdWriteNumber_G2(++miss, 9, 0);
+    if (taskParam.falsePunish > 0)
+        waitTaskTimer(5000u);
 }
 
 static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
     int rtn = 0;
-    int teachSession = 3;
+    int tried = 0;
+    //    int teachSession = 3;
     //currentSession = 0;
     lick_G2.lickSide = 0;
     //while ( currentSession++ < totalSession) {
@@ -1051,48 +1104,59 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
             /////Reward
             if (!lick_G2.lickSide) {
                 if (!isLikeOdorClassL(sample)) {
-                    serialSend(SpCorrectRejection, OUTCOME_WMDelay);
+                    serialSend(SpCorrectRejection, OUTCOME_WMDelay_2AFCL);
                     lcdWriteNumber_G2(++correctRejection, 9, 1);
                 } else {
-                    processMiss_G2(OUTCOME_WMDelay);
-                    if (taskParam.teaching == 1 && (rand() % 3) == 0) {
+                    processMiss_G2(OUTCOME_WMDelay_2AFCL);
+                    if ((taskParam.teaching & 1) && (rand() % 3) == 0) {
                         serialSend(SpLickFreq, 1);
                         setWaterPortOpen(LICKING_LEFT, 1);
-                        serialSend(SpWater, OUTCOME_WMDelay);
+                        serialSend(SpWater, OUTCOME_WMDelay_2AFCL);
                         waitTaskTimer(waterLenL);
                         setWaterPortOpen(LICKING_LEFT, 0);
                     }
                 }
             } else if (!isLikeOdorClassL(sample)) {
-                processFalse_G2(OUTCOME_WMDelay);
+                processFalse_G2(OUTCOME_WMDelay_2AFCL);
             } else {
-                processHit_G2(OUTCOME_WMDelay, 1);
+                processHit_G2(OUTCOME_WMDelay_2AFCL, 1);
             }
             break;
         case ODR_2AFC_TASK:
-            for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.lickSide; lick_G2.lickSide = lick_G2.stable);
-            taskTimeCounter = millisCounter;
-            /////Reward
-            if (!lick_G2.lickSide) {
-                processMiss_G2(OUTCOME_2AFC);
-                if (taskParam.teaching == 1 && (rand() % 3) == 0) {
-                    serialSend(SpLickFreq, 1);
-                    serialSend(SpWater, OUTCOME_2AFC);
-                    if (isLikeOdorClassL(sample)) {
-                        setWaterPortOpen(LICKING_LEFT, 1); //(side, on/off))
-                        waitTaskTimer(waterLenL);
-                        setWaterPortOpen(LICKING_LEFT, 0); //(side, on/off))
-                    } else {
-                        setWaterPortOpen(LICKING_RIGHT, 1);
-                        waitTaskTimer(waterLenR);
-                        setWaterPortOpen(LICKING_RIGHT, 0);
+
+            for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.lickSide; lick_G2.lickSide = lick_G2.stable) {
+                if (timerCounterI == rewardWindow / 2 && (!tried)) {
+                    tried = 1;
+                    if (((rand() % 4) == 0 && (taskParam.teaching & 1)) || u2Received == '1') {
+                        serialSend(SpLickFreq, 1);
+                        serialSend(SpWater, id);
+                        if (isLikeOdorClassL(sample)) {
+                            setWaterPortOpen(LICKING_LEFT, 1); //(side, on/off))
+                            wait_ms(waterLenL);
+                            setWaterPortOpen(LICKING_LEFT, 0); //(side, on/off))
+                        } else {
+                            setWaterPortOpen(LICKING_RIGHT, 1);
+                            wait_ms(waterLenR);
+                            setWaterPortOpen(LICKING_RIGHT, 0);
+                        }
+                        u2Received = -1;
+                        break;
                     }
                 }
+            }
+            taskTimeCounter = millisCounter;
+            /////Reward
+            id = isLikeOdorClassL(sample) ? OUTCOME_WMDelay_2AFCL : OUTCOME_2AFCR;
+            if (!lick_G2.lickSide) {
+                processMiss_G2(id);
+                taskParam.falsePunish |= 1;
             } else if ((isLikeOdorClassL(sample) && lick_G2.lickSide == 'R')
                     || (lick_G2.lickSide == 'L' && !isLikeOdorClassL(sample))) {
-                processFalse_G2(OUTCOME_2AFC);
+                processFalse_G2(id);
+                taskParam.falsePunish |= 1;
             } else {
-                processHit_G2(OUTCOME_2AFC, 1);
+                processHit_G2(id, 1);
+                taskParam.falsePunish &= 0xFE;
             }
             break;
 
@@ -1132,7 +1196,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
                     //                            //                            || taskType_G2 == Seq2AFC_TEACH
                     //                            //                            ||taskType_G2==
                     //                            ) && ((rand() % 3) == 0)) {
-                    if (taskParam.teaching == 1 && (rand() % 3) == 0) {
+                    if ((taskParam.teaching & 1) && (rand() % 4) == 0) {
 
                         serialSend(22, 1);
                         setWaterPortOpen(LICKING_LEFT, 1);
@@ -1225,10 +1289,11 @@ void dual_task_D_R(int laserType, int sample2, int test2) {
 
 }
 
-int delayedRspsDelay(int laserType) {
+int delayedRspsDelay(int laserType, int id) {
     if (taskParam.respCueLength >= 200) {
-        int delayLick = waitTaskTimer(1000u);
+        int delayLick = 0;
         if (taskParam.outDelay >= 2) {
+            delayLick |= waitTaskTimer(((unsigned int) (taskParam.outDelay - 1)) * 1000u);
             assertLaser_G2(laserType, atDelay1SecIn);
             delayLick |= waitTaskTimer(taskParam.outDelay * 1000u - 2000u);
             assertLaser_G2(laserType, atDelayLastSecBegin);
@@ -1237,9 +1302,9 @@ int delayedRspsDelay(int laserType) {
         stim_G2(3, taskParam.respCue[0], laserType);
         delayLick |= waitTaskTimer(500u);
         LCDsetCursor(3, 0);
-        if (delayLick) {
+        if (taskParam.teaching < 2 && delayLick) {
             muxOff(0x0f);
-            serialSend(SpAbortTrial, OUTCOME_WMDelay);
+            serialSend(SpAbortTrial, id);
             LCD_Write_Char('A');
             abortTrial++;
             return 0;
@@ -1372,7 +1437,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
             //            waitTaskTimer(1000u);
             LCDsetCursor(3, 0);
             LCD_Write_Char('R');
-            resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_WMDelay, 1000);
+            resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_WMDelay_2AFCL, 1000);
             //DPA 2AFC HERE
             if ((taskType_G2 == Seq2AFC_TASK)
                     && (resultRtn == SpCorrectRejection || resultRtn == SpMiss)) {
@@ -1381,13 +1446,13 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
                 stim_G2(3, t2, laserType);
                 waitTaskTimer(500u);
                 stim_G2(4, t2, laserType);
-                resultRtn = waterNResult_G2(sOut, t2, OUTCOME_2AFC, 1000);
+                resultRtn = waterNResult_G2(sOut, t2, OUTCOME_2AFCR, 1000);
             }
             ///////////////
             break;
         case 1:
-            if (delayedRspsDelay(laserType))
-                resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_2AFC, 1000);
+            if (delayedRspsDelay(laserType, isLikeOdorClassL(sOut) ? OUTCOME_WMDelay_2AFCL : OUTCOME_2AFCR))
+                resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_2AFCR, 4000);
             break;
             //case 2:
             //    seq2AFCResult(s1, laserType);
@@ -1402,7 +1467,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
     if (hit + correctRejection > 0) {
         correctRatio = 100 * (hit + correctRejection) / totalTrials;
         correctRatio = correctRatio > 99 ? 99 : correctRatio;
-        lcdWriteNumber_G2(correctRatio, 13, 0);
+        lcdWriteNumber_G2(correctRatio, correctRatio > 9 ? 13 : 14, 0);
     }
     LCDsetCursor(3, 0);
     LCD_Write_Char('I');
@@ -1429,11 +1494,9 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
 }
 
 void setWaterLen() {
+    sendLargeValue(waterLenL);
+    sendLargeValue(waterLenR);
     int side = getFuncNumber(1, "1-Left, 2-Right");
-    if (side == 1)
-        sendLargeValue(waterLenL);
-    else if (side == 2)
-        sendLargeValue(waterLenR);
     int newWaterLen = getFuncNumber(3, "New water len?");
     sendLargeValue(newWaterLen);
 
@@ -1441,8 +1504,9 @@ void setWaterLen() {
         write_eeprom_G2(EEP_WATER_LEN_MS_L, newWaterLen);
     else if (side == 2)
         write_eeprom_G2(EEP_WATER_LEN_MS_R, newWaterLen);
+    waterLenL = read_eeprom_G2(EEP_WATER_LEN_MS_L);
+    waterLenR = read_eeprom_G2(EEP_WATER_LEN_MS_R);
     serialSend(61, 0);
-    asm("Reset");
 }
 
 void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
@@ -1478,10 +1542,13 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         //                        break;
                     case GONOGO_TASK:
                     case ODR_2AFC_TASK:
-                        //                    case Seq2AFC_TEACH:
-                        //                    case GONOGO_LR_TASK:
-                        outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         outTest = 0;
+                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 9) {
+                            outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                            correctionRepeatCount = 0;
+                        } else {
+                            correctionRepeatCount++;
+                        }
                         break;
 
                     case ODPA_TASK:
@@ -1738,15 +1805,14 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
         }
         //        serialSend()
         serialSend(SpSess, 0);
-        sendChart(correctRatio, 0);
-        sendChart(miss * 100 / (miss + hit), 1);
+        if (!lick_G2.refreshLickReading) {
+            sendChart(correctRatio, 0);
+            sendChart(miss * 100 / (miss + hit), 1);
+        }
     }
     serialSend(SpTrain, 0); // send it's the end
     u2Received = -1;
     free(shuffledList);
-    free(taskParam.outSamples);
-    free(taskParam.outTests);
-    free(taskParam.respCue);
 }
 
 void testLaser() {

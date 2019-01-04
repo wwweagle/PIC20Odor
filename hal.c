@@ -9,6 +9,7 @@
 #include "hal.h"
 #include "adc10.h"
 #include "utils.h"
+#include <i2c.h>
 
 
 uint32_t timerCounterI, millisCounter, taskTimeCounter;
@@ -18,9 +19,35 @@ volatile int adcdataR;
 volatile int isSending;
 volatile int sendLick;
 int lickThreshL = 1023; // larger is more sensitive
-int lickThreshR = 1023; // larger is more sensitive
+int lickThreshR = 0; // larger is more sensitive
+unsigned char LCD_PCF8574_ADDR = 0x7E;
+
 
 const _prog_addressT EE_Addr_G2 = 0x7ff000;
+
+unsigned char getLCDAddr() {
+    unsigned char addr = 0x7E;
+    unsigned char altAddr = 0x4E;
+    IdleI2C();
+    StartI2C(); /* Wait till Start sequence is completed */
+    while (I2CCONbits.SEN); /* Clear interrupt flag */
+    IFS0bits.MI2CIF = 0; /* Write Slave address and set master for transmission */
+    MasterWriteI2C(addr); /* Wait till address is transmitted */
+    while (I2CSTATbits.TBF); // 8 clock cycles
+    while (!IFS0bits.MI2CIF); // Wait for 9th clock cycle
+    IFS0bits.MI2CIF = 0; // Clear interrupt flag 
+    timerCounterI = 0;
+    while (I2CSTATbits.ACKSTAT && timerCounterI<50);
+    if (timerCounterI < 50) {
+        StopI2C(); /* Wait till stop sequence is completed */
+        while (I2CCONbits.PEN);
+        return addr;
+    } else {
+        StopI2C(); /* Wait till stop sequence is completed */
+        while (I2CCONbits.PEN);
+        return altAddr;
+    }
+}
 
 void initPorts() {
     TRISA = 0x39FF;
@@ -74,19 +101,22 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     } else {
         BNC_4 = 0;
     }
-    if ((adcdataL > lickThreshL && adcdataR > lickThreshR)
-            || (adcdataL <= lickThreshL && adcdataR <= lickThreshR)) {
+    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+
+    //    if ((adcdataL > lickThreshL && adcdataR > lickThreshR)
+    //            || (adcdataL <= lickThreshL && adcdataR <= lickThreshR)) {
+    if (sel <= lickThreshL && sel >= lickThreshR) {
         lick_G2.current = 0;
         lick_G2.stable = 0;
         BNC_1 = 0;
-    } else if (lick_G2.current == 0) {
+    } else if (lick_G2.current == 0) {//(Lick left XOR lick right)
         lick_G2.filter = millisCounter;
         lick_G2.current = LICKING_DETECTED;
     } else if (lick_G2.current == LICKING_DETECTED) {
         if (millisCounter > lick_G2.filter + 10) {
             BNC_1 = 1;
             char sendSide = 2;
-            if (adcdataL > lickThreshL) {
+            if (sel > lickThreshL) {
                 lick_G2.LCount++;
                 sendSide = 'L';
                 lick_G2.stable = 'L';
@@ -114,7 +144,18 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     //    FIDtest();
     //  }
 
-
+    if ((millisCounter % 500u == 0) && (!isSending)) {
+        if (lick_G2.refreshLickReading) {
+            sendChart(sel, 0);
+            //            sendChart(adcdataR, 1);
+        }
+        if (sel > lickThreshL) {
+            serialSend(SpLickDisp, 1);
+        }
+        if (sel < lickThreshR) {
+            serialSend(SpLickDisp, 2);
+        }
+    }
 
 
 

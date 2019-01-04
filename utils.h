@@ -85,6 +85,7 @@ extern "C" {
 #define SpSess          61  // 1 start 0 end
 #define SpTrain         62  // 1 start 0 end
 #define Splaser         65
+#define SpLickDisp         71
 
 #define SpLaserSwitch    79
 
@@ -247,8 +248,8 @@ extern "C" {
 #define atRewardEnd 120
 
 
-#define OUTCOME_WMDelay 1
-#define OUTCOME_2AFC 2
+#define OUTCOME_WMDelay_2AFCL 1
+#define OUTCOME_2AFCR 2
 #define OUTCOME_DUAL 3
 
 typedef struct {
@@ -258,6 +259,7 @@ typedef struct {
     unsigned int lickSide;
     volatile unsigned int LCount;
     volatile unsigned int RCount;
+    int refreshLickReading;
 } LICK_T_G2;
 
 typedef struct {
@@ -325,6 +327,8 @@ void assertLaser_G2(int type, int step);
 void waitTrial_G2();
 void turnOnLaser_G2();
 void turnOffLaser_G2();
+void sendChart(int val, int idx);
+
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 
