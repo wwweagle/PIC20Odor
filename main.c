@@ -575,25 +575,25 @@ void callFunc(int n) {
 
         }
 
-        case 50:
-        {
-            splash_G2("Mixed oder", "6 Sample");
-            int noLaser = getFuncNumber(1, "No Laser?");
-            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
-            laser_G2.laserTrialType = laserDuringDelayChR2;
-            taskType_G2 = Mixed_oder;
-            taskParam.falsePunish = 0;
-            taskParam.outTaskPairs = 6;
-            taskParam.minBlock = 12;
-            taskParam.respCount = 0;
-            addAllOdor();
-            taskParam.outDelay = getFuncNumber(2, "Delay duration");
-            taskParam.ITI = getFuncNumber(2, "ITI duration");
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
-            int sessNum = getFuncNumber(2, "Session number?");
-            zxLaserSessions_G2(24, 96, sessNum);
-            break;
-        }
+//        case 50:
+//        {
+//            splash_G2("Mixed oder", "6 Sample");
+//            int noLaser = getFuncNumber(1, "No Laser?");
+//            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
+//            laser_G2.laserTrialType = laserDuringDelayChR2;
+//            taskType_G2 = Mixed_oder;
+//            taskParam.falsePunish = 0;
+//            taskParam.outTaskPairs = 6;
+//            taskParam.minBlock = 12;
+//            taskParam.respCount = 0;
+//            addAllOdor();
+//            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+//            taskParam.ITI = getFuncNumber(2, "ITI duration");
+//            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
+//            int sessNum = getFuncNumber(2, "Session number?");
+//            zxLaserSessions_G2(24, 96, sessNum);
+//            break;
+//        }
 
         case 51:
         case 101:
@@ -651,6 +651,36 @@ void callFunc(int n) {
                 zxLaserSessions_G2(4, 100, sessNum);
 
             }
+            lick_G2.refreshLickReading = 0;
+            break;
+        }
+        case 55:
+        {
+            lick_G2.refreshLickReading = 1;
+            splash_G2("ODR 2AFC MIX", "");
+            laser_G2.laserSessionType = LASER_NO_TRIAL;
+            taskType_G2 = ODR_2AFC_TASK;
+            taskParam.minBlock = 6;
+            taskParam.teaching = 2;
+            taskParam.waitForTrial = 1;
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 6;
+            taskParam.respCount = 1;
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.respCue = malloc(taskParam.respCount * sizeof (int));
+
+            taskParam.respCue[0] = 0;
+            taskParam.outSamples[0] = 6;
+            taskParam.outSamples[1] = 7;
+            taskParam.outSamples[2] = 16;
+            taskParam.outSamples[3] = 17;
+            taskParam.outSamples[4] = 18;
+            taskParam.outSamples[5] = 19;
+
+            taskParam.outDelay = 2;
+            taskParam.ITI = 8;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(24, 24, sessNum);
             lick_G2.refreshLickReading = 0;
             break;
         }
@@ -1544,7 +1574,11 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                     case ODR_2AFC_TASK:
                         outTest = 0;
                         if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 9) {
-                            outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                            if (taskParam.outTaskPairs == 2) {
+                                outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                            } else if (taskParam.outTaskPairs > 4) {
+                                outSample = taskParam.outSamples[shuffledMinBlock];
+                            }
                             correctionRepeatCount = 0;
                         } else {
                             correctionRepeatCount++;
@@ -1616,39 +1650,39 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
 
                         break;
 
-                    case Mixed_oder:
-                        if (currentSession < 3) {
-
-                            outSample = (shuffledMinBlock < 6) ? taskParam.outSamples[0] : taskParam.outSamples[3];
-                            outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-                        } else {
-                            if (shuffledMinBlock == 0 || shuffledMinBlock == 1) {
-                                outSample = taskParam.outSamples[0];
-                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-                            }
-                            if (shuffledMinBlock == 2 || shuffledMinBlock == 3) {
-                                outSample = taskParam.outSamples[1];
-                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-                            }
-                            if (shuffledMinBlock == 4 || shuffledMinBlock == 5) {
-                                outSample = taskParam.outSamples[2];
-                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-                            }
-                            if (shuffledMinBlock == 6 || shuffledMinBlock == 7) {
-                                outSample = taskParam.outSamples[3];
-                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-                            }
-                            if (shuffledMinBlock == 8 || shuffledMinBlock == 9) {
-                                outSample = taskParam.outSamples[4];
-                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-                            }
-                            if (shuffledMinBlock == 10 || shuffledMinBlock == 11) {
-                                outSample = taskParam.outSamples[5];
-                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-                            }
-                        }
-
-                        break;
+//                    case Mixed_oder:
+//                        if (currentSession < 3) {
+//
+//                            outSample = (shuffledMinBlock < 6) ? taskParam.outSamples[0] : taskParam.outSamples[3];
+//                            outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
+//                        } else {
+//                            if (shuffledMinBlock == 0 || shuffledMinBlock == 1) {
+//                                outSample = taskParam.outSamples[0];
+//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
+//                            }
+//                            if (shuffledMinBlock == 2 || shuffledMinBlock == 3) {
+//                                outSample = taskParam.outSamples[1];
+//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
+//                            }
+//                            if (shuffledMinBlock == 4 || shuffledMinBlock == 5) {
+//                                outSample = taskParam.outSamples[2];
+//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
+//                            }
+//                            if (shuffledMinBlock == 6 || shuffledMinBlock == 7) {
+//                                outSample = taskParam.outSamples[3];
+//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
+//                            }
+//                            if (shuffledMinBlock == 8 || shuffledMinBlock == 9) {
+//                                outSample = taskParam.outSamples[4];
+//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
+//                            }
+//                            if (shuffledMinBlock == 10 || shuffledMinBlock == 11) {
+//                                outSample = taskParam.outSamples[5];
+//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
+//                            }
+//                        }
+//
+//                        break;
                 }
 
                 LCDsetCursor(0, 0);

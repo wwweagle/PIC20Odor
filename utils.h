@@ -33,7 +33,6 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include <stdint.h>
-#include "emlist.h"
 
 int getFuncNumber(int targetDigits, const char* message);
 
@@ -119,7 +118,7 @@ extern "C" {
 #define ODPA_TASK 110
 #define DNMS_DUAL_TASK 125
 #define DUAL_TASK_EVERY_TRIAL  130
-#define Mixed_oder 131
+//#define Mixed_oder 131
 
 
 
