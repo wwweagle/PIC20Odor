@@ -2,4 +2,3 @@
 /dist/default/production/*
 !/dist/default/production/*.hex
 /debug/
-/nbproject/
