@@ -95,7 +95,7 @@ extern "C" {
 
 
 
-#define SHAPING_TASK 10
+#define DNMS_SHAPING_TASK 10
 #define DNMS_LEARNING_TASK 19
 #define DNMS_TASK 20
 #define GONOGO_TASK 30
@@ -247,7 +247,7 @@ extern "C" {
 #define atRewardEnd 120
 
 
-#define OUTCOME_WMDelay_2AFCL 1
+#define OUTCOME_1PORT_OR_2AFC_L 1
 #define OUTCOME_2AFCR 2
 #define OUTCOME_DUAL 3
 
@@ -317,7 +317,7 @@ extern int hit, miss, falseAlarm, correctRejection, abortTrial;
 #define LICK_SENT 8
 #define LICKING_BOTH 127
 
-void feedWaterFast_G2();
+void feedWaterFast_G2(int interval);
 void setWaterPortOpen(int side, int i);
 void sendLargeValue(int val);
 void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize);

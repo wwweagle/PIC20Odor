@@ -430,14 +430,16 @@ void waitTrial_G2() {
     }
 
     //    while (adcdataL > lickThreshL || adcdataR > lickThreshR) {
-    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+    //    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+    volatile int sel = adcdataL;
     while (sel > lickThreshL || sel < lickThreshR) {
         if (!waitingLickRelease) {
             serialSend(20, 100);
             waitingLickRelease = 1;
             wait_ms(200);
         }
-        sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+//        sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+        sel = adcdataL;
     }
     waitingLickRelease = 0;
 

@@ -101,10 +101,9 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     } else {
         BNC_4 = 0;
     }
-    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+//    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+    volatile int sel=adcdataL;
 
-    //    if ((adcdataL > lickThreshL && adcdataR > lickThreshR)
-    //            || (adcdataL <= lickThreshL && adcdataR <= lickThreshR)) {
     if (sel <= lickThreshL && sel >= lickThreshR) {
         lick_G2.current = 0;
         lick_G2.stable = 0;
@@ -144,7 +143,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     //    FIDtest();
     //  }
 
-    if ((millisCounter % 500u == 0) && (!isSending)) {
+    if ((millisCounter % 500 == 0) && (!isSending)) {
         if (lick_G2.refreshLickReading) {
             sendChart(sel, 0);
             //            sendChart(adcdataR, 1);

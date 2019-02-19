@@ -32,11 +32,13 @@ static void feedWaterLR();
 
 
 
+
 unsigned int taskType_G2 = DNMS_TASK;
 const char odorTypes_G2[] = "BYRQHNKLTXZdMAES0123456";
 int correctionRepeatCount = 0;
 int currentSession;
 int isLRLED;
+int teachChance=4;
 //int totalSession;
 //int alterOdorPath=0;
 
@@ -175,13 +177,20 @@ void callFunc(int n) {
             //            //            testPorts();
             //            switchOdorPath(getFuncNumber(1, "Path 1/0?"));
             //            break;
+        case 23:
+            teachChance=getFuncNumber(1,"TeachChance(df4)");
+            break;
         case 24:
             testNSetThres();
             break;
         case 25:
-            testVolume(10, LICKING_LEFT);
-            feedWaterFast_G2(waterLenL);
+        {
+            lick_G2.refreshLickReading = 1;
+            int interval = getFuncNumber(2, "Water Intvl?");
+//            testVolume(5, LICKING_LEFT);
+            feedWaterFast_G2(interval * 100);
             break;
+        }
         case 26:
         {
             splash_G2("ODPA R_D", "");
@@ -246,7 +255,7 @@ void callFunc(int n) {
             //        }
         case 33:
         {
-            splash_G2("ODPA", "");
+            splash_G2("ODPA", "SHAPING");
             int noLaser = getFuncNumber(1, "No Laser?");
             laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
             taskType_G2 = ODPA_SHAPING_TASK;
@@ -575,25 +584,25 @@ void callFunc(int n) {
 
         }
 
-//        case 50:
-//        {
-//            splash_G2("Mixed oder", "6 Sample");
-//            int noLaser = getFuncNumber(1, "No Laser?");
-//            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
-//            laser_G2.laserTrialType = laserDuringDelayChR2;
-//            taskType_G2 = Mixed_oder;
-//            taskParam.falsePunish = 0;
-//            taskParam.outTaskPairs = 6;
-//            taskParam.minBlock = 12;
-//            taskParam.respCount = 0;
-//            addAllOdor();
-//            taskParam.outDelay = getFuncNumber(2, "Delay duration");
-//            taskParam.ITI = getFuncNumber(2, "ITI duration");
-//            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
-//            int sessNum = getFuncNumber(2, "Session number?");
-//            zxLaserSessions_G2(24, 96, sessNum);
-//            break;
-//        }
+            //        case 50:
+            //        {
+            //            splash_G2("Mixed oder", "6 Sample");
+            //            int noLaser = getFuncNumber(1, "No Laser?");
+            //            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
+            //            laser_G2.laserTrialType = laserDuringDelayChR2;
+            //            taskType_G2 = Mixed_oder;
+            //            taskParam.falsePunish = 0;
+            //            taskParam.outTaskPairs = 6;
+            //            taskParam.minBlock = 12;
+            //            taskParam.respCount = 0;
+            //            addAllOdor();
+            //            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            //            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            //            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
+            //            int sessNum = getFuncNumber(2, "Session number?");
+            //            zxLaserSessions_G2(24, 96, sessNum);
+            //            break;
+            //        }
 
         case 51:
         case 101:
@@ -656,7 +665,6 @@ void callFunc(int n) {
         }
         case 55:
         {
-            lick_G2.refreshLickReading = 1;
             splash_G2("ODR 2AFC MIX", "");
             laser_G2.laserSessionType = LASER_NO_TRIAL;
             taskType_G2 = ODR_2AFC_TASK;
@@ -684,6 +692,55 @@ void callFunc(int n) {
             lick_G2.refreshLickReading = 0;
             break;
         }
+        case 61:
+        {
+            splash_G2("DNMS", "SHAPING");
+            //            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = LASER_NO_TRIAL;
+            taskType_G2 = DNMS_SHAPING_TASK;
+            taskParam.teaching = 1;
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 2;
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outSamples[0] = 2;
+            taskParam.outSamples[1] = 3;
+            taskParam.outTests[0] = 2;
+            taskParam.outTests[1] = 3;
+            taskParam.respCount = 0;
+            //            addAllOdor();
+            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            //            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(12, 50, sessNum);
+            break;
+        }
+        case 62:
+        {
+            splash_G2("DNMS", "TEST");
+            //            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = LASER_NO_TRIAL;
+            taskType_G2 = DNMS_TASK;
+            taskParam.teaching = getFuncNumber(1, "0Test 1Teach");;
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 2;
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outSamples[0] = 2;
+            taskParam.outSamples[1] = 3;
+            taskParam.outTests[0] = 2;
+            taskParam.outTests[1] = 3;
+            taskParam.respCount = 0;
+            //            addAllOdor();
+            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            //            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(12, 50, sessNum);
+            break;
+        }
+
         default:
         {
             int i;
@@ -842,7 +899,7 @@ void testPorts() {
     }
 }
 
-void feedWaterFast_G2() {
+void feedWaterFast_G2(int interval) {
 
     lick_G2.LCount = 0;
     sendLargeValue(lickThreshL);
@@ -858,7 +915,7 @@ void feedWaterFast_G2() {
     timerCounterI = 1000;
     while (1) {
         if (lick_G2.LCount > totalLickCount) {
-            if (timerCounterI >= 500) {
+            if (timerCounterI >= interval) {
                 setWaterPortOpen(LICKING_LEFT, 1);
                 timerCounterI = 0;
                 lcdWriteNumber_G2(++waterCount, 12, 1);
@@ -869,6 +926,13 @@ void feedWaterFast_G2() {
         if (timerCounterI >= waterLenL) {
             setWaterPortOpen(LICKING_LEFT, 0);
         }
+        if (u2Received == '1') {
+            setWaterPortOpen(LICKING_LEFT, 1);
+            wait_ms(waterLenL);
+            setWaterPortOpen(LICKING_LEFT, 0);
+            u2Received = -1;
+        }
+
     }
 
 }
@@ -1078,29 +1142,15 @@ void stim_G2(int place, int odorPort, int laserType) {
 
 static void processHit_G2(int id, int ratio) {
     serialSend(22, 1);
-    if (ratio > 0 || (ratio == 0 && rand() % 2)) {
-        serialSend(SpDebugInfo, 121);
-        if (lick_G2.lickSide == 'L') {
-            setWaterPortOpen(LICKING_LEFT, 1);
-            waitTaskTimer(waterLenL);
-            setWaterPortOpen(LICKING_LEFT, 0);
-        } else if (lick_G2.lickSide == 'R') {
-            setWaterPortOpen(LICKING_RIGHT, 1);
-            waitTaskTimer(waterLenR);
-            setWaterPortOpen(LICKING_RIGHT, 0);
-        }
-    } else {
-        serialSend(SpDebugInfo, 120);
-        waitTaskTimer(waterLenL);
-    }
-    if (ratio == 2) {
-        serialSend(SpDebugInfo, 122);
-        waitTaskTimer(500);
+    if (lick_G2.lickSide == 'L') {
         setWaterPortOpen(LICKING_LEFT, 1);
         waitTaskTimer(waterLenL);
         setWaterPortOpen(LICKING_LEFT, 0);
+    } else if (lick_G2.lickSide == 'R') {
+        setWaterPortOpen(LICKING_RIGHT, 1);
+        waitTaskTimer(waterLenR);
+        setWaterPortOpen(LICKING_RIGHT, 0);
     }
-
     currentMiss = 0;
     serialSend(SpHit, id);
     lcdWriteNumber_G2(++hit, 5, 0);
@@ -1123,10 +1173,8 @@ static void processMiss_G2(int id) {
 static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
     int rtn = 0;
     int tried = 0;
-    //    int teachSession = 3;
-    //currentSession = 0;
     lick_G2.lickSide = 0;
-    //while ( currentSession++ < totalSession) {
+
     switch (taskType_G2) {
         case GONOGO_TASK:
             for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.lickSide; lick_G2.lickSide = lick_G2.stable);
@@ -1134,22 +1182,22 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
             /////Reward
             if (!lick_G2.lickSide) {
                 if (!isLikeOdorClassL(sample)) {
-                    serialSend(SpCorrectRejection, OUTCOME_WMDelay_2AFCL);
+                    serialSend(SpCorrectRejection, OUTCOME_1PORT_OR_2AFC_L);
                     lcdWriteNumber_G2(++correctRejection, 9, 1);
                 } else {
-                    processMiss_G2(OUTCOME_WMDelay_2AFCL);
-                    if ((taskParam.teaching & 1) && (rand() % 3) == 0) {
+                    processMiss_G2(OUTCOME_1PORT_OR_2AFC_L);
+                    if (((rand() % teachChance) == 0 && (taskParam.teaching & 1)) || u2Received == '1') {
                         serialSend(SpLickFreq, 1);
                         setWaterPortOpen(LICKING_LEFT, 1);
-                        serialSend(SpWater, OUTCOME_WMDelay_2AFCL);
+                        serialSend(SpWater, OUTCOME_1PORT_OR_2AFC_L);
                         waitTaskTimer(waterLenL);
                         setWaterPortOpen(LICKING_LEFT, 0);
                     }
                 }
             } else if (!isLikeOdorClassL(sample)) {
-                processFalse_G2(OUTCOME_WMDelay_2AFCL);
+                processFalse_G2(OUTCOME_1PORT_OR_2AFC_L);
             } else {
-                processHit_G2(OUTCOME_WMDelay_2AFCL, 1);
+                processHit_G2(OUTCOME_1PORT_OR_2AFC_L, 1);
             }
             break;
         case ODR_2AFC_TASK:
@@ -1157,7 +1205,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
             for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.lickSide; lick_G2.lickSide = lick_G2.stable) {
                 if (timerCounterI == rewardWindow / 2 && (!tried)) {
                     tried = 1;
-                    if (((rand() % 4) == 0 && (taskParam.teaching & 1)) || u2Received == '1') {
+                    if (((rand() % teachChance) == 0 && (taskParam.teaching & 1)) || u2Received == '1') {
                         serialSend(SpLickFreq, 1);
                         serialSend(SpWater, id);
                         if (isLikeOdorClassL(sample)) {
@@ -1176,7 +1224,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
             }
             taskTimeCounter = millisCounter;
             /////Reward
-            id = isLikeOdorClassL(sample) ? OUTCOME_WMDelay_2AFCL : OUTCOME_2AFCR;
+            id = isLikeOdorClassL(sample) ? OUTCOME_1PORT_OR_2AFC_L : OUTCOME_2AFCR;
             if (!lick_G2.lickSide) {
                 processMiss_G2(id);
                 taskParam.falsePunish |= 1;
@@ -1206,7 +1254,23 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
             //        
 
             ///////////Detect/////////////////
-            for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.lickSide; lick_G2.lickSide = lick_G2.stable);
+            for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.lickSide;
+                    lick_G2.lickSide = lick_G2.stable) {
+                if (timerCounterI == rewardWindow / 2 && (!tried)) {
+                    tried = 1;
+                    if (((rand() % teachChance) == 0 && (taskParam.teaching & 1)) || u2Received == '1') {
+                        serialSend(SpLickFreq, 1);
+                        serialSend(SpWater, id);
+
+                        setWaterPortOpen(LICKING_LEFT, 1); //(side, on/off))
+                        wait_ms(waterLenL);
+                        setWaterPortOpen(LICKING_LEFT, 0); //(side, on/off))
+
+                        u2Received = -1;
+                        break;
+                    }
+                }
+            }
             taskTimeCounter = millisCounter;
             /////Reward
             if (!lick_G2.lickSide) {
@@ -1217,39 +1281,13 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
                 } else {
                     processMiss_G2(id);
                     rtn = SpMiss;
-                    //                    if ((taskParam.teaching
-                    //                            //                            taskType_G2 == SHAPING_TASK
-                    //                            //                            || taskType_G2 == ODPA_SHAPING_TASK
-                    //                            //                            || taskType_G2 == DUAL_TASK_LEARNING
-                    //                            //                            || taskType_G2 == DNMS_DUAL_TASK_LEARNING
-                    //                            //                            || taskType_G2 == ODPA_RD_SHAPING_TASK
-                    //                            //                            || taskType_G2 == Seq2AFC_TEACH
-                    //                            //                            ||taskType_G2==
-                    //                            ) && ((rand() % 3) == 0)) {
-                    if ((taskParam.teaching & 1) && (rand() % 4) == 0) {
-
-                        serialSend(22, 1);
-                        setWaterPortOpen(LICKING_LEFT, 1);
-                        serialSend(SpWater, 1);
-                        waitTaskTimer(waterLenL);
-                        setWaterPortOpen(LICKING_LEFT, 0);
-                    }
                 }
             } else if (isLikeOdorClassL(sample) == isLikeOdorClassL(test)) {
                 processFalse_G2(id);
                 rtn = SpFalseAlarm;
             } else {
-                if (taskType_G2 == Seq2AFC_TASK) {
-                    if (sample == taskParam.outSamples[0] || sample == taskParam.outSamples[1]) {
-                        processHit_G2(id, 1);
-                    } else if (sample == taskParam.outSamples[2] || sample == taskParam.outSamples[3])
-                        processHit_G2(id, 2);
-                    else {
-                        processHit_G2(id, 0);
-                    }
-                } else {
-                    processHit_G2(id, 1);
-                }
+                //Seq-2AFC was here, removed Jan 23 2019
+                processHit_G2(id, 1);
                 rtn = SpHit;
             }
             break;
@@ -1467,21 +1505,12 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
             //            waitTaskTimer(1000u);
             LCDsetCursor(3, 0);
             LCD_Write_Char('R');
-            resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_WMDelay_2AFCL, 1000);
-            //DPA 2AFC HERE
-            if ((taskType_G2 == Seq2AFC_TASK)
-                    && (resultRtn == SpCorrectRejection || resultRtn == SpMiss)) {
-                int t2 = (tOut == taskParam.outTests[0]) ? taskParam.outTests[1] : taskParam.outTests[0];
-                waitTaskTimer(1000u);
-                stim_G2(3, t2, laserType);
-                waitTaskTimer(500u);
-                stim_G2(4, t2, laserType);
-                resultRtn = waterNResult_G2(sOut, t2, OUTCOME_2AFCR, 1000);
-            }
-            ///////////////
+            resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_1PORT_OR_2AFC_L, taskParam.teaching?2000:1000);
+            //DPA SEQ-2AFC WAS HERE, REOVED Jan,23, 2019
+
             break;
         case 1:
-            if (delayedRspsDelay(laserType, isLikeOdorClassL(sOut) ? OUTCOME_WMDelay_2AFCL : OUTCOME_2AFCR))
+            if (delayedRspsDelay(laserType, isLikeOdorClassL(sOut) ? OUTCOME_1PORT_OR_2AFC_L : OUTCOME_2AFCR))
                 resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_2AFCR, 4000);
             break;
             //case 2:
@@ -1497,8 +1526,10 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
     if (hit + correctRejection > 0) {
         correctRatio = 100 * (hit + correctRejection) / totalTrials;
         correctRatio = correctRatio > 99 ? 99 : correctRatio;
-        lcdWriteNumber_G2(correctRatio, correctRatio > 9 ? 13 : 14, 0);
+    } else {
+        correctRatio = 0;
     }
+    lcdWriteNumber_G2(correctRatio, correctRatio > 9 ? 13 : 14, 0);
     LCDsetCursor(3, 0);
     LCD_Write_Char('I');
 
@@ -1566,10 +1597,10 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
                         break;
-                        //                    case SHAPING_TASK:
-                        //                        sample1 = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.sample1s[0] : taskParam.sample1s[1];
-                        //                        test1 = (sample1 == taskParam.sample1s[0]) ? taskParam.test1s[0] : taskParam.test1s[1];
-                        //                        break;
+                    case DNMS_SHAPING_TASK:
+                        outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                        outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outTests[1] : taskParam.outTests[0];
+                        break;
                     case GONOGO_TASK:
                     case ODR_2AFC_TASK:
                         outTest = 0;
@@ -1604,40 +1635,6 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         }
                         break;
 
-                    case ODPA_RD_TASK:
-
-                        //                    case Seq2AFC_TEACH:
-                    case Seq2AFC_TASK:
-                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 2) {
-                            switch (taskParam.outTaskPairs) {
-                                case 2:
-                                    outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
-                                    outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
-                                    break;
-                                case 4:
-                                    outSample = taskParam.outSamples[shuffledMinBlock];
-                                    if (((shuffledMinBlock == 1 || shuffledMinBlock == 2) && (currentTrial % 8) < 4)
-                                            || ((shuffledMinBlock == 0 || shuffledMinBlock == 3) && (currentTrial % 8) > 3)) {
-                                        outTest = taskParam.outTests[0];
-                                    } else {
-                                        outTest = taskParam.outTests[1];
-                                    }
-                                    break;
-                                case 6:
-                                    outSample = taskParam.outSamples[shuffledMinBlock];
-                                    if (((shuffledMinBlock < 3) && (currentTrial % 12) < 6)
-                                            || ((shuffledMinBlock >= 3) && (currentTrial % 12) >= 6)) {
-                                        outTest = taskParam.outTests[0];
-                                    } else {
-                                        outTest = taskParam.outTests[1];
-                                    }
-                                    break;
-
-                            }
-                            correctionRepeatCount = 0;
-                        }
-
-                        break;
 
                     case DUAL_TASK_SHAPING:
                         outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
@@ -1647,42 +1644,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                     case DUAL_TASK:
                         outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
-
                         break;
-
-//                    case Mixed_oder:
-//                        if (currentSession < 3) {
-//
-//                            outSample = (shuffledMinBlock < 6) ? taskParam.outSamples[0] : taskParam.outSamples[3];
-//                            outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-//                        } else {
-//                            if (shuffledMinBlock == 0 || shuffledMinBlock == 1) {
-//                                outSample = taskParam.outSamples[0];
-//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-//                            }
-//                            if (shuffledMinBlock == 2 || shuffledMinBlock == 3) {
-//                                outSample = taskParam.outSamples[1];
-//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-//                            }
-//                            if (shuffledMinBlock == 4 || shuffledMinBlock == 5) {
-//                                outSample = taskParam.outSamples[2];
-//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-//                            }
-//                            if (shuffledMinBlock == 6 || shuffledMinBlock == 7) {
-//                                outSample = taskParam.outSamples[3];
-//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-//                            }
-//                            if (shuffledMinBlock == 8 || shuffledMinBlock == 9) {
-//                                outSample = taskParam.outSamples[4];
-//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-//                            }
-//                            if (shuffledMinBlock == 10 || shuffledMinBlock == 11) {
-//                                outSample = taskParam.outSamples[5];
-//                                outTest = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6 || shuffledMinBlock == 8 || shuffledMinBlock == 10) ? taskParam.outTests[0] : taskParam.outTests[3];
-//                            }
-//                        }
-//
-//                        break;
                 }
 
                 LCDsetCursor(0, 0);
