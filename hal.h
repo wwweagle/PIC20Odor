@@ -49,7 +49,7 @@ extern int lickThreshR;
 extern int u2Received;
 extern volatile int adcdataL;
 extern volatile int adcdataR;
-extern uint32_t timerCounterI, millisCounter,taskTimeCounter;
+extern uint32_t timerCounterI, millisCounter,taskTimeCounter,trialOnsetTS;
 
 
 void initPorts(void);

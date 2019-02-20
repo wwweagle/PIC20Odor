@@ -98,6 +98,7 @@ extern "C" {
 #define DNMS_SHAPING_TASK 10
 #define DNMS_LEARNING_TASK 19
 #define DNMS_TASK 20
+#define ELF_DNMS_TASK 21
 #define GONOGO_TASK 30
 #define DNMS_2AFC_TEACH 38
 #define DNMS_LR_LEARNING_TASK 39
@@ -145,10 +146,12 @@ extern "C" {
 #define LASER_LR_EVERYTRIAL 40
 #define LASER_LR_EVERY_OTHER_TRIAL 42
 #define LASER_INCONGRUENT_CATCH_TRIAL 45
+#define LASER_SESS_ELF 50
 #define LASER_DUAL_TASK_ON_OFF 60
 #define LASER_DUAL_TASK_ODAP_ON_OFF 61
 #define LASER_AFTER_DISTR_3X 65
 #define LASER_OTHER_BLOCK 80
+#define LASER_ELIFE_CYC 90
 #define LASER_SESS_UNDEFINED 100
 
 
@@ -156,95 +159,107 @@ extern "C" {
 
 //laser trial type
 #define LASER_OFF 0
-#define laserDuring3Baseline 3
-#define laserDuring4Baseline 4
-#define laserDuringBaseline 5
-#define laserDuringDelay_Odor2 6
-#define laserDuringBaseAndResponse 7
-#define laserDuringBaselineNDelay 9
-#define laserDuringDelay 10
+#define LASERT147IN12 40
+#define LASERT444IN12 41
+#define LASERT741IN12 42
+#define LASERT165IN12 43
+#define LASERT363IN12 44
+#define LASERT561IN12 45
+#define LASERT183IN12 46
+#define LASERT381IN12 47
+#define LASERT1A1IN12 48
+#define LASERTBASEAIN12 49
+#define LASERTBASE6IN12 50
+//
+//#define laserDuring3Baseline 3
+//#define laserDuring4Baseline 4
+//#define laserDuringBaseline 5
+//#define laserDuringDelay_Odor2 6
+//#define laserDuringBaseAndResponse 7
+//#define laserDuringBaselineNDelay 9
+//#define laserDuringDelay 10
 #define laserDuringDelayChR2 11
-
-#define laserRampDuringDelay 14
-//#define laserLDuringDelay 15
-//#define laserRDuringDelay 16
-#define laserDuringOdor 20
-#define laserDuring1stOdor 21
-#define laserDuring2ndOdor 22
-#define laserDuringBeginningToOneSecInITI 30
-//#define laserDuringEarlyDelay 40
-//#define laserDuringMidDelay 50
-//#define laserDuringLateDelay 60
-//#define laserNoDelayControlShort 69
-#define laserNoDelayControl 70
-#define laserDuringEarlyHalf 80
-#define laserDuringLateHalf 90
-
-#define laserDuring1Quarter 91
-#define laserDuring2Quarter 92
-#define laserDuring3Quarter 93
-#define laserDuring4Quarter 94
-#define laserDuringResponseDelay 95
-
-#define laserDuring12s1Quarter 96
-#define laserDuring12s2Quarter 97
-#define laserDuring12s3Quarter 98
-#define laserDuring12s4Quarter 99
-
-#define trialTypeDnmsSwitch 100
-#define trialTypeGoNogoSwitch 110
-#define laser4sRamp 121
-#define laser2sRamp 122
-#define laser1sRamp 123
-#define laser_5sRamp 124
-#define laserSufficiency 130
-#define laserBeforeDistractor 140
-#define laserCoverDistractor 145
-#define laserAfterDistractorMax 151
-#define laserAfterMultiDistractor 160
-
-
+//
+//#define laserRampDuringDelay 14
+////#define laserLDuringDelay 15
+////#define laserRDuringDelay 16
+//#define laserDuringOdor 20
+//#define laserDuring1stOdor 21
+//#define laserDuring2ndOdor 22
+//#define laserDuringBeginningToOneSecInITI 30
+////#define laserDuringEarlyDelay 40
+////#define laserDuringMidDelay 50
+////#define laserDuringLateDelay 60
+////#define laserNoDelayControlShort 69
+//#define laserNoDelayControl 70
+//#define laserDuringEarlyHalf 80
+//#define laserDuringLateHalf 90
+//
+//#define laserDuring1Quarter 91
+//#define laserDuring2Quarter 92
+//#define laserDuring3Quarter 93
+//#define laserDuring4Quarter 94
+//#define laserDuringResponseDelay 95
+//
+//#define laserDuring12s1Quarter 96
+//#define laserDuring12s2Quarter 97
+//#define laserDuring12s3Quarter 98
+//#define laserDuring12s4Quarter 99
+//
+//#define trialTypeDnmsSwitch 100
+//#define trialTypeGoNogoSwitch 110
+//#define laser4sRamp 121
+//#define laser2sRamp 122
+//#define laser1sRamp 123
+//#define laser_5sRamp 124
+//#define laserSufficiency 130
+//#define laserBeforeDistractor 140
+//#define laserCoverDistractor 145
+//#define laserAfterDistractorMax 151
+//#define laserAfterMultiDistractor 160
 
 
 
 
-//#define atTrialStart 10
-#define at4SecBeforeS1 4
-#define at3SecBeforeS1 5
-#define at1SecBeforeS1 10
-#define at500msBeforeS1 18
-#define atS1Beginning 20
-#define atS1End 30
-#define atDelayBegin 40
-#define atDelay500MsIn 42
-#define atDelay1SecIn 200
-#define atDelay1_5SecIn 205
-#define atDelay2SecIn 210
-#define atDelay2_5SecIn 212
-#define atDelay3SecIn 214
-//#define atDelay3_5SIn 216
-//#define atDelay4_5SIn 218
-#define atPreDualTask 220
-#define atPostDualTask 222
-#define atDelay1sToMiddle 224
-#define atDelay500msToMiddle 225
-#define atDelayMiddle 230
-#define atDelayMid2Sec 235
-#define atDelayMid2_5Sec 240
-#define atDelayMid3Sec 245
-#define atDelayLast2_5SecBegin 250
-#define atDelayLast2SecBegin 255
-#define atDelayLast1_5SecBegin 61
-#define atDelayLastSecBegin 63
-#define atDelayLast500mSBegin 65
-#define atSecondOdorBeginning 70
-#define atSecondOdorEnd 80
-#define atResponseCueBeginning 90
-#define atResponseCueEnd 95
 
-#define atRewardBeginning 100
-//#define atRewardBeginning 110
-#define atRewardEnd 120
+//
+////#define atTrialStart 10
+//#define at4SecBeforeS1 4
+//#define at3SecBeforeS1 5
+//#define at1SecBeforeS1 10
+//#define at500msBeforeS1 18
+//#define atS1Beginning 20
+//#define atS1End 30
+//#define atDelayBegin 40
+//#define atDelay500MsIn 42
+//#define atDelay1SecIn 200
+//#define atDelay1_5SecIn 205
+//#define atDelay2SecIn 210
+//#define atDelay2_5SecIn 212
+//#define atDelay3SecIn 214
+////#define atDelay3_5SIn 216
+////#define atDelay4_5SIn 218
+//#define atPreDualTask 220
+//#define atPostDualTask 222
+//#define atDelay1sToMiddle 224
+//#define atDelay500msToMiddle 225
+//#define atDelayMiddle 230
+//#define atDelayMid2Sec 235
+//#define atDelayMid2_5Sec 240
+//#define atDelayMid3Sec 245
+//#define atDelayLast2_5SecBegin 250
+//#define atDelayLast2SecBegin 255
+//#define atDelayLast1_5SecBegin 61
+//#define atDelayLastSecBegin 63
+//#define atDelayLast500mSBegin 65
+//#define atSecondOdorBeginning 70
+//#define atSecondOdorEnd 80
+//#define atResponseCueBeginning 90
+//#define atResponseCueEnd 95
+//
+//#define atRewardBeginning 100
+////#define atRewardBeginning 110
+//#define atRewardEnd 120
 
 
 #define OUTCOME_1PORT_OR_2AFC_L 1
@@ -294,8 +309,8 @@ typedef struct {
     volatile unsigned int timer;
     unsigned int onTime;
     unsigned int offTime;
-    unsigned int on;
-    unsigned int side;
+    char on;
+    char side;
 } LASER_T_G2;
 
 
@@ -322,9 +337,10 @@ void setWaterPortOpen(int side, int i);
 void sendLargeValue(int val);
 void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize);
 int waitTaskTimer(unsigned int dTime);
-void assertLaser_G2(int type, int step);
+//void assertLaser_G2(int type, int step);
+char assertLaser19();
 void waitTrial_G2();
-void turnOnLaser_G2();
+void turnOnLaser_G2(int notUsed);
 void turnOffLaser_G2();
 void sendChart(int val, int idx);
 

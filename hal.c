@@ -12,12 +12,12 @@
 #include <i2c.h>
 
 
-uint32_t timerCounterI, millisCounter, taskTimeCounter;
+uint32_t timerCounterI, millisCounter, taskTimeCounter, trialOnsetTS;
 int u2Received = -1;
 volatile int adcdataL;
 volatile int adcdataR;
-volatile int isSending;
-volatile int sendLick;
+volatile char isSending;
+volatile char sendLick, sendLaser = -1;
 int lickThreshL = 1023; // larger is more sensitive
 int lickThreshR = 0; // larger is more sensitive
 unsigned char LCD_PCF8574_ADDR = 0x7E;
@@ -37,7 +37,7 @@ unsigned char getLCDAddr() {
     while (!IFS0bits.MI2CIF); // Wait for 9th clock cycle
     IFS0bits.MI2CIF = 0; // Clear interrupt flag 
     timerCounterI = 0;
-    while (I2CSTATbits.ACKSTAT && timerCounterI<50);
+    while (I2CSTATbits.ACKSTAT && timerCounterI < 50);
     if (timerCounterI < 50) {
         StopI2C(); /* Wait till stop sequence is completed */
         while (I2CCONbits.PEN);
@@ -95,14 +95,10 @@ inline void tick(unsigned int i) {
 void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
 
     tick(5u);
+    sendLaser = assertLaser19();
 
-    if (laser_G2.on) {
-        BNC_4 = 1;
-    } else {
-        BNC_4 = 0;
-    }
-//    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
-    volatile int sel=adcdataL;
+    //    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+    volatile int sel = adcdataL;
 
     if (sel <= lickThreshL && sel >= lickThreshR) {
         lick_G2.current = 0;
@@ -114,22 +110,25 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     } else if (lick_G2.current == LICKING_DETECTED) {
         if (millisCounter > lick_G2.filter + 10) {
             BNC_1 = 1;
-            char sendSide = 2;
+            //            char sendSide = 'L';
             if (sel > lickThreshL) {
                 lick_G2.LCount++;
-                sendSide = 'L';
+                sendLick = 'L';
                 lick_G2.stable = 'L';
             } else {
                 lick_G2.RCount++;
                 lick_G2.stable = 'R';
-                sendSide = 'R';
+                sendLick = 'R';
             }
             lick_G2.current = LICK_SENT;
-            if (isSending) {
-                sendLick = sendSide;
-            } else {
-                serialSend(0, sendSide);
+            //            if (isSending) {
+            //                sendLick = sendSide;
+            //            } else {
+            if (!isSending) {
+                serialSend(0, sendLick);
                 sendLick = 0;
+                serialSend(SpLaserSwitch, sendLaser);
+                sendLaser = -1;
             }
         }
     }
@@ -234,7 +233,16 @@ void serialSend(int u2Type, int u2Value) {
         U2TXREG = (unsigned char) (sendLick | 0x80);
         while (BusyUART2());
     }
+
+    if (sendLaser >-1) {
+        U2TXREG = (unsigned char) (SpLaserSwitch);
+        while (BusyUART2());
+        U2TXREG = (unsigned char) (sendLaser | 0x80);
+        while (BusyUART2());
+    } 
+
     sendLick = 0;
+    sendLaser = -1;
     isSending = 0;
 
 
