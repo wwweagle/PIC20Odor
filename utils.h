@@ -78,7 +78,7 @@ extern "C" {
 #define SpChartHigh   27
 #define SpChartLow   28
 #define SpTaskType         51
-#define Sptrialtype     58
+#define SpLaserTType     58
 #define SpITI           59  // 1 start 0 end
 
 #define SpSess          61  // 1 start 0 end
@@ -159,14 +159,13 @@ extern "C" {
 
 //laser trial type
 #define LASER_OFF 0
-#define LASERT147IN12 40
-#define LASERT444IN12 41
-#define LASERT741IN12 42
+#define LASER_TEST 2
+#define LASERT138IN12 40
+#define LASERT4h44hIN12 41
+#define LASERT831IN12 42
 #define LASERT165IN12 43
 #define LASERT363IN12 44
 #define LASERT561IN12 45
-#define LASERT183IN12 46
-#define LASERT381IN12 47
 #define LASERT1A1IN12 48
 #define LASERTBASEAIN12 49
 #define LASERTBASE6IN12 50
@@ -304,8 +303,8 @@ typedef struct {
 } TASK_T;
 
 typedef struct {
-    unsigned int laserSessionType;
-    unsigned int laserTrialType;
+    int laserSessionType;
+    int laserTrialType;
     volatile unsigned int timer;
     unsigned int onTime;
     unsigned int offTime;
@@ -340,8 +339,8 @@ int waitTaskTimer(unsigned int dTime);
 //void assertLaser_G2(int type, int step);
 char assertLaser19();
 void waitTrial_G2();
-void turnOnLaser_G2(int notUsed);
-void turnOffLaser_G2();
+//void turnOnLaser_G2(int notUsed);
+//void turnOffLaser_G2();
 void sendChart(int val, int idx);
 
 

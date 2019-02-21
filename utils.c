@@ -425,24 +425,50 @@ int waitTaskTimer(unsigned int dTime) {
 
 char assertLaser19() {
     char laserTarget;
+    uint32_t trialTS = millisCounter - trialOnsetTS - 25000u;
 
     switch (laser_G2.laserTrialType) {
         case LASER_OFF:
             laserTarget = 0;
             break;
-        case LASERT147IN12:
-            laserTarget = (millisCounter - trialOnsetTS >= 26000u && millisCounter - trialOnsetTS < 30000u);
+        case LASERT138IN12:
+            laserTarget = trialTS >= 1000u && trialTS < 4000u;
+            break;
+        case LASERT4h44hIN12:
+            laserTarget = trialTS >= 4500u && trialTS < 7500u;
+            break;
+        case LASERT831IN12:
+            laserTarget = trialTS >= 8000u && trialTS < 11000u;
+            break;
+        case LASERT165IN12:
+            laserTarget = trialTS >= 1000u && trialTS < 7000u;
+            break;
+        case LASERT363IN12:
+            laserTarget = trialTS >= 3000u && trialTS < 9000u;
+            break;
+        case LASERT561IN12:
+            laserTarget = trialTS >= 5000u && trialTS < 11000u;
+            break;
+        case LASERT1A1IN12:
+            laserTarget = trialTS >= 1000u && trialTS < 11000u;
+            break;
+        case LASERTBASEAIN12:
+            laserTarget = millisCounter - trialOnsetTS >= 13000u && millisCounter - trialOnsetTS < 23000u;
+            break;
+        case LASERTBASE6IN12:
+            laserTarget = millisCounter - trialOnsetTS >= 17000u && millisCounter - trialOnsetTS < 23000u;
+            break;
+        case LASER_TEST:
+            return -1;
             break;
     }
 
-    if (laserTarget == 1) {
-        BNC_4 = 1;
+    if (laserTarget != 0) {
         if (laser_G2.on == 0) {
             laser_G2.on = 1;
             return 1;
         }
     } else {//laserTarget==0
-        BNC_4 = 0;
         if (laser_G2.on == 1) {
             laser_G2.on = 0;
             return 0;
@@ -462,7 +488,7 @@ void waitTrial_G2() {
     volatile int sel = adcdataL;
     while (sel > lickThreshL || sel < lickThreshR) {
         if (!waitingLickRelease) {
-            serialSend(20, 100);
+            serialSend(SpTrialWait, 100);
             waitingLickRelease = 1;
             wait_ms(200);
         }
@@ -472,22 +498,22 @@ void waitTrial_G2() {
     waitingLickRelease = 0;
 
     while (u2Received != 0x31) {
-        serialSend(20, 1);
+        serialSend(SpTrialWait, 1);
         wait_ms(200);
     }
     u2Received = -1;
 }
-
-void turnOnLaser_G2(int type) {
-    laser_G2.on = 1;
-    LCDsetCursor(3, 0);
-    LCD_Write_Char('L');
-    serialSend(SpLaserSwitch, 1);
-}
-
-void turnOffLaser_G2() {
-    laser_G2.on = 0;
-    LCDsetCursor(3, 0);
-    LCD_Write_Char('.');
-    serialSend(SpLaserSwitch, 0);
-}
+//
+//void turnOnLaser_G2(int type) {
+//    laser_G2.on = 1;
+//    LCDsetCursor(3, 0);
+//    LCD_Write_Char('L');
+//    serialSend(SpLaserSwitch, 1);
+//}
+//
+//void turnOffLaser_G2() {
+//    laser_G2.on = 0;
+//    LCDsetCursor(3, 0);
+//    LCD_Write_Char('.');
+//    serialSend(SpLaserSwitch, 0);
+//}

@@ -222,7 +222,7 @@ void callFunc(int n) {
             setWaterLen();
             break;
         case 31:
-            testLaser(getFuncNumber(1, "1Step 2Pulse"));
+            testLaser(getFuncNumber(1, "1Pulse 2Step "));
             break;
 
 
@@ -711,8 +711,9 @@ void callFunc(int n) {
             taskParam.respCount = 0;
             taskParam.outDelay = 12;
             taskParam.ITI = 24;
+            taskParam.minBlock = 40;
             int sessNum = getFuncNumber(2, "Session number?");
-            zxLaserSessions_G2(12, 50, sessNum);
+            zxLaserSessions_G2(40, 50, sessNum);
             break;
         }
 
@@ -1362,11 +1363,11 @@ int delayedRspsDelay(int laserType, int id) {
     }
 }
 
-static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int laserType) {
+static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int laserTType) {
     taskTimeCounter = millisCounter;
     trialOnsetTS = millisCounter;
-    serialSend(Sptrialtype, laserType);
-    serialSend(Splaser, (laserType != LASER_OFF));
+    serialSend(SpLaserTType, laserTType);
+    serialSend(Splaser, (laserTType != LASER_OFF));
 
     LCDsetCursor(3, 0);
     LCD_Write_Char('I');
@@ -1387,7 +1388,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
         }
         waitTaskTimer(trialITI * 1000u);
     }
-    serialSend(SpITI, 0);
+
 
     //    assertLaser_G2(laserType, at4SecBeforeS1);
     waitTaskTimer(1000u);
@@ -1398,9 +1399,9 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
     waitTaskTimer(500u);
     //    assertLaser_G2(laserType, at500msBeforeS1);
     //    waitTimerJ_G2(500u);
-
+    serialSend(SpITI, 0);
     /////////////////////////////////////////////////
-    stim_G2(1, sOut, laserType);
+    stim_G2(1, sOut, laserTType);
     ////////////////////////////////////////////////
 
 
@@ -1436,7 +1437,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
                     //                    assertLaser_G2(laserType, atDelayBegin);
                     waitTaskTimer(2500u);
                     //assertLaser_G2(laserType, atPreDualTask); //@2s
-                    dual_task_D_R(laserType, sInner, tInner); //Delay+5000ms
+                    dual_task_D_R(laserTType, sInner, tInner); //Delay+5000ms
                     //waitTaskTimer(2000u);
                     //waitTaskTimer(500u);
                     //assertLaser_G2(laserType, atDelayLast500mSBegin);
@@ -1492,7 +1493,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
             }
 
             ///////////-Second odor-/////////////////
-            stim_G2(2, tOut, laserType);
+            stim_G2(2, tOut, laserTType);
             //////////////////////////////////////////
             break;
     }
@@ -1507,7 +1508,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
 
             break;
         case 1:
-            if (delayedRspsDelay(laserType, isLikeOdorClassL(sOut) ? OUTCOME_1PORT_OR_2AFC_L : OUTCOME_2AFCR))
+            if (delayedRspsDelay(laserTType, isLikeOdorClassL(sOut) ? OUTCOME_1PORT_OR_2AFC_L : OUTCOME_2AFCR))
                 resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_2AFCR, 4000);
             break;
             //case 2:
@@ -1574,8 +1575,8 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
                         break;
                     case ELF_DNMS_TASK:
-                        outSample = (currentTrial & 1) ? taskParam.outSamples[0] : taskParam.outSamples[1];
-                        outTest = (currentTrial & 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                        outSample = (shuffledMinBlock & 1) ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                        outTest = (shuffledMinBlock & 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         break;
                     case DNMS_SHAPING_TASK:
                         outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
@@ -1655,8 +1656,22 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         laser_G2.laserTrialType = (currentTrial % 2) == 0 ? LASER_OFF : laserOnType;
                         break;
                     case LASER_SESS_ELF:
-                        laser_G2.laserTrialType=(currentTrial>>2)>5?LASERT147IN12:LASER_OFF;
+                    {
+                        static const int elfTypes[] = {
+                            LASER_OFF,
+                            LASERT138IN12,
+                            LASERT165IN12,
+                            LASERT1A1IN12,
+                            LASERT363IN12,
+                            LASERT4h44hIN12,
+                            LASERT561IN12,
+                            LASERT831IN12,
+                            LASERTBASE6IN12,
+                            LASERTBASEAIN12
+                        };
+                        laser_G2.laserTrialType = elfTypes[shuffledMinBlock >> 2];
                         break;
+                    }
                         //                    case LASER_CATCH_TRIAL:
                         //                    {
                         //                        int toCatch = trialsPerSession * 2 / 10;
@@ -1795,6 +1810,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
 }
 
 void testLaser(int type) {
+    laser_G2.laserTrialType=LASER_TEST;
     if (type != 1) {
         int i = 0;
         while (1) {

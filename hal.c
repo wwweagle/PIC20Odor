@@ -12,7 +12,7 @@
 #include <i2c.h>
 
 
-uint32_t timerCounterI, millisCounter, taskTimeCounter, trialOnsetTS;
+volatile uint32_t timerCounterI, millisCounter, taskTimeCounter, trialOnsetTS;
 int u2Received = -1;
 volatile int adcdataL;
 volatile int adcdataR;
@@ -96,6 +96,13 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
 
     tick(5u);
     sendLaser = assertLaser19();
+    if (sendLaser != -1 && !isSending) {
+        char t = sendLaser;
+        sendLaser = -1;
+        serialSend(SpLaserSwitch, t);
+    }
+    BNC_4 = laser_G2.on;
+    
 
     //    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
     volatile int sel = adcdataL;
@@ -125,10 +132,9 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
             //                sendLick = sendSide;
             //            } else {
             if (!isSending) {
-                serialSend(0, sendLick);
+                char t = sendLick;
                 sendLick = 0;
-                serialSend(SpLaserSwitch, sendLaser);
-                sendLaser = -1;
+                serialSend(SpLick, t);
             }
         }
     }
@@ -239,7 +245,7 @@ void serialSend(int u2Type, int u2Value) {
         while (BusyUART2());
         U2TXREG = (unsigned char) (sendLaser | 0x80);
         while (BusyUART2());
-    } 
+    }
 
     sendLick = 0;
     sendLaser = -1;
