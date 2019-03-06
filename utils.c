@@ -431,22 +431,22 @@ char assertLaser19() {
         case LASER_OFF:
             laserTarget = 0;
             break;
-        case LASERT138IN12:
+        case LASERT3SEARLY:
             laserTarget = trialTS >= 1000u && trialTS < 4000u;
             break;
-        case LASERT4h44hIN12:
+        case LASERT3SMID:
             laserTarget = trialTS >= 4500u && trialTS < 7500u;
             break;
-        case LASERT831IN12:
+        case LASERT3SLATE:
             laserTarget = trialTS >= 8000u && trialTS < 11000u;
             break;
-        case LASERT165IN12:
+        case LASERT6SEARLY:
             laserTarget = trialTS >= 1000u && trialTS < 7000u;
             break;
-        case LASERT363IN12:
+        case LASERT6SMID:
             laserTarget = trialTS >= 3000u && trialTS < 9000u;
             break;
-        case LASERT561IN12:
+        case LASERT6SLATE:
             laserTarget = trialTS >= 5000u && trialTS < 11000u;
             break;
         case LASERT1A1IN12:

@@ -142,7 +142,8 @@ void testVolume(int repeat, int side) {
         setWaterPortOpen(localSide, 1);
         wait_ms(waterLenL);
         setWaterPortOpen(localSide, 0);
-        wait_ms(500 - waterLenL);
+        if (waterLenL <= 500)
+            wait_ms(500 - waterLenL);
     }
 }
 
@@ -190,7 +191,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
             break;
@@ -207,7 +207,8 @@ void callFunc(int n) {
                 setWaterPortOpen(LICKING_LEFT, 1);
                 wait_ms(waterLenL);
                 setWaterPortOpen(LICKING_LEFT, 0);
-                wait_ms(500 - waterLenL);
+                if (waterLenL <= 500)
+                    wait_ms(500 - waterLenL);
             }
             laser_G2.on = 1;
             break;
@@ -239,7 +240,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
             break;
@@ -259,7 +259,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
             break;
@@ -278,7 +277,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(40, 20, sessNum);
             break;
@@ -319,7 +317,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(60, 20, sessNum);
             break;
@@ -339,7 +336,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(60, 20, sessNum);
             break;
@@ -360,7 +356,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(60, 20, sessNum);
             break;
@@ -511,7 +506,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = 10;
             taskParam.ITI = 15;
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 40, sessNum);
             break;
@@ -534,7 +528,6 @@ void callFunc(int n) {
             addAllOdor();
             taskParam.outDelay = 10;
             taskParam.ITI = 15;
-            waterLenL = getFuncNumber(1, "Water fold?") * waterLenL;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 40, sessNum);
             break;
@@ -690,10 +683,61 @@ void callFunc(int n) {
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
             int sessNum = getFuncNumber(2, "Session number?");
+            if(taskParam.outDelay>=20){
+                waterLenL=waterLenL+(waterLenL>>1);
+            }
             zxLaserSessions_G2(12, 50, sessNum);
             break;
         }
         case 63:
+        {
+            splash_G2("DNMS ELF", "OPTOGENETICS");
+            //            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = LASER_SESS_ELF;
+            taskType_G2 = ELF_DNMS_TASK;
+            taskParam.teaching = 0;
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 2;
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outSamples[0] = 2;
+            taskParam.outSamples[1] = 3;
+            taskParam.outTests[0] = 2;
+            taskParam.outTests[1] = 3;
+            taskParam.respCount = 0;
+            taskParam.outDelay = 12;
+            taskParam.ITI = 24;
+            taskParam.minBlock = 40;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(40, 50, sessNum);
+            break;
+        }
+
+        case 64:
+        {
+            splash_G2("DNMS ELF 18", "OPTOGENETICS");
+            //            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = LASER_SESS_ELF;
+            taskType_G2 = ELF_DNMS_TASK;
+            taskParam.teaching = 0;
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 2;
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outSamples[0] = 2;
+            taskParam.outSamples[1] = 3;
+            taskParam.outTests[0] = 2;
+            taskParam.outTests[1] = 3;
+            taskParam.respCount = 0;
+            taskParam.outDelay = 12;
+            taskParam.ITI = 24;
+            taskParam.minBlock = 40;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(40, 50, sessNum);
+            break;
+        }
+
+        case 65:
         {
             splash_G2("DNMS ELF", "OPTOGENETICS");
             //            int noLaser = getFuncNumber(1, "No Laser?");
@@ -1659,13 +1703,13 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                     {
                         static const int elfTypes[] = {
                             LASER_OFF,
-                            LASERT138IN12,
-                            LASERT165IN12,
+                            LASERT3SEARLY,
+                            LASERT6SEARLY,
                             LASERT1A1IN12,
-                            LASERT363IN12,
-                            LASERT4h44hIN12,
-                            LASERT561IN12,
-                            LASERT831IN12,
+                            LASERT6SMID,
+                            LASERT3SMID,
+                            LASERT6SLATE,
+                            LASERT3SLATE,
                             LASERTBASE6IN12,
                             LASERTBASEAIN12
                         };
@@ -1810,7 +1854,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
 }
 
 void testLaser(int type) {
-    laser_G2.laserTrialType=LASER_TEST;
+    laser_G2.laserTrialType = LASER_TEST;
     if (type != 1) {
         int i = 0;
         while (1) {
