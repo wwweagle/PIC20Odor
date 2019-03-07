@@ -157,27 +157,11 @@ int waitTaskTimer(unsigned int dTime) {
 }
 
 char assertLaser() {
-    char laserTarget;
-    char beforeDelay = 0;
+    char laserTarget = laser_G2.on;
     uint32_t delayLen = (uint32_t) taskParam.outDelay * 1000u;
-    uint32_t clockTS;
-    if (millisCounter >= delayOnsetTS) {
-        clockTS = millisCounter - delayOnsetTS;
-    } else {
-        beforeDelay = 1;
-        clockTS = delayOnsetTS - millisCounter;
-    }
 
-    if (beforeDelay) {
-        switch (laser_G2.laserTrialType) {
-            case LASERTBASE10S:
-                laserTarget = clockTS > 1000u && clockTS <= 11000u;
-                break;
-            case LASERTBASE6S:
-                laserTarget = clockTS > 1000u && clockTS <= 7000u;
-                break;
-        }
-    } else
+    if (millisCounter >= delayOnsetTS) {
+        uint32_t clockTS = millisCounter - delayOnsetTS;
         switch (laser_G2.laserTrialType) {
             case LASER_TEST:
                 return -1;
@@ -223,6 +207,16 @@ char assertLaser() {
                         &&(clockTS < (delayLen - 1000u));
                 break;
         }
+    } else {
+        switch (laser_G2.laserTrialType) {
+            case LASERTBASE10S:
+                laserTarget = millisCounter >= (delayOnsetTS - 12000u) && millisCounter < (delayOnsetTS - 2000u);
+                break;
+            case LASERTBASE6S:
+                laserTarget = millisCounter >= (delayOnsetTS - 8000u) && millisCounter < (delayOnsetTS - 2000u);
+                break;
+        }
+    }
 
     if (laserTarget != 0) {
         if (laser_G2.on == 0) {
