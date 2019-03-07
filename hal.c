@@ -12,7 +12,7 @@
 #include <i2c.h>
 
 
-volatile uint32_t timerCounterI, millisCounter, taskTimeCounter, trialOnsetTS;
+volatile uint32_t timerCounterI = 0, millisCounter = 0, taskTimeCounter = 0, delayOnsetTS = 0;
 int u2Received = -1;
 volatile int adcdataL;
 volatile int adcdataR;
@@ -95,14 +95,14 @@ inline void tick(unsigned int i) {
 void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
 
     tick(5u);
-    sendLaser = assertLaser19();
+    sendLaser = assertLaser();
     if (sendLaser != -1 && !isSending) {
         char t = sendLaser;
         sendLaser = -1;
         serialSend(SpLaserSwitch, t);
     }
     BNC_4 = laser_G2.on;
-    
+
 
     //    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
     volatile int sel = adcdataL;

@@ -683,8 +683,8 @@ void callFunc(int n) {
             taskParam.outDelay = getFuncNumber(2, "Delay duration");
             taskParam.ITI = getFuncNumber(2, "ITI duration");
             int sessNum = getFuncNumber(2, "Session number?");
-            if(taskParam.outDelay>=20){
-                waterLenL=waterLenL+(waterLenL>>1);
+            if (taskParam.outDelay >= 20) {
+                waterLenL = waterLenL + (waterLenL >> 1);
             }
             zxLaserSessions_G2(12, 50, sessNum);
             break;
@@ -758,6 +758,29 @@ void callFunc(int n) {
             taskParam.minBlock = 40;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(40, 50, sessNum);
+            break;
+        }
+        case 66:
+        {
+            splash_G2("DNMS ELF 18", "OPTOGENETICS");
+            //            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = LASER_SESS_ELF_20;
+            taskType_G2 = ELF_DNMS_TASK;
+            taskParam.teaching = 0;
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 2;
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outSamples[0] = 2;
+            taskParam.outSamples[1] = 3;
+            taskParam.outTests[0] = 2;
+            taskParam.outTests[1] = 3;
+            taskParam.respCount = 0;
+            taskParam.outDelay = 20;
+            taskParam.ITI = 40;
+            taskParam.minBlock = 48;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(48, 50, sessNum);
             break;
         }
 
@@ -1049,22 +1072,6 @@ void stim_G2(int place, int odorPort, int laserType) {
         serialSend(SpIO, odorPort > 0 ? odorPort : odorPort + 100);
         muxOff(odorPort < 16 ? (~1) : (~4));
     } else {
-        //        switch (place) {
-        //            case 1:
-        //                assertLaser_G2(laserType, atS1Beginning);
-        //                break;
-        //            case 2:
-        //                assertLaser_G2(laserType, atSecondOdorBeginning);
-        //                break;
-        //            case 4:
-        //                assertLaser_G2(laserType, atResponseCueBeginning);
-        //            case 6:
-        //                assertLaser_G2(laserType, atPreDualTask);
-        //                break;
-        //            case 7:
-        //                break; //TODO fix laser
-        //        }
-
         muxOff(odorPort < 16 ? (~3) : (~0x0c));
         int stimSend;
         switch (place) {
@@ -1127,28 +1134,22 @@ void stim_G2(int place, int odorPort, int laserType) {
         LCDsetCursor(3, 0);
         switch (place) {
             case 1:
-                //                assertLaser_G2(laserType, atS1End);
                 LCD_Write_Char('d');
                 if (taskParam.sample1Length < 1000u)
                     waitTaskTimer(1000u - taskParam.sample1Length);
                 break;
             case 2:
-                //                assertLaser_G2(laserType, atSecondOdorEnd);
                 LCD_Write_Char('D');
                 if (taskParam.test1Length < 1000u)
                     waitTaskTimer(1000u - taskParam.test1Length);
                 break;
             case 4:
-                //                assertLaser_G2(laserType, atResponseCueEnd);
                 LCD_Write_Char('R');
                 break;
-                //TODO fix laser
             case 6:
-                //                assertLaser_G2(laserType, atResponseCueEnd);
                 LCD_Write_Char('d');
                 break;
             case 7:
-                //                assertLaser_G2(laserType, atResponseCueEnd);
                 LCD_Write_Char('d');
                 break;
         }
@@ -1382,9 +1383,7 @@ int delayedRspsDelay(int laserType, int id) {
         int delayLick = 0;
         if (taskParam.outDelay >= 2) {
             delayLick |= waitTaskTimer(((unsigned int) (taskParam.outDelay - 1)) * 1000u);
-            //            assertLaser_G2(laserType, atDelay1SecIn);
             delayLick |= waitTaskTimer(taskParam.outDelay * 1000u - 2000u);
-            //            assertLaser_G2(laserType, atDelayLastSecBegin);
             delayLick |= waitTaskTimer(500u);
         }
         stim_G2(3, taskParam.respCue[0], laserType);
@@ -1398,7 +1397,6 @@ int delayedRspsDelay(int laserType, int id) {
             return 0;
         } else {
             LCD_Write_Char('R');
-            //            assertLaser_G2(laserType, atRewardBeginning);
             stim_G2(4, taskParam.respCue[0], laserType);
             return 1;
         }
@@ -1409,21 +1407,13 @@ int delayedRspsDelay(int laserType, int id) {
 
 static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int laserTType) {
     taskTimeCounter = millisCounter;
-    trialOnsetTS = millisCounter;
+    delayOnsetTS = millisCounter + 1000u * (uint32_t) taskParam.ITI + 1000u;
     serialSend(SpLaserTType, laserTType);
     serialSend(Splaser, (laserTType != LASER_OFF));
 
     LCDsetCursor(3, 0);
     LCD_Write_Char('I');
 
-    ///--ITI1---///
-    //    if (resultRtn == SpFalseAlarm) {
-    //        taskParam.falsePunish |= 1;
-    //        correctionRepeatCount++;
-    //    } else {
-    //        taskParam.falsePunish &= 0xFFFE;
-    //    }
-    //    switchOdorPath(0);
     if (taskParam.ITI >= 4u) {
         unsigned int trialITI = taskParam.ITI - 4u;
         while (trialITI > 60u) {
@@ -1432,17 +1422,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
         }
         waitTaskTimer(trialITI * 1000u);
     }
-
-
-    //    assertLaser_G2(laserType, at4SecBeforeS1);
-    waitTaskTimer(1000u);
-    //    assertLaser_G2(laserType, at3SecBeforeS1);
-    waitTaskTimer(2000u);
-    //    assertLaser_G2(laserType, at1SecBeforeS1);
-    //    switchOdorPath(1);
-    waitTaskTimer(500u);
-    //    assertLaser_G2(laserType, at500msBeforeS1);
-    //    waitTimerJ_G2(500u);
+    waitTaskTimer(3500u);
     serialSend(SpITI, 0);
     /////////////////////////////////////////////////
     stim_G2(1, sOut, laserTType);
@@ -1453,87 +1433,22 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
             //Do nothing during Go Nogo Tasks
         case GONOGO_TASK:
         case ODR_2AFC_TASK:
-            //            if (taskParam.outDelay >0) {
-            //                assertLaser_G2(laserType, atDelayBegin);
-            ////                waitTaskTimer(500u);
-            ////                assertLaser_G2(laserType, atDelay500MsIn);
-            ////                waitTaskTimer(500u);
-            ////                assertLaser_G2(laserType, atDelay1SecIn); ////////////////1Sec////////////
-            ////                waitTaskTimer(tskParam.outDelay * 1000u - 2000u);
-            ////                assertLaser_G2(laserType, atDelayLastSecBegin);
-            ////                waitTaskTimer(1000u);
-            ////                assertLaser_G2(laserType, atSecondOdorEnd);
-            //            }
             break; //next line just before waterNresult
 
-
-        default://///////////////////////// NO DELAY /////////////////////
-            if (taskParam.outDelay == 0) {
-                waitTaskTimer(200u); //////////////// DELAY////////////////////
-            } else {
-                /****************MINIMUM DELAY*********************/
-                if (taskParam.outDelay <= 4) {
-                    waitTaskTimer(taskParam.outDelay * 1000u - 1000u);
-
-                } else if (taskParam.innerTaskPairs != 0) {
-                    ////////DISTRACTOR//////////////////////////////
+        default:
+            if (taskParam.outDelay > 0) {
+                if (taskParam.innerTaskPairs != 0) {
                     /////////DISTRACTOR TIMELINE @Delay+0/////////////
-                    //                    assertLaser_G2(laserType, atDelayBegin);
                     waitTaskTimer(2500u);
-                    //assertLaser_G2(laserType, atPreDualTask); //@2s
                     dual_task_D_R(laserTType, sInner, tInner); //Delay+5000ms
-                    //waitTaskTimer(2000u);
-                    //waitTaskTimer(500u);
-                    //assertLaser_G2(laserType, atDelayLast500mSBegin);
-                    //assertLaser_G2(laserType, atPostDualTask);
                     if (taskParam.outDelay >= 8u) {
                         waitTaskTimer((unsigned int) taskParam.outDelay * 1000 - 8000);
-                        //assertLaser_G2(laserType, atDelayLast500mSBegin);
                     }
-                    // at test odor -1000 ms
                 } else {
                     ////// DNMS/DPA Pairs 2 count==0, no inner task, delay >4
-                    /////////////////////////////////////////////////////////
-                    //                    assertLaser_G2(laserType, atDelayBegin);
-                    waitTaskTimer(500u);
-                    //                    assertLaser_G2(laserType, atDelay500MsIn);
-                    waitTaskTimer(500u);
-                    //                    assertLaser_G2(laserType, atDelay1SecIn); ////////////////1Sec////////////
-
-
-                    waitTaskTimer(1000u);
-                    //                    assertLaser_G2(laserType, atDelay2SecIn); /////////////2Sec/////////////
-
-                    waitTaskTimer(taskParam.outDelay * 500u - 2000u);
-
-                    //                    assertLaser_G2(laserType, atDelayMiddle); //13@6.5
-                    if (taskParam.outDelay >= 12) {
-                        waitTaskTimer(2000u); //13@7
-                        //                        assertLaser_G2(laserType, atDelayMid2Sec);
-                        waitTaskTimer(500u); //distractor@9s//13@9
-                        //                        assertLaser_G2(laserType, atDelayMid2_5Sec);
-                        waitTaskTimer(500u); //distractor@9.5s//13@9.5
-                        //                        assertLaser_G2(laserType, atDelayMid3Sec);
-                        waitTaskTimer((taskParam.outDelay - 11)*500u); //13@10
-                    } else {
-                        waitTaskTimer(taskParam.outDelay * 500u - 2500u);
-                    }
-                    //                    assertLaser_G2(laserType, atDelayLast2_5SecBegin);
-                    waitTaskTimer(500u); //13@10.5
-                    //                    assertLaser_G2(laserType, atDelayLast2SecBegin); //////////////-2 Sec//////////////////////
-
-                    waitTaskTimer(500u);
-                    //                    assertLaser_G2(laserType, atDelayLast1_5SecBegin);
-                    waitTaskTimer(500u);
-
+                    waitTaskTimer((unsigned int) taskParam.outDelay * 1000u - 1000u);
                 }
-                //                assertLaser_G2(laserType, atDelayLastSecBegin); /////////////////////////-1 Sec////////////////
                 waitTaskTimer(500u);
-                //                assertLaser_G2(laserType, atDelayLast500mSBegin);
-                //            waitTimerJ(300u);
-                //            assertLaser(type, atDelayLast200mSBegin);
-                //            waitTimerJ(200u);
-                //                waitTimerJ_G2(500u);
             }
 
             ///////////-Second odor-/////////////////
@@ -1619,6 +1534,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
                         break;
                     case ELF_DNMS_TASK:
+                    
                         outSample = (shuffledMinBlock & 1) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         outTest = (shuffledMinBlock & 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         break;
@@ -1705,13 +1621,32 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                             LASER_OFF,
                             LASERT3SEARLY,
                             LASERT6SEARLY,
-                            LASERT1A1IN12,
+                            LASERT10SEARLY,
                             LASERT6SMID,
                             LASERT3SMID,
                             LASERT6SLATE,
                             LASERT3SLATE,
-                            LASERTBASE6IN12,
-                            LASERTBASEAIN12
+                            LASERTBASE6S,
+                            LASERTBASE10S
+                        };
+                        laser_G2.laserTrialType = elfTypes[shuffledMinBlock >> 2];
+                        break;
+                    }
+                    case LASER_SESS_ELF_20:
+                    {
+                        static const int elfTypes[] = {
+                            LASER_OFF,
+                            LASER_OFF,
+                            LASERT3SEARLY,
+                            LASERT6SEARLY,
+                            LASERT12SEARLY,
+                            LASERT6SMID,
+                            LASERT3SMID,
+                            LASERT12SMID,
+                            LASERT6SLATE,
+                            LASERT3SLATE,
+                            LASERT12SLATE,
+                            LASERTBASE10S
                         };
                         laser_G2.laserTrialType = elfTypes[shuffledMinBlock >> 2];
                         break;

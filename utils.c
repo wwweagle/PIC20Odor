@@ -156,312 +156,73 @@ int waitTaskTimer(unsigned int dTime) {
     return (lick_G2.LCount > currLickL || lick_G2.RCount > currLickR);
 }
 
-//void assertLaser_G2(int type, int step) {
-//    switch (type) {
-//        case LASER_OFF:
-//            break;
-//        case laserDuringDelay:
-//            if (step == atDelayBegin) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuringDelayChR2:
-//            if (step == atDelay1SecIn || step == atPostDualTask) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLastSecBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuringDelay_Odor2:
-//            if (step == atDelay1SecIn) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atSecondOdorEnd) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuringBaselineNDelay:
-//            if (step == atDelay1SecIn || step == at3SecBeforeS1) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLastSecBegin || step == at500msBeforeS1) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuringOdor:
-//            if (step == atS1Beginning || step == atSecondOdorBeginning) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atS1End || step == atSecondOdorEnd) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring1stOdor:
-//            if (step == atS1Beginning) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atS1End) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring2ndOdor:
-//            if (step == atSecondOdorBeginning) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atSecondOdorEnd) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuringEarlyHalf:
-//            if (step == atDelay1SecIn) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayMiddle) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//
-//        case laserDuringLateHalf:
-//            if (step == atDelayMiddle) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLastSecBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//
-//        case laserDuring1Quarter:
-//            if (step == atDelayBegin) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelay1_5SecIn) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring2Quarter:
-//            if (step == atDelay2SecIn) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelay500msToMiddle) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring3Quarter:
-//            if (step == atDelayMiddle) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelayLast2_5SecBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring4Quarter:
-//            if (step == atDelayLast2SecBegin) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring12s1Quarter:
-//            if (step == atDelayBegin) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelay2_5SecIn) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring12s2Quarter:
-//            if (step == atDelay3SecIn) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelay500msToMiddle) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring12s3Quarter:
-//            if (step == atDelayMiddle) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelayMid2_5Sec) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring12s4Quarter:
-//            if (step == atDelayMid3Sec) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuringResponseDelay:
-//            if (step == atSecondOdorEnd) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atRewardBeginning) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserNoDelayControl:
-//            if (step == at1SecBeforeS1) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atRewardBeginning) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//            //        case laserNoDelayControlShort:
-//            //            if (step == atS1Beginning) {
-//            //                turnOnLaser_G2(3);
-//            //            } else if (step == atSecondOdorEnd) {
-//            //                turnOffLaser_G2();
-//            //            }
-//            //            break;
-//        case laserDuringBaseline:
-//            if (step == at3SecBeforeS1) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atS1Beginning) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring3Baseline:
-//            if (step == at4SecBeforeS1) {
-//                turnOnLaser_G2(3);
-//            } else if (step == at1SecBeforeS1) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuring4Baseline:
-//            if (step == at4SecBeforeS1) {
-//                turnOnLaser_G2(3);
-//            } else if (step == at500msBeforeS1) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laserDuringBaseAndResponse:
-//            if (step == at1SecBeforeS1 || step == atSecondOdorEnd) {
-//                turnOnLaser_G2(3);
-//            } else if (step == at500msBeforeS1 || step == atRewardBeginning) {
-//
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laser4sRamp:
-//            if (step == atDelay500MsIn) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laser2sRamp:
-//            if (step == atDelayLast2_5SecBegin) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laser1sRamp:
-//            if (step == atDelayLast1_5SecBegin) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//        case laser_5sRamp:
-//            if (step == atDelayLastSecBegin) {
-//                turnOnLaser_G2(3);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//            //        case laserDelayDistractorEarly:
-//            //            if (step == atDelay2SecIn) {
-//            //                turnOnLaser(3);
-//            //            } else if (step == atDelay2SecIn) {
-//            //                turnOffLaser();
-//            //            }
-//            //            break;
-//            //        case laserDelayDistractorLate:
-//            //            if (step == atDelay1SecIn) {
-//            //                turnOnLaser(3);
-//            //            } else if (step == atDelay2SecIn) {
-//            //                turnOffLaser();
-//            //            }
-//            //            break;
-//        case laserRampDuringDelay:
-//            if (step == atDelay1SecIn) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//            //        case laserAfterDistractor:
-//            //            if (step == atDelayMid2_5Sec) {
-//            //                turnOnLaser(laser.side);
-//            //            } else if (step == atDelayLast2_5SecBegin) {
-//            //                turnOffLaser();
-//            //            }
-//            //            break;
-//            //        case laserAfterDistractorLong:
-//            //            if (step == atDelayMid2_5Sec) {
-//            //                turnOnLaser(laser.side);
-//            //            } else if (step == atDelayLast500mSBegin) {
-//            //                turnOffLaser();
-//            //            }
-//            //            break;
-//
-//        case laserCoverDistractor:
-//            if (step == atPreDualTask) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atPostDualTask) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//
-//        case laserAfterDistractorMax:
-//            if (step == atPostDualTask) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atDelayLast500mSBegin) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//
-//        case laserAfterMultiDistractor:
-//            if (step == atPostDualTask) {
-//                turnOnLaser_G2(laser_G2.side);
-//            } else if (step == atPreDualTask) {
-//                turnOffLaser_G2();
-//            }
-//            break;
-//
-//
-//    }
-//}
-
-char assertLaser19() {
+char assertLaser() {
     char laserTarget;
-    uint32_t trialTS = millisCounter - trialOnsetTS - 25000u;
-
-    switch (laser_G2.laserTrialType) {
-        case LASER_OFF:
-            laserTarget = 0;
-            break;
-        case LASERT3SEARLY:
-            laserTarget = trialTS >= 1000u && trialTS < 4000u;
-            break;
-        case LASERT3SMID:
-            laserTarget = trialTS >= 4500u && trialTS < 7500u;
-            break;
-        case LASERT3SLATE:
-            laserTarget = trialTS >= 8000u && trialTS < 11000u;
-            break;
-        case LASERT6SEARLY:
-            laserTarget = trialTS >= 1000u && trialTS < 7000u;
-            break;
-        case LASERT6SMID:
-            laserTarget = trialTS >= 3000u && trialTS < 9000u;
-            break;
-        case LASERT6SLATE:
-            laserTarget = trialTS >= 5000u && trialTS < 11000u;
-            break;
-        case LASERT1A1IN12:
-            laserTarget = trialTS >= 1000u && trialTS < 11000u;
-            break;
-        case LASERTBASEAIN12:
-            laserTarget = millisCounter - trialOnsetTS >= 13000u && millisCounter - trialOnsetTS < 23000u;
-            break;
-        case LASERTBASE6IN12:
-            laserTarget = millisCounter - trialOnsetTS >= 17000u && millisCounter - trialOnsetTS < 23000u;
-            break;
-        case LASER_TEST:
-            return -1;
-            break;
+    char beforeDelay = 0;
+    uint32_t delayLen = (uint32_t) taskParam.outDelay * 1000u;
+    uint32_t clockTS;
+    if (millisCounter >= delayOnsetTS) {
+        clockTS = millisCounter - delayOnsetTS;
+    } else {
+        beforeDelay = 1;
+        clockTS = delayOnsetTS - millisCounter;
     }
+
+    if (beforeDelay) {
+        switch (laser_G2.laserTrialType) {
+            case LASERTBASE10S:
+                laserTarget = clockTS > 1000u && clockTS <= 11000u;
+                break;
+            case LASERTBASE6S:
+                laserTarget = clockTS > 1000u && clockTS <= 7000u;
+                break;
+        }
+    } else
+        switch (laser_G2.laserTrialType) {
+            case LASER_TEST:
+                return -1;
+                break;
+            case LASER_OFF:
+                laserTarget = 0;
+                break;
+            case LASERT3SEARLY:
+                laserTarget = clockTS >= 1000u && clockTS < 4000u;
+                break;
+            case LASERT3SMID:
+                laserTarget = (clockTS >= ((delayLen >> 1) - 1500u))
+                        &&(clockTS < ((delayLen >> 1) + 1500u));
+                break;
+            case LASERT3SLATE:
+                laserTarget = (clockTS >= delayLen - 4000u)
+                        && (clockTS < delayLen - 1000u);
+                break;
+            case LASERT6SEARLY:
+                laserTarget = clockTS >= 1000u && clockTS < 7000u;
+                break;
+            case LASERT6SMID:
+                laserTarget = (clockTS >= ((delayLen >> 1) - 3000u))
+                        &&(clockTS < ((delayLen >> 1) + 3000u));
+                break;
+            case LASERT6SLATE:
+                laserTarget = (clockTS >= (delayLen - 7000u))
+                        &&(clockTS < (delayLen - 1000u));
+                break;
+            case LASERT10SEARLY:
+                laserTarget = clockTS >= 1000u && clockTS < 11000u;
+                break;
+            case LASERT12SEARLY:
+                laserTarget = clockTS >= 1000u && clockTS < 13000u;
+                break;
+            case LASERT12SMID:
+                laserTarget = (clockTS >= ((delayLen >> 1) - 6000u))
+                        &&(clockTS < ((delayLen >> 1) + 6000u));
+                break;
+                break;
+            case LASERT12SLATE:
+                laserTarget = (clockTS >= (delayLen - 13000u))
+                        &&(clockTS < (delayLen - 1000u));
+                break;
+        }
 
     if (laserTarget != 0) {
         if (laser_G2.on == 0) {
@@ -471,6 +232,7 @@ char assertLaser19() {
     } else {//laserTarget==0
         if (laser_G2.on == 1) {
             laser_G2.on = 0;
+
             return 0;
         }
     }

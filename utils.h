@@ -147,6 +147,7 @@ extern "C" {
 #define LASER_LR_EVERY_OTHER_TRIAL 42
 #define LASER_INCONGRUENT_CATCH_TRIAL 45
 #define LASER_SESS_ELF 50
+#define LASER_SESS_ELF_20 51
 #define LASER_DUAL_TASK_ON_OFF 60
 #define LASER_DUAL_TASK_ODAP_ON_OFF 61
 #define LASER_AFTER_DISTR_3X 65
@@ -166,9 +167,14 @@ extern "C" {
 #define LASERT6SEARLY 43
 #define LASERT6SMID 44
 #define LASERT6SLATE 45
-#define LASERT1A1IN12 48
-#define LASERTBASEAIN12 49
-#define LASERTBASE6IN12 50
+#define LASERT10SEARLY 48
+#define LASERTBASE10S 49
+#define LASERTBASE6S 50
+
+#define LASERT12SEARLY 51
+#define LASERT12SMID 52
+#define LASERT12SLATE 53
+
 //
 //#define laserDuring3Baseline 3
 //#define laserDuring4Baseline 4
@@ -216,49 +222,6 @@ extern "C" {
 //#define laserCoverDistractor 145
 //#define laserAfterDistractorMax 151
 //#define laserAfterMultiDistractor 160
-
-
-
-
-
-//
-////#define atTrialStart 10
-//#define at4SecBeforeS1 4
-//#define at3SecBeforeS1 5
-//#define at1SecBeforeS1 10
-//#define at500msBeforeS1 18
-//#define atS1Beginning 20
-//#define atS1End 30
-//#define atDelayBegin 40
-//#define atDelay500MsIn 42
-//#define atDelay1SecIn 200
-//#define atDelay1_5SecIn 205
-//#define atDelay2SecIn 210
-//#define atDelay2_5SecIn 212
-//#define atDelay3SecIn 214
-////#define atDelay3_5SIn 216
-////#define atDelay4_5SIn 218
-//#define atPreDualTask 220
-//#define atPostDualTask 222
-//#define atDelay1sToMiddle 224
-//#define atDelay500msToMiddle 225
-//#define atDelayMiddle 230
-//#define atDelayMid2Sec 235
-//#define atDelayMid2_5Sec 240
-//#define atDelayMid3Sec 245
-//#define atDelayLast2_5SecBegin 250
-//#define atDelayLast2SecBegin 255
-//#define atDelayLast1_5SecBegin 61
-//#define atDelayLastSecBegin 63
-//#define atDelayLast500mSBegin 65
-//#define atSecondOdorBeginning 70
-//#define atSecondOdorEnd 80
-//#define atResponseCueBeginning 90
-//#define atResponseCueEnd 95
-//
-//#define atRewardBeginning 100
-////#define atRewardBeginning 110
-//#define atRewardEnd 120
 
 
 #define OUTCOME_1PORT_OR_2AFC_L 1
@@ -336,8 +299,7 @@ void setWaterPortOpen(int side, int i);
 void sendLargeValue(int val);
 void shuffleArray_G2(unsigned int * orgArray, unsigned int arraySize);
 int waitTaskTimer(unsigned int dTime);
-//void assertLaser_G2(int type, int step);
-char assertLaser19();
+char assertLaser();
 void waitTrial_G2();
 //void turnOnLaser_G2(int notUsed);
 //void turnOffLaser_G2();
