@@ -783,6 +783,29 @@ void callFunc(int n) {
             zxLaserSessions_G2(48, 50, sessNum);
             break;
         }
+        case 67:
+        {
+            splash_G2("DNMS ELF VDLY", "OPTOGENETICS");
+            //            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = LASER_SESS_ELF_VARDELAY;
+            taskType_G2 = ELF_DNMS_TASK_VARDELAY;
+            taskParam.teaching = 0;
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 2;
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outSamples[0] = 2;
+            taskParam.outSamples[1] = 3;
+            taskParam.outTests[0] = 2;
+            taskParam.outTests[1] = 3;
+            taskParam.respCount = 0;
+            taskParam.outDelay = 20;
+            taskParam.ITI = getFuncNumber(2, "ITI?");;
+            taskParam.minBlock = 32;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(taskParam.minBlock, 50, sessNum);
+            break;
+        }
 
         default:
         {
@@ -1405,7 +1428,7 @@ int delayedRspsDelay(int laserType, int id) {
     }
 }
 
-static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int laserTType) {
+static void zxLaserTrial_G2(int sOutter, int tOutter, int sInner, int tInner, int laserTType) {
     taskTimeCounter = millisCounter;
     delayOnsetTS = millisCounter + 1000u * (uint32_t) taskParam.ITI + 1000u;
     serialSend(SpLaserTType, laserTType);
@@ -1425,7 +1448,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
     waitTaskTimer(3500u);
     serialSend(SpITI, 0);
     /////////////////////////////////////////////////
-    stim_G2(1, sOut, laserTType);
+    stim_G2(1, sOutter, laserTType);
     ////////////////////////////////////////////////
 
 
@@ -1452,7 +1475,7 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
             }
 
             ///////////-Second odor-/////////////////
-            stim_G2(2, tOut, laserTType);
+            stim_G2(2, tOutter, laserTType);
             //////////////////////////////////////////
             break;
     }
@@ -1462,13 +1485,13 @@ static void zxLaserTrial_G2(int sOut, int tOut, int sInner, int tInner, int lase
             //            waitTaskTimer(1000u);
             LCDsetCursor(3, 0);
             LCD_Write_Char('R');
-            resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_1PORT_OR_2AFC_L, taskParam.teaching ? 2000 : 1000);
+            resultRtn = waterNResult_G2(sOutter, tOutter, OUTCOME_1PORT_OR_2AFC_L, taskParam.teaching ? 2000 : 1000);
             //DPA SEQ-2AFC WAS HERE, REOVED Jan,23, 2019
 
             break;
         case 1:
-            if (delayedRspsDelay(laserTType, isLikeOdorClassL(sOut) ? OUTCOME_1PORT_OR_2AFC_L : OUTCOME_2AFCR))
-                resultRtn = waterNResult_G2(sOut, tOut, OUTCOME_2AFCR, 4000);
+            if (delayedRspsDelay(laserTType, isLikeOdorClassL(sOutter) ? OUTCOME_1PORT_OR_2AFC_L : OUTCOME_2AFCR))
+                resultRtn = waterNResult_G2(sOutter, tOutter, OUTCOME_2AFCR, 4000);
             break;
             //case 2:
             //    seq2AFCResult(s1, laserType);
@@ -1534,9 +1557,15 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
                         break;
                     case ELF_DNMS_TASK:
-                    
+                    case ELF_DNMS_TASK_VARDELAY:
                         outSample = (shuffledMinBlock & 1) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         outTest = (shuffledMinBlock & 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                        if (taskType_G2 == ELF_DNMS_TASK_VARDELAY) {
+                            delayOnsetTS = millisCounter + 1000u * (uint32_t) taskParam.ITI + 1000u;
+                            int delayLens[] = {5, 8, 12, 20};
+                            taskParam.outDelay = delayLens[(shuffledMinBlock & 0xc) >> 2];
+                        }
+
                         break;
                     case DNMS_SHAPING_TASK:
                         outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
@@ -1640,15 +1669,25 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                             LASERT3SEARLY,
                             LASERT6SEARLY,
                             LASERT12SEARLY,
-                            LASERT6SMID,
                             LASERT3SMID,
+                            LASERT6SMID,
                             LASERT12SMID,
-                            LASERT6SLATE,
                             LASERT3SLATE,
+                            LASERT6SLATE,
                             LASERT12SLATE,
                             LASERTBASE10S
                         };
                         laser_G2.laserTrialType = elfTypes[shuffledMinBlock >> 2];
+                        break;
+                    }
+                    case LASER_SESS_ELF_VARDELAY:
+                    {
+                        if (shuffledMinBlock > 15) {
+                            laser_G2.laserTrialType = LASERT3SLATE;
+                        } else {
+                            laser_G2.laserTrialType = LASER_OFF;
+                        }
+
                         break;
                     }
                         //                    case LASER_CATCH_TRIAL:

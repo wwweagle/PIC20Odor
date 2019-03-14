@@ -206,6 +206,9 @@ char assertLaser() {
                 laserTarget = (clockTS >= (delayLen - 13000u))
                         &&(clockTS < (delayLen - 1000u));
                 break;
+            default:
+                laserTarget=0;
+                break;
         }
     } else {
         switch (laser_G2.laserTrialType) {
@@ -214,6 +217,9 @@ char assertLaser() {
                 break;
             case LASERTBASE6S:
                 laserTarget = millisCounter >= (delayOnsetTS - 8000u) && millisCounter < (delayOnsetTS - 2000u);
+                break;
+            default:
+                laserTarget=0;
                 break;
         }
     }
