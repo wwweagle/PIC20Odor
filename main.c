@@ -72,8 +72,7 @@ void testWaterDual() {
 }
 
 static int isLikeOdorClassL(int odor) {
-    if (odor == 6 || odor == 16 || odor == 17 || odor == 3) return 1;
-    return 0;
+    return (odor == 6 || odor == 16 || odor == 17 || odor == 3 || odor == 5);
 }
 
 void addAllOdor() {
@@ -223,42 +222,50 @@ void callFunc(int n) {
             setWaterLen();
             break;
         case 31:
-            testLaser(getFuncNumber(1, "1Pulse 2Step "));
+            testLaser(getFuncNumber(1, "0Step 1Puls 2cfs"));
             break;
 
 
         case 33:
         {
             splash_G2("ODPA", "SHAPING");
-            int noLaser = getFuncNumber(1, "No Laser?");
-            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
+            laser_G2.laserSessionType = LASER_NO_TRIAL;
             taskType_G2 = ODPA_SHAPING_TASK;
             taskParam.teaching = 1;
-            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
+            taskParam.falsePunish = 0;
             taskParam.outTaskPairs = 2;
             taskParam.respCount = 0;
-            addAllOdor();
-            taskParam.outDelay = getFuncNumber(2, "Delay duration");
-            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outSamples[0] = 6;
+            taskParam.outSamples[1] = 7;
+            taskParam.outTests[0] = 5;
+            taskParam.outTests[1] = 12;
+            taskParam.outDelay = 5;
+            taskParam.ITI = 10;
+            taskParam.minBlock = 4;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
             break;
         }
         case 34:
         {
-            splash_G2("ODPA", "");
-            int noLaser = getFuncNumber(1, "No Laser?");
-            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_EVERY_TRIAL;
-            laser_G2.laserTrialType = laserDuringDelayChR2;
-            //laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
-            //laser_G2.laserTrialType = laserDuringDelayChR2;
+            splash_G2("ODPA", "LEARNING");
+            laser_G2.laserSessionType = LASER_NO_TRIAL;
             taskType_G2 = ODPA_TASK;
-            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
+            taskParam.teaching = 0;
+            taskParam.falsePunish = 0;
             taskParam.outTaskPairs = 2;
             taskParam.respCount = 0;
-            addAllOdor();
-            taskParam.outDelay = getFuncNumber(2, "Delay duration");
-            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outSamples[0] = 6;
+            taskParam.outSamples[1] = 7;
+            taskParam.outTests[0] = 5;
+            taskParam.outTests[1] = 12;
+            taskParam.outDelay = 5;
+            taskParam.ITI = 10;
+            taskParam.minBlock = 4;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
             break;
@@ -800,7 +807,8 @@ void callFunc(int n) {
             taskParam.outTests[1] = 3;
             taskParam.respCount = 0;
             taskParam.outDelay = 20;
-            taskParam.ITI = getFuncNumber(2, "ITI?");;
+            taskParam.ITI = getFuncNumber(2, "ITI?");
+            ;
             taskParam.minBlock = 32;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(taskParam.minBlock, 50, sessNum);
@@ -1595,16 +1603,6 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         outTest = (outSample == taskParam.outSamples[0]) ? taskParam.outTests[1] : taskParam.outTests[0];
                         break;
-                        //                    case ODPA_RD_SHAPING_TASK:
-                        //                        outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
-                        //                        outTest = (outSample == taskParam.outSamples[0]) ? taskParam.outTests[1] : taskParam.outTests[0];
-                        //                        if (currentTrial > 15) {
-                        //                            laser_G2.laserTrialType = laserDuringDelayChR2;
-                        //                        } else {
-                        //                            laser_G2.laserTrialType = LASER_OFF;
-                        //                        }
-                        //                        break;
-
 
                     case DUAL_TASK_SHAPING:
                         outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
@@ -1804,12 +1802,12 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         //                    case LASER_DUAL_TASK_ODAP_ON_OFF:
                         //                        laser_G2.laserTrialType = (shuffledMinBlock < 2) ? LASER_OFF : laserCoverDistractor;
                         //                        break;
-                        //                    case LASER_OTHER_BLOCK:
-                        //                        if (rand()&0x1)
-                        //                            laser_G2.laserTrialType = currentTrial < (trialsPerSession / 2) ? LASER_OFF : laserOnType;
-                        //                        else
-                        //                            laser_G2.laserTrialType = currentTrial < (trialsPerSession / 2) ? laserOnType : LASER_OFF;
-                        //                        break;
+                    case LASER_OTHER_BLOCK:
+                        if (rand()&0x1)
+                            laser_G2.laserTrialType = currentTrial < (trialsPerSession / 2) ? LASER_OFF : laserOnType;
+                        else
+                            laser_G2.laserTrialType = currentTrial < (trialsPerSession / 2) ? laserOnType : LASER_OFF;
+                        break;
                 }
                 zxLaserTrial_G2(outSample, outTest, innerSample, innerTest, laser_G2.laserTrialType);
                 currentTrial++;
@@ -1829,20 +1827,33 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
 
 void testLaser(int type) {
     laser_G2.laserTrialType = LASER_TEST;
-    if (type != 1) {
-        int i = 0;
-        while (1) {
-            i ^= 1;
-            laser_G2.on = i;
-            getFuncNumber(1, "Toggle Laser");
-        }
-    } else {
-        while (true) {
-            laser_G2.on = 1;
-            wait_Sec(5);
-            laser_G2.on = 0;
-            wait_Sec(5);
-        }
+    int i = 0;
+    switch (type) {
+        case 0:
+            while (1) {
+                i ^= 1;
+                laser_G2.on = i;
+                getFuncNumber(1, "Toggle Laser");
+
+            }
+            break;
+        case 1:
+            while (true) {
+                laser_G2.on = 1;
+                wait_Sec(5);
+                laser_G2.on = 0;
+                wait_Sec(5);
+            }
+            break;
+        case 2:
+            for (i=0; i < 50; i++) {
+                laser_G2.on = 1;
+                wait_Sec(3);
+                laser_G2.on = 0;
+                wait_Sec(17);
+                serialSend(SpDebugInfo,i);
+            }
+            break;
     }
 }
 
