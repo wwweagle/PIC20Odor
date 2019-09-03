@@ -10,6 +10,8 @@
 #include <i2c.h>
 #include "utils.h"
 
+int I2CError = 0;
+
 void initI2C(void) {
     unsigned int config2, config1;
 
@@ -37,14 +39,18 @@ void initI2C(void) {
 }
 
 void I2C_Write_Byte_Single_Reg(unsigned char deviceADDR, unsigned char val) {
-    uint32_t lcdTimer=millisCounter;
+    if (I2CError) {
+        return;
+    }
+
+    uint32_t lcdTimer = millisCounter + 200u;
     IdleI2C();
 
     StartI2C();
 
     /* Wait till Start sequence is completed */
 
-    while (I2CCONbits.SEN && (lcdTimer+100u)>millisCounter);
+    while (I2CCONbits.SEN && lcdTimer > millisCounter);
 
     /* Clear interrupt flag */
 
@@ -56,26 +62,29 @@ void I2C_Write_Byte_Single_Reg(unsigned char deviceADDR, unsigned char val) {
 
     /* Wait till address is transmitted */
 
-    while (I2CSTATbits.TBF && (lcdTimer+100u)>millisCounter); // 8 clock cycles
+    while (I2CSTATbits.TBF && lcdTimer > millisCounter); // 8 clock cycles
 
-    while (!IFS0bits.MI2CIF && (lcdTimer+100u)>millisCounter); // Wait for 9th clock cycle
+    while (!IFS0bits.MI2CIF && lcdTimer > millisCounter); // Wait for 9th clock cycle
 
     IFS0bits.MI2CIF = 0; // Clear interrupt flag 
-    
-    
-    while (I2CSTATbits.ACKSTAT && (lcdTimer+100u)>millisCounter);
-    
+
+
+    while (I2CSTATbits.ACKSTAT && lcdTimer > millisCounter);
+
     /* Transmit string of data */
 
     MasterWriteI2C(val);
-    
+
     StopI2C();
 
     /* Wait till stop sequence is completed */
 
-    while (I2CCONbits.PEN && (lcdTimer+100u)>millisCounter);
+    while (I2CCONbits.PEN && lcdTimer > millisCounter);
     //
     //  CloseI2C();
+    if (lcdTimer <= millisCounter) {
+        I2CError = 1;
+    }
 
 }
 
