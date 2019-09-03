@@ -104,8 +104,8 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     BNC_4 = laser_G2.on;
 
 
-    //    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
-    volatile int sel = adcdataL;
+    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+//    volatile int sel = adcdataL;
 
     if (sel <= lickThreshL && sel >= lickThreshR) {
         lick_G2.current = 0;

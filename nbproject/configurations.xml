@@ -40,11 +40,11 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.33</languageToolchainVersion>
+        <languageToolchainVersion>1.36</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="dsPIC30F_DFP" vendor="Microchip" version="1.0.10"/>
+        <pack name="dsPIC30F_DFP" vendor="Microchip" version="1.0.16"/>
       </packs>
       <compileType>
         <linkerTool>
@@ -85,7 +85,8 @@
         <property key="enable-short-double" value="false"/>
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
-        <property key="extra-include-directories" value=""/>
+        <property key="extra-include-directories"
+                  value="..\..\..\..\Program Files (x86)\Microchip\xc16\v1.36\support\peripheral_30F_24H_33F;..\..\..\..\Program Files (x86)\Microchip\xc16\v1.36\support\dsPIC30F\h;..\..\..\..\Program Files (x86)\Microchip\xc16\v1.36\include"/>
         <property key="isolate-each-function" value="false"/>
         <property key="keep-inline" value="false"/>
         <property key="oXC16gcc-align-arr" value="false"/>

@@ -7,7 +7,7 @@
 
 #include <i2c.h>
 #include <stdlib.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 
 #include "utils.h"
 #include "hal.h"
@@ -134,15 +134,24 @@ void testVolume(int repeat, int side) {
     if (side == 0) {
         side = getFuncNumber(1, "1-Left 2-Right");
     }
-    int i, localSide;
-    if (side == 1) localSide = LICKING_LEFT;
-    else if (side == 2) localSide = LICKING_RIGHT;
+
+    int i, localSide, waterLen;
+    if (side == 1) {
+        localSide = LICKING_LEFT;
+        waterLen = waterLenL;
+    } else if (side == 2) {
+        localSide = LICKING_RIGHT;
+        waterLen = waterLenR;
+    }
+
     for (i = 0; i < repeat; i++) {
         setWaterPortOpen(localSide, 1);
-        wait_ms(waterLenL);
+        wait_ms(waterLen);
         setWaterPortOpen(localSide, 0);
-        if (waterLenL <= 500)
-            wait_ms(500 - waterLenL);
+        if (waterLen <= 500)
+            wait_ms(500 - waterLen);
+        else
+            wait_ms(2000-waterLen);
     }
 }
 
@@ -1011,7 +1020,7 @@ void feedWaterFast_G2(int interval) {
 
 }
 
-static void feedWaterLR() {
+static void feedWaterLR() { //Menu #52
     taskType_G2 = GONOGO_2AFC_TASK;
     int lastLocation = 0;
     lick_G2.LCount = 0u;
@@ -1074,7 +1083,7 @@ static void feedWaterLR() {
     }
 }
 
-void testNSetThres() {
+void testNSetThres() { // #24
     sendLargeValue(lickThreshL);
     sendLargeValue(lickThreshR);
     int side = getFuncNumber(1, "1-LEFT 2-RIGHT");
@@ -1521,7 +1530,7 @@ static void zxLaserTrial_G2(int sOutter, int tOutter, int sInner, int tInner, in
     waitTrial_G2();
 }
 
-void setWaterLen() {
+void setWaterLen() {//#30
     sendLargeValue(waterLenL);
     sendLargeValue(waterLenR);
     int side = getFuncNumber(1, "1-Left, 2-Right");
@@ -1838,7 +1847,7 @@ void testLaser(int type) {
             }
             break;
         case 1:
-            while (true) {
+            while (1) {
                 laser_G2.on = 1;
                 wait_Sec(5);
                 laser_G2.on = 0;
@@ -1846,12 +1855,12 @@ void testLaser(int type) {
             }
             break;
         case 2:
-            for (i=0; i < 50; i++) {
+            for (i = 0; i < 50; i++) {
                 laser_G2.on = 1;
                 wait_Sec(3);
                 laser_G2.on = 0;
                 wait_Sec(17);
-                serialSend(SpDebugInfo,i);
+                serialSend(SpDebugInfo, i);
             }
             break;
     }
