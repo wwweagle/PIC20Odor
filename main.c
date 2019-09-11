@@ -135,7 +135,7 @@ void testVolume(int repeat, int side) {
         side = getFuncNumber(1, "1-Left 2-Right");
     }
 
-    int i, localSide, waterLen;
+    int i, localSide=0, waterLen=0;
     if (side == 1) {
         localSide = LICKING_LEFT;
         waterLen = waterLenL;
@@ -151,7 +151,7 @@ void testVolume(int repeat, int side) {
         if (waterLen <= 500)
             wait_ms(500 - waterLen);
         else
-            wait_ms(2000-waterLen);
+            wait_ms(2000 - waterLen);
     }
 }
 
@@ -1106,14 +1106,20 @@ void stim_G2(int place, int odorPort, int laserType) {
         muxOff(odorPort < 16 ? (~1) : (~4));
         waitTaskTimer(500);
     }
-    if (place != 3)
-        BNC_2 = 1;
+
     if (place == 3) {
         serialSend(SpIO, odorPort > 0 ? odorPort : odorPort + 100);
         muxOff(odorPort < 16 ? (~1) : (~4));
     } else {
+        if (isLikeOdorClassL(odorPort)) {
+            BNC_3 = 1;
+        } else {
+            BNC_4 = 1;
+        }
+
+
         muxOff(odorPort < 16 ? (~3) : (~0x0c));
-        int stimSend;
+        int stimSend=0;
         switch (place) {
             case 1:
             case 2:
@@ -1198,7 +1204,8 @@ void stim_G2(int place, int odorPort, int laserType) {
     Nop();
     Nop();
     Nop();
-    BNC_2 = 0;
+    BNC_3 = 0;
+    BNC_4 = 0;
 }
 
 static void processHit_G2(int id, int ratio) {
@@ -1560,7 +1567,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
         splash_G2("    H___M___ __%", "S__ F___C___t___");
         lcdWriteNumber_G2(currentSession, 1, 1);
         hit = miss = falseAlarm = correctRejection = abortTrial = 0;
-        int outSample, outTest;
+        int outSample=0, outTest=0;
         int innerSample = 0, innerTest = 0;
         for (currentTrial = 0; currentTrial < trialsPerSession && currentMiss < missLimit;) {
             shuffleArray_G2(shuffledList, taskParam.minBlock);

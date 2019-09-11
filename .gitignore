@@ -1,4 +1,5 @@
 /build/
+/private/
 /dist/default/production/*
 !/dist/default/production/*.hex
 /debug/
