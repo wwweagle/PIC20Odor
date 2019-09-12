@@ -102,51 +102,54 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
         serialSend(SpLaserSwitch, t);
     }
     BNC_5 = laser_G2.on;
-
-    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+    volatile int sel = (adcdataL + adcdataR) == 0
+            ? 512
+            : (int) ((adcdataL - adcdataR)*512.0 / (adcdataL + adcdataR)) + 512;
+    int toNotify = (lick_G2.current == LICKING_DETECTED) ||
+            (sel > lickThreshL && lick_G2.stable == 'R') ||
+            (sel < lickThreshR && lick_G2.stable == 'L');
     //    volatile int sel = adcdataL;
-
     if (sel <= lickThreshL && sel >= lickThreshR) {
         lick_G2.current = 0;
         lick_G2.stable = 0;
         //        BNC_1 = 0;
         //        BNC_2 = 0;
-        LATG = LATG & 0xff;
-
+        LATG = LATG & 0xfcff;
     } else if (lick_G2.current == 0) {//(Lick left XOR lick right)
         lick_G2.filter = millisCounter;
         lick_G2.current = LICKING_DETECTED;
-    } else if (lick_G2.current == LICKING_DETECTED) {
-        if (millisCounter > lick_G2.filter + 10) {
-
-            //            char sendSide = 'L';
-            if (sel > lickThreshL) {
-                BNC_1 = 1;
-                lick_G2.LCount++;
-                sendLick = 'L';
-                lick_G2.stable = 'L';
-            } else {
-                BNC_2 = 1;
-                lick_G2.RCount++;
-                lick_G2.stable = 'R';
-                sendLick = 'R';
-            }
-            lick_G2.current = LICK_SENT;
-            //            if (isSending) {
-            //                sendLick = sendSide;
-            //            } else {
-            if (!isSending) {
-                char t = sendLick;
-                sendLick = 0;
-                serialSend(SpLick, t);
-            }
+    } else if (toNotify) {
+        //        if (millisCounter > lick_G2.filter + 5) {
+        //            char sendSide = 'L';
+        if (sel > lickThreshL) {
+            BNC_2 = 0;
+            Nop();
+            Nop();
+            BNC_1 = 1;
+            lick_G2.LCount++;
+            sendLick = 'L';
+            lick_G2.stable = 'L';
+        } else {
+            BNC_1 = 0;
+            Nop();
+            Nop();
+            BNC_2 = 1;
+            lick_G2.RCount++;
+            lick_G2.stable = 'R';
+            sendLick = 'R';
         }
+        lick_G2.current = LICK_SENT;
+        //            if (isSending) {
+        //                sendLick = sendSide;
+        //            } else {
+        if (!isSending) {
+            char t = sendLick;
+            sendLick = 0;
+            serialSend(SpLick, t);
+        }
+        //        }
     }
-    //  if (Serial.peek() == 0x2a) {
-    //    protectedSerialSend_G2(61, 0);
-    //    Timer1.detachInterrupt();
-    //    callResetGen2();
-    //  }
+
     //  if(sendFID && (millis()>fidTimeStamp+500)){
     //    fidTimeStamp=millis();
     //    FIDtest();

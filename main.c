@@ -135,7 +135,7 @@ void testVolume(int repeat, int side) {
         side = getFuncNumber(1, "1-Left 2-Right");
     }
 
-    int i, localSide=0, waterLen=0;
+    int i, localSide = 0, waterLen = 0;
     if (side == 1) {
         localSide = LICKING_LEFT;
         waterLen = waterLenL;
@@ -990,7 +990,6 @@ void feedWaterFast_G2(int interval) {
     unsigned int waterCount = 0;
     unsigned int totalLickCount = 0;
 
-
     LCDclear();
     LCDhome();
     LCD_Write_Str("Total Lick");
@@ -1015,9 +1014,7 @@ void feedWaterFast_G2(int interval) {
             setWaterPortOpen(LICKING_LEFT, 0);
             u2Received = -1;
         }
-
     }
-
 }
 
 static void feedWaterLR() { //Menu #52
@@ -1111,7 +1108,9 @@ void stim_G2(int place, int odorPort, int laserType) {
         serialSend(SpIO, odorPort > 0 ? odorPort : odorPort + 100);
         muxOff(odorPort < 16 ? (~1) : (~4));
     } else {
-        if (isLikeOdorClassL(odorPort)) {
+        if (odorPort == 0) {
+            LATE = LATE | 0x0300;
+        } else if (isLikeOdorClassL(odorPort)) {
             BNC_3 = 1;
         } else {
             BNC_4 = 1;
@@ -1119,7 +1118,7 @@ void stim_G2(int place, int odorPort, int laserType) {
 
 
         muxOff(odorPort < 16 ? (~3) : (~0x0c));
-        int stimSend=0;
+        int stimSend = 0;
         switch (place) {
             case 1:
             case 2:
@@ -1202,10 +1201,10 @@ void stim_G2(int place, int odorPort, int laserType) {
     }
     Nop();
     Nop();
-    Nop();
-    Nop();
-    BNC_3 = 0;
-    BNC_4 = 0;
+    //    BNC_3 = 0;
+    //    BNC_4 = 0;
+    LATE = LATE & 0xfcff;
+
 }
 
 static void processHit_G2(int id, int ratio) {
@@ -1567,7 +1566,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
         splash_G2("    H___M___ __%", "S__ F___C___t___");
         lcdWriteNumber_G2(currentSession, 1, 1);
         hit = miss = falseAlarm = correctRejection = abortTrial = 0;
-        int outSample=0, outTest=0;
+        int outSample = 0, outTest = 0;
         int innerSample = 0, innerTest = 0;
         for (currentTrial = 0; currentTrial < trialsPerSession && currentMiss < missLimit;) {
             shuffleArray_G2(shuffledList, taskParam.minBlock);
