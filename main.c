@@ -581,8 +581,10 @@ void callFunc(int n) {
         {
             lick_G2.refreshLickReading = 1;
             splash_G2("ODR 2AFC", "");
-            laser_G2.laserSessionType = LASER_NO_TRIAL;
-            taskType_G2 = ODR_2AFC_TASK;
+
+            int opLaser = getFuncNumber(1, "Laser?");
+            laser_G2.laserSessionType = opLaser ? LASER_OTHER_TRIAL : LASER_NO_TRIAL;
+            taskType_G2 = LASERT3SMID;
             taskParam.teaching = getFuncNumber(1, "0Tst 1Tch 23NoPu");
             taskParam.waitForTrial = getFuncNumber(1, "TrialWait 1Y 0N");
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
