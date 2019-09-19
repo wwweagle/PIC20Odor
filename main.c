@@ -579,6 +579,7 @@ void callFunc(int n) {
 
         case 53:
         {
+
             lick_G2.refreshLickReading = 1;
             splash_G2("ODR 2AFC", "");
 
@@ -1111,15 +1112,13 @@ void stim_G2(int place, int odorPort, int laserType) {
         serialSend(SpIO, odorPort > 0 ? odorPort : odorPort + 100);
         muxOff(odorPort < 16 ? (~1) : (~4));
     } else {
-        if (odorPort == 0) {
+        if (place == 4) {
             LATE = LATE | 0x0300;
         } else if (isLikeOdorClassL(odorPort)) {
             BNC_3 = 1;
         } else {
             BNC_4 = 1;
         }
-
-
         muxOff(odorPort < 16 ? (~3) : (~0x0c));
         int stimSend = 0;
         switch (place) {
@@ -1427,12 +1426,11 @@ void dual_task_D_R(int laserType, int sample2, int test2) {
 
 }
 
-int delayedRspsDelay(int laserType, int id) {
+int delayedRspsDelay(int laserType, int waterPortSide) {
     if (taskParam.respCueLength >= 200) {
         int delayLick = 0;
         if (taskParam.outDelay >= 2) {
             delayLick |= waitTaskTimer(((unsigned int) (taskParam.outDelay - 1)) * 1000u);
-            delayLick |= waitTaskTimer(taskParam.outDelay * 1000u - 2000u);
             delayLick |= waitTaskTimer(500u);
         }
         stim_G2(3, taskParam.respCue[0], laserType);
@@ -1440,12 +1438,11 @@ int delayedRspsDelay(int laserType, int id) {
         LCDsetCursor(3, 0);
         if (taskParam.teaching < 2 && delayLick) {
             muxOff(0x0f);
-            serialSend(SpAbortTrial, id);
+            serialSend(SpAbortTrial, waterPortSide);
             LCD_Write_Char('A');
             abortTrial++;
             return 0;
         } else {
-            LCD_Write_Char('R');
             stim_G2(4, taskParam.respCue[0], laserType);
             return 1;
         }
@@ -1600,8 +1597,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         break;
                     case GONOGO_TASK:
                     case ODR_2AFC_TASK:
-                        outTest = 0;
-                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 9) {
+                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 9 || currentTrial == 0) {
                             if (taskParam.outTaskPairs == 2) {
                                 outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                             } else if (taskParam.outTaskPairs > 4) {
@@ -1611,6 +1607,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         } else {
                             correctionRepeatCount++;
                         }
+                        outTest = taskType_G2 == odorTypes_G2 ? taskParam.respCue[0] : 0;
                         break;
 
                     case ODPA_TASK:

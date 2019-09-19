@@ -1,5 +1,7 @@
 /build/
-/private/
-/dist/default/production/*
+/nbproject/private/**
+/dist/default/production/**
 !/dist/default/production/*.hex
 /debug/
+/nbproject/**
+!/nbproject/project.xml
