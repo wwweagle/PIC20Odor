@@ -1607,7 +1607,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         } else {
                             correctionRepeatCount++;
                         }
-                        outTest = taskType_G2 == odorTypes_G2 ? taskParam.respCue[0] : 0;
+                        outTest = taskType_G2 == ODR_2AFC_TASK ? taskParam.respCue[0] : 0;
                         break;
 
                     case ODPA_TASK:
