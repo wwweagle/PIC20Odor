@@ -584,7 +584,8 @@ void callFunc(int n) {
 
             int opLaser = getFuncNumber(1, "Laser?");
             laser_G2.laserSessionType = opLaser ? LASER_OTHER_TRIAL : LASER_NO_TRIAL;
-            taskType_G2 = LASERT3SMID;
+            laser_G2.laserTrialType = LASERT3SMID;
+            taskType_G2 = ODR_2AFC_TASK;
             taskParam.teaching = getFuncNumber(1, "0Tst 1Tch 23NoPu");
             taskParam.waitForTrial = getFuncNumber(1, "TrialWait 1Y 0N");
             taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
@@ -1246,10 +1247,10 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
 
     switch (taskType_G2) {
         case GONOGO_TASK:
-            for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.lickSide; lick_G2.lickSide = lick_G2.stable);
+            for (timerCounterI = 0; timerCounterI < rewardWindow && lick_G2.lickSide != 'L'; lick_G2.lickSide = lick_G2.stable);
             taskTimeCounter = millisCounter;
             /////Reward
-            if (!lick_G2.lickSide) {
+            if (lick_G2.lickSide != 'L') {
                 if (!isLikeOdorClassL(sample)) {
                     serialSend(SpCorrectRejection, OUTCOME_1PORT_OR_2AFC_L);
                     lcdWriteNumber_G2(++correctRejection, 9, 1);
@@ -1516,7 +1517,7 @@ static void zxLaserTrial_G2(int sOutter, int tOutter, int sInner, int tInner, in
             break;
         case 1:
             if (delayedRspsDelay(laserTType, isLikeOdorClassL(sOutter) ? OUTCOME_1PORT_OR_2AFC_L : OUTCOME_2AFCR))
-                resultRtn = waterNResult_G2(sOutter, tOutter, OUTCOME_2AFCR, 4000);
+                resultRtn = waterNResult_G2(sOutter, tOutter, OUTCOME_2AFCR, 2000);
             break;
             //case 2:
             //    seq2AFCResult(s1, laserType);
@@ -1525,6 +1526,7 @@ static void zxLaserTrial_G2(int sOutter, int tOutter, int sInner, int tInner, in
     }
     //    waitTaskTimer(1000u); //water time sync
     // Total Trials
+    LCD_Write_Char('I');
     int totalTrials = hit + correctRejection + miss + falseAlarm + abortTrial;
     lcdWriteNumber_G2(totalTrials, 13, 1);
     // Discrimination rate
@@ -1842,7 +1844,7 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
     free(shuffledList);
 }
 
-void testLaser(int type) {
+void testLaser(int type) { //31
     laser_G2.laserTrialType = LASER_TEST;
     int i = 0;
     switch (type) {
