@@ -101,7 +101,11 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
         sendLaser = -1;
         serialSend(SpLaserSwitch, t);
     }
-    BNC_5 = laser_G2.on;
+    //BNC5=RA9 BNC6=RA10
+    if (laser_G2.on) {
+        //    BNC_5 = laser_G2.on;
+        LATA = LATA | (laser_G2.side << 8);
+    }
     volatile int sel = (adcdataL + adcdataR) == 0
             ? 512
             : (int) ((adcdataL - adcdataR)*512.0 / (adcdataL + adcdataR)) + 512;
