@@ -72,7 +72,7 @@ void testWaterDual() {
 }
 
 static int isLikeOdorClassL(int odor) {
-    return (odor == 6 || odor == 16 || odor == 17 || odor == 3 || odor == 5);
+    return (odor == 6 || odor == 16 || odor == 17 || odor == 1 || odor == 3 || odor == 5);
 }
 
 void addAllOdor() {
@@ -233,6 +233,29 @@ void callFunc(int n) {
         case 31:
             testLaser(getFuncNumber(1, "0Step 1Puls 2cfs"));
             break;
+
+
+        case 32:
+        {
+            splash_G2("GO-Nogo", "2+ 2-");
+            int noLaser = getFuncNumber(1, "No Laser?");
+            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_OTHER_TRIAL;
+            laser_G2.laserTrialType = laserDuringDelayChR2;
+
+            taskType_G2 = GONOGO_TASK;
+            taskParam.respCount = getFuncNumber(1, "Resp cue?");
+            taskParam.teaching = getFuncNumber(1, "Teaching?");
+            taskParam.falsePunish = 0;
+            taskParam.outTaskPairs = 4;
+            addAllOdor();
+            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            //            waterLen = getFuncNumber(1, "Water fold?") * waterLen;
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(20, 20, sessNum);
+            break;
+        }
+
 
 
         case 33:
@@ -1562,13 +1585,13 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
     int laserOnType = laser_G2.laserTrialType;
     unsigned int* shuffledList = malloc(taskParam.minBlock * sizeof (unsigned int));
     serialSend(SpTaskType, taskType_G2);
+    int outSample = 0, outTest = 0;
+    int innerSample = 0, innerTest = 0;
     while ((currentMiss < missLimit) && (currentSession++ < totalSession)) {
         serialSend(SpSess, 1);
         splash_G2("    H___M___ __%", "S__ F___C___t___");
         lcdWriteNumber_G2(currentSession, 1, 1);
         hit = miss = falseAlarm = correctRejection = abortTrial = 0;
-        int outSample = 0, outTest = 0;
-        int innerSample = 0, innerTest = 0;
         for (currentTrial = 0; currentTrial < trialsPerSession && currentMiss < missLimit;) {
             shuffleArray_G2(shuffledList, taskParam.minBlock);
             int idxInMinBlock;
@@ -1597,10 +1620,10 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         break;
                     case GONOGO_TASK:
                     case ODR_2AFC_TASK:
-                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 9 || currentTrial == 0) {
+                        if ((taskParam.falsePunish & 0x03) != 0x03 || correctionRepeatCount > 9) {
                             if (taskParam.outTaskPairs == 2) {
                                 outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
-                            } else if (taskParam.outTaskPairs > 4) {
+                            } else if (taskParam.outTaskPairs >= 4) {
                                 outSample = taskParam.outSamples[shuffledMinBlock];
                             }
                             correctionRepeatCount = 0;
