@@ -20,7 +20,8 @@ LICK_T_G2 lick_G2 = {
 };
 
 LASER_T_G2 laser_G2 = {.laserSessionType = LASER_NO_TRIAL, .laserTrialType = LASER_OFF,
-    .timer = 0u, .onTime = 65535u, .offTime = 0u, .on = 0, .side = 1}; //1L,2R,3LR
+    .timer = 0u, .onTime = 65535u,
+    .offTime = 0u, .on = 0, .side = 1}; //1L,2R,3LR
 
 TASK_T taskParam = {
     .outSamples = NULL,
@@ -207,7 +208,7 @@ char assertLaser() {
                         &&(clockTS < (delayLen - 1000u));
                 break;
             default:
-                laserTarget=0;
+                laserTarget = 0;
                 break;
         }
     } else {
@@ -219,7 +220,7 @@ char assertLaser() {
                 laserTarget = millisCounter >= (delayOnsetTS - 8000u) && millisCounter < (delayOnsetTS - 2000u);
                 break;
             default:
-                laserTarget=0;
+                laserTarget = 0;
                 break;
         }
     }
@@ -246,16 +247,16 @@ void waitTrial_G2() {
     }
 
     //    while (adcdataL > lickThreshL || adcdataR > lickThreshR) { //TODO: removed
-        volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
-//    volatile int sel = adcdataL;
+    volatile int sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+    //    volatile int sel = adcdataL;
     while (sel > lickThreshL || sel < lickThreshR) {
         if (!waitingLickRelease) {
             serialSend(SpTrialWait, 100);
             waitingLickRelease = 1;
             wait_ms(200);
         }
-                sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
-//        sel = adcdataL;
+        sel = (int) ((((double) (adcdataL - adcdataR)) / (adcdataL + adcdataR) + 1)*512);
+        //        sel = adcdataL;
     }
     waitingLickRelease = 0;
 

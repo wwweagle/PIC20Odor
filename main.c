@@ -682,6 +682,35 @@ void callFunc(int n) {
             lick_G2.refreshLickReading = 0;
             break;
         }
+
+        case 56:
+        {
+
+            lick_G2.refreshLickReading = 1;
+            splash_G2("ODR 2AFC", "LR Laser");
+
+            int opLaser = getFuncNumber(1, "Laser?");
+            laser_G2.laserSessionType = opLaser ? LASER_LR_OTHER_TRIAL : LASER_NO_TRIAL;
+            laser_G2.laserTrialType = LASERT3SMID;
+            taskType_G2 = ODR_2AFC_TASK;
+            taskParam.teaching = getFuncNumber(1, "0Tst 1Tch 23NoPu");
+            taskParam.waitForTrial = getFuncNumber(1, "TrialWait 1Y 0N");
+            taskParam.falsePunish = getFuncNumber(1, "False Punish 2/0");
+            taskParam.outTaskPairs = 2;
+            taskParam.respCount = 1;
+            addAllOdor();
+            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            int sessNum = getFuncNumber(2, "Session number?");
+            zxLaserSessions_G2(20, 100, sessNum);
+            lick_G2.refreshLickReading = 0;
+            break;
+        }
+
+
+
+
+
         case 61:
         {
             splash_G2("DNMS", "SHAPING");
@@ -1680,6 +1709,22 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         break;
                     case LASER_OTHER_TRIAL:
                         laser_G2.laserTrialType = (currentTrial % 2) == 0 ? LASER_OFF : laserOnType;
+                        break;
+                    case LASER_LR_OTHER_TRIAL:
+                        switch (currentTrial % 4) {
+                            case 0:
+                            case 2:
+                                laser_G2.laserTrialType = LASER_OFF;
+                                break;
+                            case 1:
+                                laser_G2.laserTrialType = laserOnType;
+                                laser_G2.side = 1;
+                                break;
+                            case 3:
+                                laser_G2.laserTrialType = laserOnType;
+                                laser_G2.side = 2;
+                                break;
+                        }
                         break;
                     case LASER_SESS_ELF:
                     {

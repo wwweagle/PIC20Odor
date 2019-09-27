@@ -145,7 +145,7 @@ extern "C" {
 #define LASER_12s_EACH_QUARTER 26
 #define LASER_VARY_LENGTH 30
 #define LASER_LR_EVERYTRIAL 40
-#define LASER_LR_EVERY_OTHER_TRIAL 42
+#define LASER_LR_OTHER_TRIAL 42
 #define LASER_INCONGRUENT_CATCH_TRIAL 45
 #define LASER_SESS_ELF 50
 #define LASER_SESS_ELF_20 51
@@ -176,6 +176,7 @@ extern "C" {
 #define LASERT12SEARLY 51
 #define LASERT12SMID 52
 #define LASERT12SLATE 53
+
 
 //
 //#define laserDuring3Baseline 3
@@ -309,4 +310,5 @@ void sendChart(int val, int idx);
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */
+
 
