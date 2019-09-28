@@ -103,10 +103,9 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void) {
     }
     //BNC5=RA9 BNC6=RA10
     if (laser_G2.on) {
-        //    BNC_5 = laser_G2.on;
-        LATA |=  (laser_G2.side << 8);
-    }else{
-        LATA &=  0xFCFF;
+        LATA |= (laser_G2.side << 9);
+    } else {
+        LATA &= 0xF9FF;
     }
     volatile int sel = (adcdataL + adcdataR) == 0
             ? 512

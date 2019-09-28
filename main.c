@@ -231,7 +231,7 @@ void callFunc(int n) {
             setWaterLen();
             break;
         case 31:
-            testLaser(getFuncNumber(1, "0Step 1Puls 2cfs"));
+            testLaser(getFuncNumber(1, "0 3Step 1Puls"));
             break;
 
 
@@ -1507,7 +1507,7 @@ static void zxLaserTrial_G2(int sOutter, int tOutter, int sInner, int tInner, in
     taskTimeCounter = millisCounter;
     delayOnsetTS = millisCounter + 1000u * (uint32_t) taskParam.ITI + 1000u;
     serialSend(SpLaserTType, laserTType);
-    serialSend(Splaser, (laserTType != LASER_OFF));
+    serialSend(Splaser, (laserTType == LASER_OFF) ? 0 : laser_G2.side);
 
     LCDsetCursor(3, 0);
     LCD_Write_Char('I');
@@ -1914,11 +1914,11 @@ void testLaser(int type) { //31
     int i = 0;
     switch (type) {
         case 0:
+            laser_G2.side = 1;
             while (1) {
                 i ^= 1;
                 laser_G2.on = i;
                 getFuncNumber(1, "Toggle Laser");
-
             }
             break;
         case 1:
@@ -1929,13 +1929,12 @@ void testLaser(int type) { //31
                 wait_Sec(5);
             }
             break;
-        case 2:
-            for (i = 0; i < 50; i++) {
-                laser_G2.on = 1;
-                wait_Sec(3);
-                laser_G2.on = 0;
-                wait_Sec(17);
-                serialSend(SpDebugInfo, i);
+        case 3:
+            laser_G2.side = 2;
+            while (1) {
+                i ^= 1;
+                laser_G2.on = i;
+                getFuncNumber(1, "Toggle Laser");
             }
             break;
     }
