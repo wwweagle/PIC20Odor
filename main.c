@@ -269,12 +269,9 @@ void callFunc(int n) {
             taskParam.respCount = 0;
             taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
             taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
-            taskParam.outSamples[0] = 6;
-            taskParam.outSamples[1] = 7;
-            taskParam.outTests[0] = 5;
-            taskParam.outTests[1] = 12;
-            taskParam.outDelay = 5;
-            taskParam.ITI = 10;
+            addAllOdor();
+            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
             taskParam.minBlock = 4;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
@@ -291,12 +288,9 @@ void callFunc(int n) {
             taskParam.respCount = 0;
             taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
             taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
-            taskParam.outSamples[0] = 6;
-            taskParam.outSamples[1] = 7;
-            taskParam.outTests[0] = 5;
-            taskParam.outTests[1] = 12;
-            taskParam.outDelay = 5;
-            taskParam.ITI = 10;
+            addAllOdor();
+            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            taskParam.ITI = getFuncNumber(2, "ITI duration");
             taskParam.minBlock = 4;
             int sessNum = getFuncNumber(2, "Session number?");
             zxLaserSessions_G2(20, 20, sessNum);
@@ -1375,8 +1369,7 @@ static int waterNResult_G2(int sample, int test, int id, int rewardWindow) {
             //        
 
             ///////////Detect/////////////////
-            for (timerCounterI = 0; timerCounterI < rewardWindow && !lick_G2.lickSide;
-                    lick_G2.lickSide = lick_G2.stable) {
+            for (timerCounterI = 0; timerCounterI < rewardWindow && lick_G2.lickSide != 'L'; lick_G2.lickSide = lick_G2.stable) {
                 if (timerCounterI == rewardWindow / 2 && (!tried)) {
                     tried = 1;
                     if (((rand() % teachChance) == 0 && (taskParam.teaching & 1)) || u2Received == '1') {
