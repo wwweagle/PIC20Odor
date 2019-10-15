@@ -118,6 +118,7 @@ extern "C" {
 #define ODPA_RD_SHAPING_TASK 100
 #define ODPA_RD_TASK 102
 #define ODPA_TASK 110
+#define ODPA_VARDELAY_TASK 111
 #define DNMS_DUAL_TASK 125
 #define DUAL_TASK_EVERY_TRIAL  130
 //#define Mixed_oder 131

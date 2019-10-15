@@ -337,23 +337,44 @@ void callFunc(int n) {
         }
         case 37:
         {
-            splash_G2("Seq 2AFC", "6 Samp Var Rwd");
-            int noLaser = getFuncNumber(1, "No Laser?");
-            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
-            laser_G2.laserTrialType = laserDuringDelayChR2;
-            taskType_G2 = Seq2AFC_TASK;
-            taskParam.teaching = 1;
-            taskParam.respCount = 0;
+            splash_G2("ODPA", "Record");
+            laser_G2.laserSessionType = LASER_NO_TRIAL;
+            taskType_G2 = ODPA_VARDELAY_TASK;
+            taskParam.teaching = 0;
             taskParam.falsePunish = 0;
-            taskParam.outTaskPairs = 6;
-            taskParam.minBlock = 6;
+            taskParam.outTaskPairs = 2;
+            taskParam.respCount = 0;
+            taskParam.outSamples = malloc(taskParam.outTaskPairs * sizeof (int));
+            taskParam.outTests = malloc(taskParam.outTaskPairs * sizeof (int));
             addAllOdor();
-            taskParam.outDelay = getFuncNumber(2, "Delay duration");
-            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            taskParam.outDelay = 3;
+            taskParam.ITI = 12;
+            taskParam.minBlock = 8;
             int sessNum = getFuncNumber(2, "Session number?");
-            zxLaserSessions_G2(60, 20, sessNum);
+            zxLaserSessions_G2(16, 100, sessNum);
             break;
         }
+
+
+            //        case 37:
+            //        {
+            //            splash_G2("Seq 2AFC", "6 Samp Var Rwd");
+            //            int noLaser = getFuncNumber(1, "No Laser?");
+            //            laser_G2.laserSessionType = noLaser ? LASER_NO_TRIAL : LASER_CATCH_TRIAL;
+            //            laser_G2.laserTrialType = laserDuringDelayChR2;
+            //            taskType_G2 = Seq2AFC_TASK;
+            //            taskParam.teaching = 1;
+            //            taskParam.respCount = 0;
+            //            taskParam.falsePunish = 0;
+            //            taskParam.outTaskPairs = 6;
+            //            taskParam.minBlock = 6;
+            //            addAllOdor();
+            //            taskParam.outDelay = getFuncNumber(2, "Delay duration");
+            //            taskParam.ITI = getFuncNumber(2, "ITI duration");
+            //            int sessNum = getFuncNumber(2, "Session number?");
+            //            zxLaserSessions_G2(60, 20, sessNum);
+            //            break;
+            //        }
 
         case 38:
         {
@@ -1658,6 +1679,11 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                     case ODPA_TASK:
                         outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
                         outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
+                        break;
+                    case ODPA_VARDELAY_TASK:
+                        outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                        outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
+                        taskParam.outDelay = idxInMinBlock < (taskParam.minBlock / 2) ? 3 : 6;
                         break;
 
                     case ODPA_SHAPING_TASK:
