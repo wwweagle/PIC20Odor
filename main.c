@@ -1681,8 +1681,10 @@ void zxLaserSessions_G2(int trialsPerSession, int missLimit, int totalSession) {
                         outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
                         break;
                     case ODPA_VARDELAY_TASK:
-                        outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2) ? taskParam.outSamples[0] : taskParam.outSamples[1];
-                        outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2) ? taskParam.outTests[0] : taskParam.outTests[1];
+                        outSample = (shuffledMinBlock == 0 || shuffledMinBlock == 2 || shuffledMinBlock == 4 || shuffledMinBlock == 6)
+                                ? taskParam.outSamples[0] : taskParam.outSamples[1];
+                        outTest = (shuffledMinBlock == 1 || shuffledMinBlock == 2 || shuffledMinBlock == 5 || shuffledMinBlock == 6)
+                                ? taskParam.outTests[0] : taskParam.outTests[1];
                         taskParam.outDelay = idxInMinBlock < (taskParam.minBlock / 2) ? 3 : 6;
                         break;
 
